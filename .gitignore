@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.Python
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+secrets/
+
+# Build
+dist/
+build/
+.next/
+out/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs / reports (local gate artifacts may be committed selectively)
+*.log
+npm-debug.log*
+logs/
+
+# Docker volumes / local data
+data/
+pgdata/
+redis-data/
+rabbitmq-data/
+minio-data/
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
+# Misc
+.cache/
+tmp/
+temp/

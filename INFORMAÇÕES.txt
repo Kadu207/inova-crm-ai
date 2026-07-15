@@ -1,0 +1,26 @@
+Pela complexidade dos projetos que você vem desenvolvendo (Inova Finance AI, Inova Gastro, Inova Health, arquitetura de agentes, Redis, RabbitMQ, governança, etc.), eu recomendo ir além deste documento inicial e montar uma documentação de nível corporativo, semelhante ao que fizemos anteriormente, organizada em volumes.
+
+Minha sugestão seria um pacote com aproximadamente 20 documentos, por exemplo:
+
+Visão Geral da Plataforma (Master Plan)
+Arquitetura Corporativa
+Arquitetura Frontend
+Arquitetura Backend
+Arquitetura de Banco de Dados
+Arquitetura Event-Driven (Redis, RabbitMQ, Workers)
+Integração Chatwoot
+Integração n8n
+Agentes de IA
+Multi-tenant
+Segurança (LGPD, RBAC, Auditoria)
+DevOps (Docker, Traefik, Cloudflare, CI/CD)
+Observabilidade (Grafana, Prometheus, Loki, Sentry)
+APIs e OpenAPI
+Regras de Negócio do CRM
+Fluxos Comerciais e Atendimento
+Roadmap de Desenvolvimento
+Guia para Cursor
+Guia para Claude Code
+Manual de Implantação em Produção
+
+Esse conjunto serviria como a documentação oficial do projeto e permitiria ao Cursor e ao Claude Code gerar código de forma muito mais consistente, reduzindo retrabalho e mantendo a arquitetura alinhada ao longo do desenvolvimento.
