@@ -1,0 +1,48 @@
+# Cloudflare Tunnel ingress — Inova CRM AI
+# Copy to /etc/cloudflared/config.yml and adjust tunnel UUID/credentials.
+# All origins bind localhost only — no public host ports 80/443.
+
+tunnel: <YOUR_TUNNEL_UUID>
+credentials-file: /etc/cloudflared/<YOUR_TUNNEL_UUID>.json
+
+ingress:
+  # Frontend Next.js — crm.inovatitech.com.br
+  - hostname: crm.inovatitech.com.br
+    service: http://127.0.0.1:9400
+
+  # API NestJS — api-crm.inovatitech.com.br
+  - hostname: api-crm.inovatitech.com.br
+    service: http://127.0.0.1:9401
+
+  # AI FastAPI — ai-crm.inovatitech.com.br
+  - hostname: ai-crm.inovatitech.com.br
+    service: http://127.0.0.1:9402
+
+  # Chatwoot — chat-crm.inovatitech.com.br
+  - hostname: chat-crm.inovatitech.com.br
+    service: http://127.0.0.1:9403
+
+  # n8n — n8n-crm.inovatitech.com.br
+  - hostname: n8n-crm.inovatitech.com.br
+    service: http://127.0.0.1:9404
+
+  # MinIO S3 API — s3-crm.inovatitech.com.br
+  - hostname: s3-crm.inovatitech.com.br
+    service: http://127.0.0.1:9405
+
+  # MinIO Console — storage-crm.inovatitech.com.br
+  - hostname: storage-crm.inovatitech.com.br
+    service: http://127.0.0.1:9406
+
+  # Grafana — ops-crm.inovatitech.com.br
+  - hostname: ops-crm.inovatitech.com.br
+    service: http://127.0.0.1:9408
+
+  # Catch-all (required by cloudflared)
+  - service: http_status:404
+
+# NOT exposed via Tunnel (VPN/SSH only):
+#   RabbitMQ UI — 127.0.0.1:9407
+#   PostgreSQL — Docker network only
+#   Redis — Docker network only
+#   RabbitMQ AMQP — Docker network only

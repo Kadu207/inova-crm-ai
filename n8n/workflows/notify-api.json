@@ -1,0 +1,150 @@
+{
+  "name": "CRM — Notify API (generic)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "notify-api",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "notify-webhook",
+      "name": "Webhook Notify",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "crm-notify-api"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "api",
+              "name": "apiBase",
+              "value": "={{ $env.API_BASE_URL || 'https://api-crm.inovatitech.com.br' }}",
+              "type": "string"
+            },
+            {
+              "id": "path",
+              "name": "notifyPath",
+              "value": "={{ $json.body?.path || $json.path || '/v1/notifications/dispatch' }}",
+              "type": "string"
+            },
+            {
+              "id": "tenant",
+              "name": "tenantId",
+              "value": "={{ $json.body?.tenantId || $json.tenantId || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "type",
+              "name": "notificationType",
+              "value": "={{ $json.body?.type || $json.type || 'generic' }}",
+              "type": "string"
+            },
+            {
+              "id": "payload",
+              "name": "payload",
+              "value": "={{ $json.body?.payload || $json.payload || $json.body || $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "notify-set",
+      "name": "Config Notify",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.apiBase }}{{ $json.notifyPath }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            },
+            {
+              "name": "X-Correlation-Id",
+              "value": "={{ $execution.id }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ tenantId: $json.tenantId, type: $json.notificationType, payload: $json.payload, source: 'n8n', workflow: 'notify-api' }) }}",
+        "options": {}
+      },
+      "id": "notify-http",
+      "name": "POST API Notify",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, workflow: 'notify-api', correlationId: $execution.id }) }}"
+      },
+      "id": "notify-respond",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Notify": {
+      "main": [
+        [
+          {
+            "node": "Config Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Notify": {
+      "main": [
+        [
+          {
+            "node": "POST API Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST API Notify": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "inova-crm-ai"
+  }
+}

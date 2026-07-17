@@ -1,0 +1,95 @@
+# Workflow Spec Kit — Inova CRM AI
+# Fluxo SDD: especificar → planejar → tarefas → implementar
+
+name: speckit-inova-crm-ai
+version: '1.0'
+language: pt-BR
+
+integration: cursor-agent
+
+phases:
+  - id: specify
+    name: Especificar
+    skill: speckit-specify
+    description: >
+      Cria ou atualiza a spec em specs/NNN-nome/spec.md a partir do template.
+      Valida alinhamento com constitution.md (tenant-first, n8n boundary) antes de avançar.
+    inputs:
+      - feature_name
+      - feature_number
+      - context
+    outputs:
+      - specs/{number}-{slug}/spec.md
+    gate:
+      - spec_tem_criterios_aceite
+      - spec_referencia_constituicao
+      - spec_tenant_id_considerado
+
+  - id: plan
+    name: Planejar
+    skill: speckit-plan
+    description: >
+      Gera plan.md na pasta da feature com fases incrementais,
+      componentes afetados, TDD e critérios de Quality Gate.
+    depends_on:
+      - specify
+    inputs:
+      - specs/{number}-{slug}/spec.md
+    outputs:
+      - specs/{number}-{slug}/plan.md
+    gate:
+      - plano_respeita_construcao_incremental
+      - plano_inclui_quality_gate
+      - riscos_documentados
+
+  - id: tasks
+    name: Tarefar
+    skill: speckit-tasks
+    description: >
+      Quebra o plano em tarefas acionáveis (tasks.md) com prioridades P0–P2
+      e blocos por camada (prisma, backend, workers, frontend, n8n).
+    depends_on:
+      - plan
+    inputs:
+      - specs/{number}-{slug}/plan.md
+    outputs:
+      - specs/{number}-{slug}/tasks.md
+    gate:
+      - todas_tarefas_p0_identificadas
+      - task_gate_documentada
+
+  - id: implement
+    name: Implementar
+    skill: speckit-implement
+    description: >
+      Executa tasks.md respeitando constitution.md.
+      Quality Gate hard-stop: npm run gate PASS antes de marcar DONE.
+      Atualiza baseline.md ao concluir fase com gate PASS.
+    depends_on:
+      - tasks
+    inputs:
+      - specs/{number}-{slug}/tasks.md
+      - .specify/memory/constitution.md
+    outputs:
+      - codigo_alterado
+      - .specify/memory/baseline.md
+    gate:
+      - quality_gate_pass
+      - checklist_qualidade_aprovado
+      - baseline_atualizado_se_fase_fechada
+
+artifacts:
+  constitution: .specify/memory/constitution.md
+  baseline: .specify/memory/baseline.md
+  templates:
+    spec: .specify/templates/spec-template.md
+    plan: .specify/templates/plan-template.md
+    tasks: .specify/templates/tasks-template.md
+    checklist: .specify/templates/checklist-template.md
+
+conventions:
+  spec_folder: 'specs/{NNN}-{slug}'
+  numbering: '001, 002, 003...'
+  commit_prefix: 'feat|fix|chore|docs|refactor|test'
+  issue_reference: 'GitLab #<numero>'
+  quality_gate_command: 'npm run gate'

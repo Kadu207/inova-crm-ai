@@ -1,0 +1,30 @@
+# VPS shared override — service port map.
+# Reserved: Frontend 9400, API 9401, AI 9402, Chatwoot 9403, n8n 9404,
+#           MinIO 9405/9406, RabbitMQ UI 9407, Grafana 9408, Postgres 9410.
+#
+# Chatwoot (9403) sobe em chatwoot/docker-compose.vps.yml — rede externa inova-crm.
+services:
+  frontend:
+    ports:
+      - '127.0.0.1:9400:3000'
+
+  api:
+    ports:
+      - '127.0.0.1:9401:3000'
+
+  ai:
+    ports:
+      - '127.0.0.1:9402:8000'
+
+  n8n:
+    ports:
+      - '127.0.0.1:9404:5678'
+
+  rabbitmq:
+    ports:
+      - '127.0.0.1:9407:15672'
+
+  minio:
+    ports:
+      - '127.0.0.1:9405:9000'
+      - '127.0.0.1:9406:9001'

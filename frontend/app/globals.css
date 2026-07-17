@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Superfícies */
+  --inova-base: #1b1b1d;
+  --inova-panel: #232326;
+  --inova-void: #141416;
+  --inova-line: #2f2f33;
+  --inova-mist: #2a2a2e;
+
+  /* Marca — flame */
+  --inova-flame: #fb640a;
+  --inova-ember: #ff8a3d;
+  --inova-rust: #b8480c;
+  --inova-glow: #f86905;
+
+  /* Neutros quentes */
+  --inova-bone: #f4f1ec;
+  --inova-smoke: #a5a29d;
+  --inova-faint: #6f6c68;
+
+  /* Semânticas */
+  --inova-ok: #3ad07f;
+  --inova-warn: #ffb454;
+  --inova-bad: #ff5a52;
+
+  /* Raios */
+  --radius-sm: 8px;
+  --radius-md: 13px;
+  --radius-lg: 16px;
+
+  /* Sombras */
+  --shadow-card: 0 12px 40px -12px rgba(0, 0, 0, 0.85);
+  --shadow-elevated: 0 40px 90px -40px rgba(0, 0, 0, 1);
+
+  /* Layout */
+  --sidebar-width: 16rem;
+  --header-height: 3.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-void font-body text-bone antialiased;
+    min-height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+      env(safe-area-inset-left);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--inova-flame);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-md bg-flame px-4 py-2.5 text-sm font-medium text-[#160b04] transition-colors hover:bg-flame-ember disabled:opacity-60 sm:min-h-0 sm:py-2;
+  }
+
+  .btn-ghost {
+    @apply inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-transparent px-4 py-2.5 text-sm font-medium text-bone transition-colors hover:border-flame hover:text-flame sm:min-h-0 sm:py-2;
+  }
+
+  .card-panel {
+    @apply rounded-lg border border-line bg-panel p-4 shadow-card sm:p-6;
+  }
+
+  .input-field {
+    @apply w-full rounded-md border border-line bg-void px-3 py-2.5 text-base text-bone placeholder:text-faint focus:border-flame focus:outline-none sm:py-2 sm:text-sm;
+  }
+
+  .page-main {
+    @apply flex-1 overflow-y-auto p-4 sm:p-6;
+  }
+
+  .table-scroll {
+    @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
+  }
+
+  .kanban-board {
+    @apply flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kanban-column {
+    @apply w-[min(85vw,18rem)] shrink-0 snap-start sm:w-72;
+  }
+}
+
+@layer utilities {
+  .touch-target {
+    @apply min-h-11 min-w-11;
+  }
+}

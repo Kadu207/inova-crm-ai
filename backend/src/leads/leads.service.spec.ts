@@ -1,0 +1,100 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
+import { LeadStatus, LeadSource } from '@prisma/client';
+import { LeadsService } from './leads.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { EventsService } from '../events/events.service';
+
+const tenantId = 'tenant-1';
+
+const mockLead = {
+  id: 'lead-1',
+  tenantId,
+  title: 'Test Lead',
+  status: LeadStatus.NEW,
+  source: LeadSource.MANUAL,
+  contactId: null,
+  companyId: null,
+  assignedToId: null,
+  score: 0,
+  notes: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+describe('LeadsService', () => {
+  let service: LeadsService;
+  let prisma: {
+    lead: {
+      findMany: jest.Mock;
+      findFirst: jest.Mock;
+      create: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+    };
+  };
+  let events: { publish: jest.Mock };
+
+  beforeEach(async () => {
+    prisma = {
+      lead: {
+        findMany: jest.fn(),
+        findFirst: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      },
+    };
+    events = { publish: jest.fn().mockResolvedValue(undefined) };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        LeadsService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: EventsService, useValue: events },
+      ],
+    }).compile();
+
+    service = module.get(LeadsService);
+  });
+
+  it('findAll returns tenant-scoped leads', async () => {
+    prisma.lead.findMany.mockResolvedValue([mockLead]);
+    const result = await service.findAll(tenantId);
+    expect(result).toHaveLength(1);
+    expect(prisma.lead.findMany).toHaveBeenCalledWith({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+    });
+  });
+
+  it('findOne throws when lead not in tenant', async () => {
+    prisma.lead.findFirst.mockResolvedValue(null);
+    await expect(service.findOne(tenantId, 'missing')).rejects.toThrow(NotFoundException);
+  });
+
+  it('create publishes lead.created event', async () => {
+    prisma.lead.create.mockResolvedValue(mockLead);
+    const result = await service.create(tenantId, { title: 'Test Lead' });
+    expect(result.id).toBe('lead-1');
+    expect(events.publish).toHaveBeenCalledWith(
+      tenantId,
+      'lead.created',
+      expect.objectContaining({ leadId: 'lead-1' }),
+    );
+  });
+
+  it('qualify updates status and publishes lead.qualified', async () => {
+    prisma.lead.findFirst.mockResolvedValue(mockLead);
+    const qualified = { ...mockLead, status: LeadStatus.QUALIFIED, score: 80 };
+    prisma.lead.update.mockResolvedValue(qualified);
+
+    const result = await service.qualify(tenantId, 'lead-1');
+    expect(result.status).toBe(LeadStatus.QUALIFIED);
+    expect(events.publish).toHaveBeenCalledWith(
+      tenantId,
+      'lead.qualified',
+      expect.objectContaining({ leadId: 'lead-1' }),
+    );
+  });
+});

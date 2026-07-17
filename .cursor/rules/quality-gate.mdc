@@ -1,0 +1,59 @@
+---
+description: Quality Gate hard-stop — no DONE without full gate PASS
+alwaysApply: true
+---
+
+# Quality Gate — Hard-Stop
+
+**Regra inegociável:** nenhuma task Spec Kit, módulo ou fase avança enquanto o Quality Gate não estiver **100% PASS**.
+
+## Quando executar
+
+- Antes de marcar qualquer task em `tasks.md` como DONE (`[x]`)
+- Antes de atualizar `.specify/memory/baseline.md`
+- Antes de abrir PR / merge para próxima fase
+- Após qualquer correção pós-FAIL — reexecutar o gate **completo**
+
+## Comando
+
+```bash
+npm run gate
+# ou: pnpm gate (quando monorepo estiver configurado na Fase 1)
+```
+
+Script previsto: `infrastructure/scripts/quality-gate.ps1` / `quality-gate.sh`
+
+## Pipeline (ordem fixa — aborta no primeiro FAIL)
+
+1. **Port audit** — portas `9400–9419` sem conflito (`docs/ports.md`)
+2. **Format** — Prettier / Ruff format check
+3. **Lint** — ESLint + Ruff; zero errors; `--max-warnings 0` no CI
+4. **Typecheck** — `tsc --noEmit` + Pyright/mypy
+5. **Prisma validate** — quando schema mudou
+6. **Tests** — unit + integration; cobertura ≥ 70% no bounded context tocado
+7. **Contract tests** — OpenAPI + eventos RabbitMQ + webhooks
+8. **E2E/smoke** — Playwright + health compose
+9. **Security** — audit de dependências; Sonatype antes de deps novas
+10. **Static review** — linter diagnostics + constitution check
+11. **Docs sync** — `docs/` atualizado se API/evento/porta mudou
+
+## Proibido sem ADR
+
+- `eslint-disable` / `@ts-ignore` / `// nosec`
+- Pular testes ou marcar DONE com gate vermelho
+- "Deixar para depois" itens P0 do gate
+
+ADRs em `docs/adr/`. Waivers de segurança documentados com prazo.
+
+## Em caso de FAIL
+
+1. Gerar relatório priorizado: `reports/quality-gate/<task-id>.md`
+2. Corrigir **todas** as falhas
+3. Reexecutar gate completo
+4. Só então marcar task DONE e liberar próxima como READY
+
+## Definition of Done
+
+- [ ] Gate PASS documentado
+- [ ] Nenhum TODO/FIXME bloqueante sem issue
+- [ ] Constitution respeitada (tenantId, n8n-boundary, API-only)

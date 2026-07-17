@@ -1,0 +1,50 @@
+---
+description: n8n orchestration only — no business rules in Function/IF nodes
+alwaysApply: true
+globs: "**/{n8n/**,docs/integracao-n8n.md}"
+---
+
+# n8n — Limite de Orquestração
+
+Documentação: `docs/integracao-n8n.md` · ADR: `docs/adr/003-n8n-orchestrator-boundary.md`
+
+## O que o n8n PODE fazer
+
+- Receber webhook (Chatwoot, gateway externo, cron)
+- Validar assinatura HMAC do webhook
+- Chamar API NestJS (`api-crm.inovatitech.com.br`) com `API_TOKEN`
+- Aguardar resposta HTTP e encadear próximo nó HTTP
+- Notificar (email, Slack, WhatsApp via Chatwoot API — nunca canal direto)
+- Retry/backoff em falhas de rede
+- Human-in-the-loop: pausar e aguardar aprovação via webhook de retorno
+
+## O que o n8n NÃO PODE fazer
+
+- Regras de negócio em nós **Function**, **Code** ou **IF** complexos
+- Qualificação de lead, scoring, estágio de funil, SLA, cálculo financeiro
+- Acesso direto a PostgreSQL, Redis, RabbitMQ ou MinIO
+- Decisões que deveriam estar no backend ou workers
+- Bypass de Chatwoot para enviar mensagem em canal
+
+## Padrão de workflow
+
+```
+Webhook/Cron → [Config: apiBase, tokens] → HTTP Request (API) → [opcional: Notify]
+```
+
+Toda decisão de domínio retorna da API — o n8n só roteia baseado em status HTTP ou campo simples de roteamento já calculado pela API.
+
+## Infra n8n CRM
+
+- Instância dedicada: `n8n-crm.inovatitech.com.br` (porta host `9404`)
+- Modo fila: main + worker + **Redis** (não RabbitMQ para fila n8n)
+- Credenciais via variáveis de ambiente — nó Config referencia `{{$env.VAR}}`
+
+## Revisão obrigatória
+
+Ao importar/alterar workflow em `n8n/`:
+
+- [ ] Sem Function/Code com lógica CRM
+- [ ] Sem IF com mais de roteamento binário (sucesso/erro)
+- [ ] Toda mutação de dados via API NestJS
+- [ ] API_TOKEN — nunca credencial de usuário humano

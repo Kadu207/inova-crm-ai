@@ -1,0 +1,19 @@
+﻿# Git hooks via Lefthook â€” https://github.com/evilmartians/lefthook
+# Install: npm install && npx lefthook install
+
+pre-commit:
+  parallel: true
+  commands:
+    format-check:
+      glob: '*.{js,mjs,cjs,ts,tsx,json,md,yml,yaml}'
+      run: npx prettier --check {staged_files}
+    lint:
+      glob: '*.{js,mjs,cjs,ts,tsx}'
+      run: npx eslint {staged_files} --max-warnings 0 --no-warn-ignored
+    gate-foundation:
+      run: node infrastructure/scripts/quality-gate.mjs --phase=1
+
+pre-push:
+  commands:
+    quality-gate:
+      run: node infrastructure/scripts/quality-gate.mjs --phase=1

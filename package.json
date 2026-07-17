@@ -1,0 +1,51 @@
+{
+  "name": "inova-crm-ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Inova CRM AI — omnichannel CRM platform",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "workers",
+    "packages/*"
+  ],
+  "scripts": {
+    "gate": "node infrastructure/scripts/quality-gate.mjs",
+    "gate:soft": "node infrastructure/scripts/quality-gate.mjs --phase=0 --soft",
+    "ports": "npm run ports:ps1",
+    "ports:ps1": "powershell -NoProfile -ExecutionPolicy Bypass -File infrastructure/scripts/check-ports.ps1",
+    "ports:sh": "bash infrastructure/scripts/check-ports.sh",
+    "smoke": "npm run smoke:ps1",
+    "smoke:ps1": "powershell -NoProfile -ExecutionPolicy Bypass -File infrastructure/scripts/smoke-health.ps1",
+    "smoke:sh": "bash infrastructure/scripts/smoke-health.sh",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test:unit --workspaces --if-present",
+    "test:contract": "npm run test:contract --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspaces --if-present",
+    "infra:config": "docker compose --env-file infrastructure/.env.example -f infrastructure/docker-compose.yml -f infrastructure/docker-compose.dev.yml config",
+    "infra:up": "docker compose --env-file .env -f infrastructure/docker-compose.yml -f infrastructure/docker-compose.dev.yml up -d",
+    "infra:up:apps": "docker compose --env-file .env -f infrastructure/docker-compose.yml -f infrastructure/docker-compose.dev.yml --profile apps up -d --build",
+    "infra:down": "docker compose --env-file .env -f infrastructure/docker-compose.yml -f infrastructure/docker-compose.dev.yml --profile apps down",
+    "db:migrate": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$env:DATABASE_URL=(Select-String -Path .env -Pattern '^DATABASE_URL=(.*)$').Matches.Groups[1].Value; npm run prisma:deploy --workspace=@inova-crm/backend\"",
+    "db:seed": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$env:DATABASE_URL=(Select-String -Path .env -Pattern '^DATABASE_URL=(.*)$').Matches.Groups[1].Value; npm run prisma:seed --workspace=@inova-crm/backend\"",
+    "prepare": "lefthook install || true"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.22.0",
+    "globals": "^16.0.0",
+    "lefthook": "^1.11.3",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

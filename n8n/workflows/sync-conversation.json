@@ -1,0 +1,154 @@
+{
+  "name": "CRM — Sync Conversation (Chatwoot)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sync-conversation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "sync-webhook",
+      "name": "Webhook Sync Conversation",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "crm-sync-conversation"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "evt",
+              "name": "event",
+              "value": "={{ $json.body?.event || $json.event }}",
+              "type": "string"
+            },
+            {
+              "id": "acc",
+              "name": "accountId",
+              "value": "={{ $json.body?.account?.id || $json.account?.id }}",
+              "type": "number"
+            },
+            {
+              "id": "conv",
+              "name": "conversationId",
+              "value": "={{ $json.body?.conversation?.id || $json.conversation?.id }}",
+              "type": "number"
+            },
+            {
+              "id": "status",
+              "name": "conversationStatus",
+              "value": "={{ $json.body?.conversation?.status || $json.conversation?.status || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "assignee",
+              "name": "assigneeId",
+              "value": "={{ $json.body?.conversation?.meta?.assignee?.id || $json.conversation?.meta?.assignee?.id || null }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sync-set",
+      "name": "Config Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL || 'https://api-crm.inovatitech.com.br' }}/api/v1/conversations/sync",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            },
+            {
+              "name": "X-Chatwoot-Account-Id",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "X-Correlation-Id",
+              "value": "={{ $execution.id }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId, payload: $('Webhook Sync Conversation').first().json.body || $('Webhook Sync Conversation').first().json }) }}",
+        "options": {}
+      },
+      "id": "sync-http",
+      "name": "POST API Sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, workflow: 'sync-conversation', correlationId: $execution.id }) }}"
+      },
+      "id": "sync-respond",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Sync Conversation": {
+      "main": [
+        [
+          {
+            "node": "Config Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Context": {
+      "main": [
+        [
+          {
+            "node": "POST API Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST API Sync": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "inova-crm-ai"
+  }
+}

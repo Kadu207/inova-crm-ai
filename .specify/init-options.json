@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "projectName": "Inova CRM AI",
+  "language": "pt-BR",
+  "integration": "cursor-agent",
+  "integrations": {
+    "cursor-agent": {
+      "enabled": true,
+      "description": "Agente Cursor como executor do fluxo SDD (specify → plan → tasks → implement)",
+      "skillsPath": ".cursor/skills",
+      "rulesPath": ".cursor/rules/specify-rules.mdc"
+    }
+  },
+  "defaults": {
+    "workflow": "speckit-inova-crm-ai",
+    "specTemplate": ".specify/templates/spec-template.md",
+    "planTemplate": ".specify/templates/plan-template.md",
+    "tasksTemplate": ".specify/templates/tasks-template.md",
+    "checklistTemplate": ".specify/templates/checklist-template.md",
+    "constitution": ".specify/memory/constitution.md",
+    "baseline": ".specify/memory/baseline.md"
+  },
+  "conventions": {
+    "specDirectory": "specs",
+    "specNaming": "{NNN}-{slug}",
+    "commitStyle": "conventional",
+    "primaryDocs": "Plano_Mestre_Inova_CRM_AI.md"
+  },
+  "gates": {
+    "requireConstitutionCheck": true,
+    "requireBaselineUpdateOnImplement": true,
+    "requireQualityGatePass": true,
+    "qualityGateHardStop": true,
+    "blockDirectDbAccessForAgents": true,
+    "requireTenantIdOnDomainTables": true,
+    "n8nOrchestratorOnly": true,
+    "requireHumanApprovalFor": [
+      "invoice_emit",
+      "delete",
+      "bulk_export_pii",
+      "credential_alta_sensibilidade",
+      "mensagem_cliente_alta_confianca"
+    ]
+  }
+}

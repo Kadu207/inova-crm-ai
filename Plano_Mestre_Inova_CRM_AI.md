@@ -1,138 +1,167 @@
-# Plano Mestre -- Inova CRM AI
+# Plano Mestre — Inova CRM AI
 
-Versão: 1.0
+**Versão:** 1.1  
+**Data:** 2026-07-14  
+**Status:** Fase 0 — Fundação em progresso
+
+---
 
 ## Objetivo
 
-Construir uma plataforma CRM SaaS integrada ao Chatwoot e n8n, preparada
-para evolução com IA, multi-tenant e integração aos produtos da Inova
-TI.
+Construir uma plataforma **CRM SaaS multi-tenant** da Inova TI, com atendimento omnichannel (Chatwoot dedicado), automação (n8n dedicado), arquitetura event-driven e IA especializada — governada por Spec Kit, TDD e **Quality Gate hard-stop**.
 
-## Objetivos técnicos
+---
 
--   CRM Web completo
--   Atendimento omnichannel com Chatwoot
--   Automação com n8n
--   PostgreSQL
--   Redis
--   RabbitMQ (eventos internos)
--   Docker + Traefik
--   Cloudflare
--   API REST
--   IA especializada
--   Multi-tenant
+## Decisões estruturais (v1.1)
 
-## Arquitetura
+| Decisão      | Escolha                                                        |
+| ------------ | -------------------------------------------------------------- |
+| Multi-tenant | **Desde o dia 1** — `tenantId` + RLS (não Fase 7)              |
+| Portas VPS   | Bloco reservado **9400–9419**                                  |
+| Quality Gate | Hard-stop — nenhuma task/fase avança com lint/testes vermelhos |
+| Chatwoot     | Instância **dedicada** `chat-crm` — único ponto de canais      |
+| n8n          | Instância **dedicada** `n8n-crm` — **orquestrador only**       |
+| MinIO        | Storage **dedicado** CRM (`s3-crm` / `storage-crm`)            |
+| Redis        | Cache, sessão, rate-limit, filas n8n                           |
+| RabbitMQ     | Eventos de domínio (outbox → workers)                          |
+| Roteamento   | Cloudflare Tunnel (sem nginx/Caddy na 80 do host)              |
+| Deploy       | VPS Hetzner `/opt/inova-crm-ai`                                |
 
-Frontend: - Next.js - TypeScript - Tailwind - shadcn/ui
+ADRs: `docs/adr/001`–`004`.
 
-Backend: - NestJS - Prisma - PostgreSQL - Redis - RabbitMQ - Swagger
+---
 
-IA: - FastAPI - OpenAI/OpenRouter - RAG - Agentes especializados
+## Stack
 
-Infraestrutura: - Debian 13 - Docker Compose - Traefik - Cloudflare -
-Grafana - Prometheus - Loki - Sentry
+| Camada      | Tecnologia                                                        |
+| ----------- | ----------------------------------------------------------------- |
+| Frontend    | Next.js, TypeScript, Tailwind, shadcn/ui                          |
+| Backend     | NestJS, Prisma, PostgreSQL + RLS                                  |
+| Workers     | NestJS consumers RabbitMQ                                         |
+| IA          | FastAPI, OpenAI/OpenRouter, RAG                                   |
+| Mensageria  | RabbitMQ (eventos), Redis (cache/filas n8n)                       |
+| Storage     | MinIO dedicado                                                    |
+| Atendimento | Chatwoot dedicado                                                 |
+| Automação   | n8n dedicado (sem regra de negócio em Function/IF)                |
+| Infra       | Docker Compose, Cloudflare Tunnel, Grafana/Prometheus/Loki/Sentry |
+
+---
+
+## Hostnames e portas (resumo)
+
+| Serviço  | URL                           | Porta host  |
+| -------- | ----------------------------- | ----------- |
+| CRM      | `crm.inovatitech.com.br`      | 9400        |
+| API      | `api-crm.inovatitech.com.br`  | 9401        |
+| AI       | `ai-crm.inovatitech.com.br`   | 9402        |
+| Chatwoot | `chat-crm.inovatitech.com.br` | 9403        |
+| n8n      | `n8n-crm.inovatitech.com.br`  | 9404        |
+| MinIO    | `s3-crm` / `storage-crm`      | 9405 / 9406 |
+
+Mapa completo: [docs/ports.md](docs/ports.md).
+
+---
 
 ## Módulos do CRM
 
-1.  Dashboard
-2.  Empresas
-3.  Contatos
-4.  Leads
-5.  Funil Kanban
-6.  Oportunidades
-7.  Agenda
-8.  Tarefas
-9.  Produtos
-10. Serviços
-11. Propostas
-12. Contratos
-13. Financeiro
-14. Cobrança
-15. Atendimento
-16. Relatórios
-17. Configurações
-18. Usuários
-19. Permissões
-20. Auditoria
+Dashboard · Empresas · Contatos · Leads · Funil Kanban · Oportunidades · Agenda · Tarefas · Produtos · Serviços · Propostas · Contratos · Financeiro · Cobrança · Atendimento · Relatórios · Configurações · Usuários · Permissões · Auditoria
 
-## Integrações
+Regras de negócio: **backend only** — [docs/regras-negocio-crm.md](docs/regras-negocio-crm.md).
 
--   Chatwoot
--   n8n
--   WhatsApp
--   Instagram
--   Facebook
--   Email
--   Cloudflare R2/MinIO
--   APIs REST
--   Webhooks
+---
 
-## Fluxos principais
+## Arquitetura (resumo)
 
-1.  Novo lead → Chatwoot → n8n → CRM
-2.  Qualificação automática por IA
-3.  Criação de oportunidade
-4.  Geração de proposta
-5.  Follow-up automático
-6.  Cobrança automatizada
-7.  Pós-venda
+```
+Cloudflare Tunnel → Frontend / API / AI / Chatwoot / n8n
+Frontend → API NestJS → PostgreSQL + Redis + RabbitMQ + MinIO
+Chatwoot → webhook → n8n → API
+API → outbox → RabbitMQ → Workers → (AI)
+```
+
+Eventos: [docs/events/catalog-v0.md](docs/events/catalog-v0.md) (`lead.*`, `contact.*`, `opportunity.*`, `conversation.*`, `invoice.*`, `ai.*`).
+
+---
 
 ## Estrutura de pastas
 
-    inova-crm-ai/
-      docs/
-      frontend/
-      backend/
-      ai-services/
-      workers/
-      infrastructure/
-      chatwoot/
-      n8n/
+```
+inova-crm-ai/
+  .specify/          # Spec Kit (constitution, templates, workflows)
+  .cursor/rules/     # Regras Cursor (gate, ports, tenant, n8n, events)
+  docs/              # Pacote corporativo (~20 volumes + ADRs)
+  specs/             # Features SDD (NNN-slug)
+  frontend/
+  backend/
+  workers/
+  ai-services/
+  infrastructure/
+  n8n/
+  chatwoot/
+```
 
-## Roadmap
+---
 
-Fase 1 - Infraestrutura - Docker - Traefik - PostgreSQL - Redis
+## Governança
 
-Fase 2 - Chatwoot
+- **Constitution:** `.specify/memory/constitution.md`
+- **Fluxo SDD:** specify → plan → tasks → implement
+- **TDD** por bounded context
+- **EDD:** catálogo de eventos antes de publisher
+- **Quality Gate:** `npm run gate` — ver `.cursor/rules/quality-gate.mdc`
+- **Squads:** Governança → Build → QA (gate owner) → Delivery
 
-Fase 3 - n8n
+---
 
-Fase 4 - CRM MVP
+## Roadmap (sequencial)
 
-Fase 5 - Financeiro - Cobrança
+| Fase  | Entrega                               | Gate               |
+| ----- | ------------------------------------- | ------------------ |
+| **0** | Spec Kit, docs, ADRs, tokens, portas  | Fundação completa  |
+| **1** | Docker: PG, Redis, RabbitMQ, MinIO    | compose healthy    |
+| **2** | Chatwoot dedicado + webhooks          | smoke ingest       |
+| **3** | n8n dedicado + workflows orquestração | smoke API call     |
+| **4** | CRM MVP (leads, funil, tenant)        | E2E + gate         |
+| **5** | Financeiro / cobrança                 | invoice.* events   |
+| **6** | IA (FastAPI, RAG, agentes)            | qualificação smoke |
+| **7** | Produção SaaS (deploy, backup, obs)   | gate pós-deploy    |
 
-Fase 6 - IA
+Detalhe: [docs/roadmap.md](docs/roadmap.md).
 
-Fase 7 - SaaS Multi-tenant
+---
 
 ## Regras de engenharia
 
--   Clean Architecture
--   DDD
--   SOLID
--   TDD
--   OpenAPI
--   Event Driven
--   CI/CD
--   Observabilidade
--   LGPD
--   Segurança por padrão
+- Clean Architecture + DDD + SOLID
+- Tenant-first + LGPD + auditoria
+- OpenAPI documentado
+- Event-driven (RabbitMQ)
+- Observabilidade estruturada
+- CI/CD com gate obrigatório
+- Design Inova TI (flame/dark) — não defaults AI purple/cream
 
-## Critérios de aceite
+---
 
--   Cobertura de testes
--   APIs documentadas
--   Logs estruturados
--   Auditoria
--   Backups
--   Escalabilidade horizontal
+## Critérios de aceite (por fase)
 
-## Prompt para Cursor/Claude Code
+- Quality Gate 100% PASS
+- Cobertura testes ≥ 70% nos contextos tocados
+- APIs documentadas (OpenAPI)
+- Logs com `tenantId` + `correlationId`
+- Backups validados (Fase 7)
+- Baseline atualizada (`.specify/memory/baseline.md`)
 
-"Implemente este projeto seguindo rigorosamente esta documentação.
-Utilize arquitetura limpa, DDD, SOLID, TDD, Event Driven, PostgreSQL,
-Redis, RabbitMQ, Next.js, NestJS, FastAPI, Docker, Traefik e
-Chatwoot+n8n. Nenhuma regra de negócio deve ficar dentro do n8n; ele
-será apenas o orquestrador. Gere código modular, documentado, testável e
-preparado para evolução SaaS multi-tenant."
+---
+
+## Prompt para agentes (Cursor / Claude Code)
+
+```
+Implemente o Inova CRM AI seguindo Plano Mestre v1.1, constitution e docs/.
+Clean Architecture, DDD, SOLID, TDD, Event Driven, tenant-first (tenantId + RLS).
+Stack: PostgreSQL, Redis (cache/filas n8n), RabbitMQ (eventos), MinIO, Next.js, NestJS, FastAPI.
+Chatwoot e n8n dedicados. n8n SOMENTE orquestrador — regras no backend.
+Portas 9400–9419. Quality Gate obrigatório antes de marcar task DONE.
+Design: marca Inova TI (flame #fb640a) — não purple/cream AI.
+```
+
+Guias: [docs/guia-cursor.md](docs/guia-cursor.md) · [docs/guia-claude-code.md](docs/guia-claude-code.md)

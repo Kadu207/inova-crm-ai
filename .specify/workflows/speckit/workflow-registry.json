@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "project": "Inova CRM AI",
+  "defaultWorkflow": "speckit-inova-crm-ai",
+  "integration": "cursor-agent",
+  "workflows": [
+    {
+      "id": "speckit-inova-crm-ai",
+      "name": "Spec Kit Inova CRM AI (SDD completo)",
+      "path": ".specify/workflows/speckit/workflow.yml",
+      "phases": ["specify", "plan", "tasks", "implement"],
+      "language": "pt-BR",
+      "description": "Fluxo padrão: especificação → plano → tarefas → implementação com Quality Gate hard-stop."
+    }
+  ],
+  "skills": {
+    "specify": "speckit-specify",
+    "plan": "speckit-plan",
+    "tasks": "speckit-tasks",
+    "implement": "speckit-implement",
+    "checklist": "speckit-checklist",
+    "clarify": "speckit-clarify",
+    "analyze": "speckit-analyze"
+  },
+  "paths": {
+    "specs": "specs",
+    "memory": ".specify/memory",
+    "templates": ".specify/templates",
+    "rules": ".cursor/rules",
+    "docs": "docs",
+    "constitution": ".specify/memory/constitution.md",
+    "qualityGate": ".cursor/rules/quality-gate.mdc"
+  },
+  "gates": {
+    "qualityGateHardStop": true,
+    "tenantFirst": true,
+    "n8nOrchestratorOnly": true
+  },
+  "activeFeatures": []
+}

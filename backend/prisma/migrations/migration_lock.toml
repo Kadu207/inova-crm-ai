@@ -1,0 +1,4 @@
+# Provider,binary,lockFileVersion
+#   for more info see: https://pris.ly/d/migrate-lock
+
+provider = "postgresql"

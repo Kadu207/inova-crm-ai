@@ -1,0 +1,52 @@
+---
+description: RabbitMQ domain events — Redis is not the domain event bus
+alwaysApply: true
+globs: "**/{backend/**,workers/**,docs/events/**}"
+---
+
+# Eventos de Domínio — RabbitMQ
+
+Catálogo oficial: `docs/events/catalog-v0.md`
+
+## Papéis
+
+| Sistema | Uso | Proibido |
+|---------|-----|----------|
+| **RabbitMQ** | Eventos de domínio (outbox → exchange → workers) | Cache, sessão |
+| **Redis** | Cache, sessão, rate-limit, filas n8n, locks | Barramento de domínio |
+| **Outbox** | Tabela no Postgres; worker publica no RabbitMQ | Publicar direto sem outbox |
+
+## Contrato base (todo evento)
+
+```json
+{
+  "eventType": "lead.created",
+  "tenantId": "uuid",
+  "correlationId": "uuid",
+  "idempotencyKey": "string",
+  "timestamp": "ISO-8601",
+  "payload": {}
+}
+```
+
+## Domínios v0
+
+- `lead.*` — leads e qualificação
+- `contact.*` — contatos e empresas
+- `opportunity.*` — funil e oportunidades
+- `conversation.*` — atendimento (sync Chatwoot)
+- `invoice.*` — financeiro e cobrança
+- `ai.*` — jobs RAG, scoring, sugestões
+
+## Regras de implementação
+
+1. Novo evento → registrar em `docs/events/catalog-v0.md` **antes** do publisher.
+2. Publisher via **outbox pattern** no backend NestJS (transação com escrita de domínio).
+3. Consumers em `workers/` — um worker por domínio principal, não micro-função por container.
+4. n8n **não** consome fila de domínio diretamente — chama API HTTP ou recebe webhook do limiar externo.
+5. Idempotência obrigatória nos consumers (`idempotencyKey`).
+6. `tenantId` obrigatório em todo evento — consumers rejeitam sem tenant.
+
+## ADR
+
+Ver `docs/adr/004-redis-vs-rabbitmq.md`.

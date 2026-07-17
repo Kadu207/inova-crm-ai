@@ -1,0 +1,46 @@
+---
+description: Multi-tenant from day 1 — tenantId required, no cross-tenant queries
+alwaysApply: true
+globs: "**/{backend/**,frontend/**,workers/**,**/*.prisma}"
+---
+
+# Multi-Tenant — Tenant-First
+
+Documentação: `docs/multi-tenant.md` · ADR: `docs/adr/001-tenant-first.md`
+
+## Regras obrigatórias
+
+1. **`tenantId` em toda tabela de domínio** — leads, contacts, opportunities, conversations, invoices, etc.
+2. **RLS no PostgreSQL** — políticas por `tenant_id`; aplicar em migrations.
+3. **Nenhuma query cross-tenant** — proibido `findMany` sem filtro de tenant.
+4. **JWT / API_TOKEN carrega tenant** — middleware extrai e injeta no request context.
+5. **Testes de isolamento** — todo bounded context deve ter teste que prova vazamento impossível.
+6. **Eventos RabbitMQ** — `tenantId` obrigatório no envelope.
+7. **MinIO** — prefixo ou bucket por tenant (`{tenantId}/...`).
+8. **Chatwoot** — mapear `account_id` ↔ `tenantId` na integração.
+
+## Prisma (convenção)
+
+```prisma
+model Lead {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  // ...
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([tenantId])
+  @@map("leads")
+}
+```
+
+## Proibido
+
+- Tabelas de domínio sem `tenantId` "para adicionar depois"
+- Super-admin queries sem auditoria explícita
+- Cache Redis sem chave prefixada por tenant
+- Compartilhar dados entre tenants em qualquer camada
+
+## Fase 0→7
+
+Multi-tenant **não** é Fase 7 — é requisito desde a primeira migration de produto (Fase 4 MVP).

@@ -1,0 +1,109 @@
+# Inova CRM AI — Chatwoot dedicado (rails + sidekiq + postgres pgvector + redis).
+# Rede externa inova-crm: compartilhada com API/workers/n8n da infrastructure/.
+name: crm-chatwoot
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: crm_cw_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE:-chatwoot_crm}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - crm_cw_pg:/var/lib/postgresql/data
+    networks:
+      - cw
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: crm_cw_redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - crm_cw_redis:/data
+    networks:
+      - cw
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rails:
+    image: chatwoot/chatwoot:latest
+    container_name: crm_chatwoot_rails
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    entrypoint: docker/entrypoints/rails.sh
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    networks:
+      - cw
+      - inova-crm
+    healthcheck:
+      # FORCE_SSL redireciona HTTP→HTTPS; aceitar 2xx/3xx como healthy.
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qS -O /dev/null http://127.0.0.1:3000/ 2>&1 | grep -qE "HTTP/1\\.[01] (200|301|302)"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  sidekiq:
+    image: chatwoot/chatwoot:latest
+    container_name: crm_chatwoot_sidekiq
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rails:
+        condition: service_started
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    networks:
+      - cw
+    healthcheck:
+      test: ['CMD-SHELL', 'pgrep -f sidekiq || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  crm_cw_pg:
+  crm_cw_redis:
+
+networks:
+  cw:
+    driver: bridge
+  inova-crm:
+    external: true
+    name: inova-crm

@@ -1,0 +1,6 @@
+# VPS override — bind Chatwoot UI to localhost for Cloudflare Tunnel.
+# Tunnel hostname: chat-crm.inovatitech.com.br → 127.0.0.1:9403
+services:
+  rails:
+    ports:
+      - '127.0.0.1:9403:3000'

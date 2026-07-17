@@ -1,0 +1,46 @@
+---
+description: Reserved port block 9400-9419 for Inova CRM AI services
+alwaysApply: true
+globs: "**/{docker-compose*.yml,.env*,infrastructure/**}"
+---
+
+# Mapa de Portas — Inova CRM AI
+
+**Bloco reservado:** `9400–9419` — não usar para outros projetos Inova nesta VPS.
+
+Documentação completa: `docs/ports.md`
+
+## Bind host (VPS / dev local)
+
+| Porta | Serviço | Host Cloudflare | Container |
+|-------|---------|-----------------|-----------|
+| 9400 | Frontend Next.js | `crm.inovatitech.com.br` | 3000 |
+| 9401 | API NestJS | `api-crm.inovatitech.com.br` | 3000 |
+| 9402 | AI FastAPI | `ai-crm.inovatitech.com.br` | 8000 |
+| 9403 | Chatwoot | `chat-crm.inovatitech.com.br` | 3000 |
+| 9404 | n8n | `n8n-crm.inovatitech.com.br` | 5678 |
+| 9405 | MinIO API | `s3-crm.inovatitech.com.br` | 9000 |
+| 9406 | MinIO Console | `storage-crm.inovatitech.com.br` | 9001 |
+| 9407 | RabbitMQ UI | VPN/SSH only | 15672 |
+| 9408 | Grafana | `ops-crm.inovatitech.com.br` | 3000 |
+| 9409 | Prometheus | interno | 9090 |
+| 9410 | Loki | interno | 3100 |
+| 9411 | worker-crm-leads | interno | health |
+| 9412 | worker-crm-pipeline | interno | health |
+| 9413 | worker-crm-billing | interno | health |
+| 9414 | worker-crm-ai | interno | health |
+| 9415 | worker-crm-audit | interno | health |
+| 9416–9419 | Reservado | — | expansão |
+
+## Sem publish público
+
+- PostgreSQL (5432) — rede Docker only
+- Redis (6379) — rede Docker only
+- RabbitMQ AMQP (5672) — rede Docker only
+
+## Regras
+
+- Antes de `docker compose up`, executar `check-ports` (Fase 1).
+- Conflito de porta = Quality Gate FAIL.
+- Não expor 80/443 no host — roteamento via **Cloudflare Tunnel**.
+- Evitar colisão com Inova Finance (`5442/5680/3101`) e Inova-TI (`9300–9304`).

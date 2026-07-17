@@ -1,0 +1,61 @@
+---
+description: Spec Kit SDD flow and constitution for Inova CRM AI
+alwaysApply: true
+---
+
+# Spec Kit — Inova CRM AI
+
+Este projeto segue **Spec-Driven Development (SDD)** via Spec Kit.
+
+## Referências obrigatórias
+
+- **Constituição:** `.specify/memory/constitution.md` — leia antes de qualquer implementação.
+- **Plano Mestre:** `Plano_Mestre_Inova_CRM_AI.md`
+- **Baseline:** `.specify/memory/baseline.md` — atualizar somente após Quality Gate PASS.
+- **Workflow:** `.specify/workflows/speckit/workflow.yml`
+
+## Fluxo SDD (ordem fixa)
+
+1. **Specify** — `specs/NNN-slug/spec.md` a partir de `.specify/templates/spec-template.md`
+2. **Plan** — `plan.md` com fases incrementais e critérios de gate
+3. **Tasks** — `tasks.md` com prioridades P0–P2 e blocos por camada
+4. **Implement** — código + TDD + **Quality Gate PASS** antes de marcar DONE
+
+Skills Spec Kit (quando disponíveis em `.cursor/skills/`): `speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`, `speckit-checklist`.
+
+## Princípios inegociáveis (resumo)
+
+| Princípio | Regra |
+|-----------|-------|
+| Tenant-first | `tenantId` + RLS desde o dia 1 |
+| API/toolbelt | Agentes e n8n não acessam DB/MinIO direto |
+| n8n | Orquestrador only — ver `n8n-boundary.mdc` |
+| Mensageria | RabbitMQ = eventos; Redis = cache/sessão/filas n8n |
+| Canais | Somente via Chatwoot |
+| Quality Gate | Hard-stop — ver `quality-gate.mdc` |
+
+## Scripts Spec Kit
+
+```powershell
+# Windows
+.specify/scripts/ps/check-prerequisites.ps1
+.specify/scripts/ps/create-new-feature.ps1 "Descrição da feature"
+.specify/scripts/ps/setup-plan.ps1
+.specify/scripts/ps/setup-tasks.ps1
+```
+
+```bash
+# Linux/macOS/WSL
+.specify/scripts/bash/check-prerequisites.sh
+.specify/scripts/bash/create-new-feature.sh "Descrição da feature"
+.specify/scripts/bash/setup-plan.sh
+.specify/scripts/bash/setup-tasks.sh
+```
+
+## Documentação corporativa
+
+Pacote em `docs/` — manter sincronizado quando API, eventos ou portas mudarem.
+
+## Commits
+
+Conventional commits (`feat`, `fix`, `chore`, `docs`, `refactor`, `test`). Referenciar issues GitLab com `#<numero>`.

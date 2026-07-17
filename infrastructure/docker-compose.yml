@@ -1,0 +1,285 @@
+# Inova CRM AI — base infrastructure (internal network only).
+# Use with docker-compose.dev.yml (local) or docker-compose.vps.yml (VPS).
+name: inova-crm
+
+networks:
+  inova-crm:
+    name: inova-crm
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:
+  n8n_data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: inova-crm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-crm}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init/01-databases.sh:/docker-entrypoint-initdb.d/01-databases.sh:ro
+    networks:
+      - inova-crm
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: inova-crm-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    # Nunca publicar 6379 no host público (alerta BSI/CERT-Bund).
+    # Acesso só via rede Docker inova-crm + senha.
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+      --protected-mode yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - inova-crm
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: inova-crm-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - inova-crm
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  minio:
+    image: minio/minio:latest
+    container_name: inova-crm-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    networks:
+      - inova-crm
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  n8n:
+    image: n8nio/n8n:1.70.1
+    container_name: inova-crm-n8n
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${N8N_DB:-n8n_crm}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      QUEUE_BULL_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_HOST: ${N8N_SUBDOMAIN:-n8n-crm.inovatitech.com.br}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://${N8N_SUBDOMAIN:-n8n-crm.inovatitech.com.br}/
+      N8N_PROXY_HOPS: 1
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      API_BASE_URL: ${API_BASE_URL:-https://api-crm.inovatitech.com.br}
+      API_TOKEN: ${API_TOKEN:-}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - inova-crm
+    healthcheck:
+      # Imagem n8n (Alpine/Node) inclui wget; path explícito evita PATH vazio no healthcheck.
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qO- http://127.0.0.1:5678/healthz || /usr/bin/wget -qO- http://127.0.0.1:5678/healthz || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  n8n-worker:
+    image: n8nio/n8n:1.70.1
+    container_name: inova-crm-n8n-worker
+    restart: unless-stopped
+    command: worker
+    depends_on:
+      n8n:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${N8N_DB:-n8n_crm}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      QUEUE_BULL_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      API_BASE_URL: ${API_BASE_URL:-https://api-crm.inovatitech.com.br}
+      API_TOKEN: ${API_TOKEN:-}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - inova-crm
+
+  api:
+    profiles: ['apps']
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: inova-crm-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_APP_DB:-crm}?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://127.0.0.1:9400,http://localhost:9400}
+      API_TOKEN: ${API_TOKEN:-}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
+      AI_BASE_URL: http://ai:8000
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    networks:
+      - inova-crm
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(\"http://127.0.0.1:3000/health\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 8
+      start_period: 60s
+
+  workers:
+    profiles: ['apps']
+    build:
+      context: ../workers
+      dockerfile: Dockerfile
+    container_name: inova-crm-workers
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    environment:
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      API_BASE_URL: http://api:3000
+      API_TOKEN: ${API_TOKEN:-}
+      AI_BASE_URL: http://ai:8000
+    networks:
+      - inova-crm
+
+  frontend:
+    profiles: ['apps']
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api-crm.inovatitech.com.br}
+    container_name: inova-crm-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api-crm.inovatitech.com.br}
+    networks:
+      - inova-crm
+    healthcheck:
+      # Next standalone não inclui wget/curl — usar Node fetch (igual API).
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(\"http://127.0.0.1:3000/login\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  ai:
+    profiles: ['apps']
+    build:
+      context: ../ai-services
+      dockerfile: Dockerfile
+    container_name: inova-crm-ai
+    restart: unless-stopped
+    environment:
+      AI_API_TOKEN: ${AI_API_TOKEN:-}
+    networks:
+      - inova-crm
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'python -c "import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/health\")"',
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 20s

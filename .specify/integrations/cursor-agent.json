@@ -1,0 +1,39 @@
+{
+  "id": "cursor-agent",
+  "version": "1.0",
+  "name": "Cursor Agent — Spec Kit SDD",
+  "description": "Integração do agente Cursor com o fluxo Spec Kit do Inova CRM AI.",
+  "enabled": true,
+  "paths": {
+    "skills": ".cursor/skills",
+    "rules": ".cursor/rules",
+    "specifyRules": ".cursor/rules/specify-rules.mdc",
+    "qualityGate": ".cursor/rules/quality-gate.mdc",
+    "constitution": ".specify/memory/constitution.md",
+    "baseline": ".specify/memory/baseline.md",
+    "workflow": ".specify/workflows/speckit/workflow.yml",
+    "workflowRegistry": ".specify/workflows/speckit/workflow-registry.json",
+    "specs": "specs",
+    "templates": ".specify/templates",
+    "docs": "docs",
+    "adrs": "docs/adr",
+    "eventCatalog": "docs/events/catalog-v0.md",
+    "ports": "docs/ports.md"
+  },
+  "skills": {
+    "specify": "speckit-specify",
+    "plan": "speckit-plan",
+    "tasks": "speckit-tasks",
+    "implement": "speckit-implement",
+    "checklist": "speckit-checklist",
+    "clarify": "speckit-clarify",
+    "analyze": "speckit-analyze"
+  },
+  "gates": [
+    "requireConstitutionCheck",
+    "requireQualityGatePass",
+    "qualityGateHardStop",
+    "requireTenantIdOnDomainTables",
+    "n8nOrchestratorOnly"
+  ]
+}

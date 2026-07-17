@@ -1,0 +1,160 @@
+{
+  "name": "CRM — Lead Inbound (Chatwoot)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-inbound",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "lead-webhook",
+      "name": "Webhook Lead Inbound",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "crm-lead-inbound"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "evt",
+              "name": "event",
+              "value": "={{ $json.body?.event || $json.event }}",
+              "type": "string"
+            },
+            {
+              "id": "acc",
+              "name": "accountId",
+              "value": "={{ $json.body?.account?.id || $json.account?.id || $json.body?.account_id || $json.account_id }}",
+              "type": "number"
+            },
+            {
+              "id": "conv",
+              "name": "conversationId",
+              "value": "={{ $json.body?.conversation?.id || $json.conversation?.id || $json.body?.id || $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "name",
+              "name": "senderName",
+              "value": "={{ $json.body?.sender?.name || $json.sender?.name || $json.body?.meta?.sender?.name || $json.meta?.sender?.name || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "name": "senderPhone",
+              "value": "={{ $json.body?.sender?.phone_number || $json.sender?.phone_number || $json.body?.meta?.sender?.phone_number || $json.meta?.sender?.phone_number || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "msg",
+              "name": "messageContent",
+              "value": "={{ $json.body?.content || $json.content || ($json.body?.messages && $json.body.messages[0]?.content) || ($json.messages && $json.messages[0]?.content) || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "lead-set",
+      "name": "Config Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL || 'https://api-crm.inovatitech.com.br' }}/api/v1/leads/inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            },
+            {
+              "name": "X-Chatwoot-Account-Id",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "X-Correlation-Id",
+              "value": "={{ $execution.id }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, message: $json.messageContent }) }}",
+        "options": {}
+      },
+      "id": "lead-http",
+      "name": "POST API Leads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, workflow: 'lead-inbound', correlationId: $execution.id }) }}"
+      },
+      "id": "lead-respond",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Lead Inbound": {
+      "main": [
+        [
+          {
+            "node": "Config Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Context": {
+      "main": [
+        [
+          {
+            "node": "POST API Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST API Leads": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "inova-crm-ai"
+  }
+}

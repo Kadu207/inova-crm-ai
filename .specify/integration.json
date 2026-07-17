@@ -1,0 +1,24 @@
+{
+  "integration": "cursor-agent",
+  "version": "1.0",
+  "projectName": "Inova CRM AI",
+  "script": "auto",
+  "scripts": {
+    "check-prerequisites": {
+      "ps1": ".specify/scripts/ps/check-prerequisites.ps1",
+      "sh": ".specify/scripts/bash/check-prerequisites.sh"
+    },
+    "create-new-feature": {
+      "ps1": ".specify/scripts/ps/create-new-feature.ps1",
+      "sh": ".specify/scripts/bash/create-new-feature.sh"
+    },
+    "setup-plan": {
+      "ps1": ".specify/scripts/ps/setup-plan.ps1",
+      "sh": ".specify/scripts/bash/setup-plan.sh"
+    },
+    "setup-tasks": {
+      "ps1": ".specify/scripts/ps/setup-tasks.ps1",
+      "sh": ".specify/scripts/bash/setup-tasks.sh"
+    }
+  }
+}

@@ -1,0 +1,538 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum TenantPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  TRIAL
+  CANCELLED
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  SALES
+  SUPPORT
+  VIEWER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  UNQUALIFIED
+  CONVERTED
+  LOST
+}
+
+enum LeadSource {
+  MANUAL
+  CHATWOOT
+  WEB
+  IMPORT
+  API
+}
+
+enum OpportunityStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ConversationStatus {
+  OPEN
+  PENDING
+  RESOLVED
+  SNOOZED
+}
+
+enum ProposalStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+  TERMINATED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  PIX
+  BOLETO
+  CREDIT_CARD
+  BANK_TRANSFER
+  OTHER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  EXPORT
+  WEBHOOK
+}
+
+// ─── Tenant & Identity ───────────────────────────────────────────────────────
+
+model Tenant {
+  id        String       @id @default(cuid())
+  slug      String       @unique
+  name      String
+  plan      TenantPlan   @default(FREE)
+  status    TenantStatus @default(TRIAL)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  // Chatwoot account ↔ tenant (dedicated chat-crm instance)
+  chatwootAccountId Int? @unique @map("chatwoot_account_id")
+
+  // Phase 7 prep — optional quotas
+  maxUsers         Int? @map("max_users")
+  maxLeads         Int? @map("max_leads")
+  maxStorageMb     Int? @map("max_storage_mb")
+  maxAiRequestsDay Int? @map("max_ai_requests_day")
+
+  users         User[]
+  companies     Company[]
+  contacts      Contact[]
+  leads         Lead[]
+  pipelines     Pipeline[]
+  opportunities Opportunity[]
+  tasks         Task[]
+  products      Product[]
+  services      Service[]
+  conversations Conversation[]
+  auditLogs     AuditLog[]
+  proposals     Proposal[]
+  contracts     Contract[]
+  invoices      Invoice[]
+  payments      Payment[]
+  outboxEvents  OutboxEvent[]
+  tenantConfigs TenantConfig[]
+
+  @@map("tenants")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String   @map("tenant_id")
+  email        String
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(SALES)
+  name         String
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  assignedLeads         Lead[]         @relation("LeadAssignee")
+  assignedOpportunities Opportunity[]  @relation("OpportunityAssignee")
+  assignedTasks         Task[]         @relation("TaskAssignee")
+  auditLogs             AuditLog[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model TenantConfig {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  key       String
+  value     Json
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+  @@map("tenant_configs")
+}
+
+// ─── CRM Core ────────────────────────────────────────────────────────────────
+
+model Company {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  name      String
+  document  String?
+  website   String?
+  industry  String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contacts    Contact[]
+  leads       Lead[]
+  proposals   Proposal[]
+  contracts   Contract[]
+  invoices    Invoice[]
+
+  @@index([tenantId])
+  @@map("companies")
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  companyId String?  @map("company_id")
+  name      String
+  email     String?
+  phone     String?
+  title     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  leads         Lead[]
+  opportunities Opportunity[]
+  conversations Conversation[]
+
+  @@index([tenantId])
+  @@index([tenantId, email])
+  @@map("contacts")
+}
+
+model Lead {
+  id           String     @id @default(cuid())
+  tenantId     String     @map("tenant_id")
+  contactId    String?    @map("contact_id")
+  companyId    String?    @map("company_id")
+  assignedToId String?    @map("assigned_to_id")
+  title        String
+  status       LeadStatus @default(NEW)
+  source       LeadSource @default(MANUAL)
+  score        Int        @default(0)
+  notes        String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  assignedTo User?    @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("leads")
+}
+
+model Pipeline {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  name      String
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stages        PipelineStage[]
+  opportunities Opportunity[]
+
+  @@index([tenantId])
+  @@map("pipelines")
+}
+
+model PipelineStage {
+  id         String   @id @default(cuid())
+  tenantId   String   @map("tenant_id")
+  pipelineId String   @map("pipeline_id")
+  name       String
+  order      Int
+  probability Int     @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  pipeline      Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  opportunities Opportunity[]
+
+  @@index([tenantId])
+  @@index([pipelineId])
+  @@map("pipeline_stages")
+}
+
+model Opportunity {
+  id           String            @id @default(cuid())
+  tenantId     String            @map("tenant_id")
+  pipelineId   String            @map("pipeline_id")
+  stageId      String            @map("stage_id")
+  contactId    String?           @map("contact_id")
+  assignedToId String?           @map("assigned_to_id")
+  title        String
+  value        Decimal           @default(0) @db.Decimal(15, 2)
+  status       OpportunityStatus @default(OPEN)
+  expectedCloseDate DateTime?    @map("expected_close_date")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  stage      PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  contact    Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  assignedTo User?         @relation("OpportunityAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  tasks      Task[]
+  proposals  Proposal[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("opportunities")
+}
+
+model Task {
+  id            String       @id @default(cuid())
+  tenantId      String       @map("tenant_id")
+  opportunityId String?      @map("opportunity_id")
+  assignedToId  String?      @map("assigned_to_id")
+  title         String
+  description   String?
+  status        TaskStatus   @default(PENDING)
+  priority      TaskPriority @default(MEDIUM)
+  dueDate       DateTime?    @map("due_date")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  assignedTo  User?        @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("tasks")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  name        String
+  sku         String?
+  price       Decimal  @default(0) @db.Decimal(15, 2)
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("products")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  name        String
+  code        String?
+  price       Decimal  @default(0) @db.Decimal(15, 2)
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("services")
+}
+
+model Conversation {
+  id               String             @id @default(cuid())
+  tenantId         String             @map("tenant_id")
+  contactId        String?            @map("contact_id")
+  chatwootId       Int?               @map("chatwoot_id")
+  chatwootAccountId Int?              @map("chatwoot_account_id")
+  status           ConversationStatus @default(OPEN)
+  channel          String?
+  lastMessageAt    DateTime?          @map("last_message_at")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, chatwootId])
+  @@index([tenantId])
+  @@map("conversations")
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  tenantId   String      @map("tenant_id")
+  userId     String?     @map("user_id")
+  action     AuditAction
+  entityType String      @map("entity_type")
+  entityId   String?     @map("entity_id")
+  metadata   Json?
+  ipAddress  String?     @map("ip_address")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, entityType])
+  @@map("audit_logs")
+}
+
+// ─── Phase 5 — Finance ───────────────────────────────────────────────────────
+
+model Proposal {
+  id            String         @id @default(cuid())
+  tenantId      String         @map("tenant_id")
+  opportunityId String?        @map("opportunity_id")
+  companyId     String?        @map("company_id")
+  title         String
+  status        ProposalStatus @default(DRAFT)
+  totalValue    Decimal        @default(0) @map("total_value") @db.Decimal(15, 2)
+  validUntil    DateTime?      @map("valid_until")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contracts   Contract[]
+
+  @@index([tenantId])
+  @@map("proposals")
+}
+
+model Contract {
+  id         String         @id @default(cuid())
+  tenantId   String         @map("tenant_id")
+  proposalId String?        @map("proposal_id")
+  companyId  String?        @map("company_id")
+  title      String
+  status     ContractStatus @default(DRAFT)
+  startDate  DateTime?      @map("start_date")
+  endDate    DateTime?      @map("end_date")
+  value      Decimal        @default(0) @db.Decimal(15, 2)
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @updatedAt @map("updated_at")
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  proposal Proposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  company  Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  invoices Invoice[]
+
+  @@index([tenantId])
+  @@map("contracts")
+}
+
+model Invoice {
+  id         String        @id @default(cuid())
+  tenantId   String        @map("tenant_id")
+  contractId String?       @map("contract_id")
+  companyId  String?       @map("company_id")
+  number     String
+  status     InvoiceStatus @default(DRAFT)
+  amount     Decimal       @default(0) @db.Decimal(15, 2)
+  dueDate    DateTime?     @map("due_date")
+  paidAt     DateTime?     @map("paid_at")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contract Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  company  Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  payments Payment[]
+
+  @@unique([tenantId, number])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("invoices")
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  tenantId  String        @map("tenant_id")
+  invoiceId String        @map("invoice_id")
+  amount    Decimal       @db.Decimal(15, 2)
+  status    PaymentStatus @default(PENDING)
+  method    PaymentMethod @default(PIX)
+  paidAt    DateTime?     @map("paid_at")
+  reference String?
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([invoiceId])
+  @@map("payments")
+}
+
+// ─── Events (Outbox) ─────────────────────────────────────────────────────────
+
+model OutboxEvent {
+  id             String    @id @default(cuid())
+  tenantId       String    @map("tenant_id")
+  eventType      String    @map("event_type")
+  correlationId  String    @map("correlation_id")
+  idempotencyKey String    @map("idempotency_key")
+  payload        Json
+  publishedAt    DateTime? @map("published_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([publishedAt])
+  @@map("outbox_events")
+}
