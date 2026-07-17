@@ -37,11 +37,21 @@ describe('TenantGuard', () => {
     expect(() => guard.canActivate(createContext(req))).toThrow(ForbiddenException);
   });
 
-  it('rejects tenant mismatch', () => {
+  it('rejects tenant mismatch when JWT differs from resolved tenant', () => {
     const req = {
       user: { tenantId: 't1' },
+      tenantId: 't2', // already resolved by middleware
       headers: { 'x-tenant-id': 't2' },
     };
     expect(() => guard.canActivate(createContext(req))).toThrow(ForbiddenException);
+  });
+
+  it('allows JWT tenant when header is slug-compatible via resolved tenantId', () => {
+    const req = {
+      user: { tenantId: 't1' },
+      tenantId: 't1',
+      headers: { 'x-tenant-id': 'demo' },
+    };
+    expect(guard.canActivate(createContext(req))).toBe(true);
   });
 });
