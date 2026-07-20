@@ -263,13 +263,16 @@ model Lead {
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  assignedTo User?    @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact       Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  assignedTo    User?          @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  opportunities Opportunity[]
+  conversations Conversation[]
 
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([tenantId, contactId])
   @@map("leads")
 }
 
@@ -312,6 +315,7 @@ model Opportunity {
   tenantId     String            @map("tenant_id")
   pipelineId   String            @map("pipeline_id")
   stageId      String            @map("stage_id")
+  leadId       String?           @map("lead_id")
   contactId    String?           @map("contact_id")
   assignedToId String?           @map("assigned_to_id")
   title        String
@@ -324,6 +328,7 @@ model Opportunity {
   tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
   stage      PipelineStage @relation(fields: [stageId], references: [id], onDelete: Restrict)
+  lead       Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
   contact    Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
   assignedTo User?         @relation("OpportunityAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
   tasks      Task[]
@@ -331,6 +336,7 @@ model Opportunity {
 
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([tenantId, leadId])
   @@map("opportunities")
 }
 
@@ -394,6 +400,7 @@ model Conversation {
   id               String             @id @default(cuid())
   tenantId         String             @map("tenant_id")
   contactId        String?            @map("contact_id")
+  leadId           String?            @map("lead_id")
   chatwootId       Int?               @map("chatwoot_id")
   chatwootAccountId Int?              @map("chatwoot_account_id")
   status           ConversationStatus @default(OPEN)
@@ -404,9 +411,11 @@ model Conversation {
 
   tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  lead    Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
 
   @@unique([tenantId, chatwootId])
   @@index([tenantId])
+  @@index([tenantId, leadId])
   @@map("conversations")
 }
 

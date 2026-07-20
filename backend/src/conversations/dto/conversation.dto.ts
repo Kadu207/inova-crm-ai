@@ -21,6 +21,11 @@ export class CreateConversationDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  leadId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   channel?: string;
 
   @ApiPropertyOptional({ enum: ConversationStatus })
@@ -72,4 +77,29 @@ export class SyncConversationDto {
   @IsOptional()
   @IsInt()
   assigneeId?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  contactId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  leadId?: string;
 }

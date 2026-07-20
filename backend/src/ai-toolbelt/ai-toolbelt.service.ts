@@ -21,7 +21,7 @@ export class AiToolbeltService {
   constructor(private readonly leadsService: LeadsService) {}
 
   async qualifyLead(tenantId: string, leadId: string): Promise<QualifyLeadResult> {
-    const lead = await this.leadsService.qualify(tenantId, leadId, 75);
+    const lead = await this.leadsService.qualify(tenantId, leadId, { score: 75 });
     return {
       leadId: lead.id,
       score: lead.score,

@@ -1,7 +1,11 @@
 import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OpportunitiesService } from './opportunities.service';
-import { CreateOpportunityDto, UpdateOpportunityDto } from './dto/opportunity.dto';
+import {
+  CreateOpportunityDto,
+  MoveOpportunityDto,
+  UpdateOpportunityDto,
+} from './dto/opportunity.dto';
 import { TenantId } from '../common/decorators/tenant.decorator';
 
 @ApiTags('opportunities')
@@ -28,5 +32,23 @@ export class OpportunitiesController {
   @Patch(':id')
   update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateOpportunityDto) {
     return this.opportunitiesService.update(tenantId, id, dto);
+  }
+
+  @Post(':id/move')
+  @ApiOperation({ summary: 'Move opportunity to another pipeline stage' })
+  move(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: MoveOpportunityDto) {
+    return this.opportunitiesService.moveStage(tenantId, id, dto);
+  }
+
+  @Post(':id/won')
+  @ApiOperation({ summary: 'Mark opportunity as won (RN-OPP-02)' })
+  won(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.opportunitiesService.markWon(tenantId, id);
+  }
+
+  @Post(':id/lost')
+  @ApiOperation({ summary: 'Mark opportunity as lost (RN-OPP-02)' })
+  lost(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.opportunitiesService.markLost(tenantId, id);
   }
 }

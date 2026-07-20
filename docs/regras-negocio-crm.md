@@ -1,8 +1,8 @@
 # Regras de Negócio do CRM — Inova CRM AI
 
 **Volume:** 14  
-**Versão:** 0.1 (Fase 0 — skeleton)  
-**Status:** em construção
+**Versão:** 0.2  
+**Status:** implementado no backend (MVP)
 
 ---
 
@@ -12,51 +12,38 @@ Catálogo de regras de negócio por módulo. **Toda regra vive no backend** — 
 
 ---
 
-## Sumário
-
-1. [Propósito](#propósito)
-2. [Módulos](#módulos)
-3. [Leads](#leads)
-4. [Funil e oportunidades](#funil-e-oportunidades)
-5. [Atendimento](#atendimento)
-6. [Financeiro](#financeiro)
-7. [Permissões](#permissões)
-8. [Auditoria](#auditoria)
-
----
-
-## Módulos
-
-1. Dashboard · 2. Empresas · 3. Contatos · 4. Leads · 5. Funil Kanban · 6. Oportunidades · 7. Agenda · 8. Tarefas · 9. Produtos · 10. Serviços · 11. Propostas · 12. Contratos · 13. Financeiro · 14. Cobrança · 15. Atendimento · 16. Relatórios · 17. Configurações · 18. Usuários · 19. Permissões · 20. Auditoria
-
 ## Leads
 
-<!-- TODO Fase 4 -->
-
-- RN-LEAD-01: Todo lead possui `tenantId` e origem rastreável
-- RN-LEAD-02: Qualificação altera status via API (evento `lead.qualified`)
-- RN-LEAD-03: Duplicata detectada por email/telefone no mesmo tenant
+| ID         | Regra                                                           | Implementação                                                     |
+| ---------- | --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| RN-LEAD-01 | Todo lead possui `tenantId` e origem rastreável                 | `LeadsService.create` / `inboundFromChatwoot` (`source=CHATWOOT`) |
+| RN-LEAD-02 | Qualificação altera status via API + `lead.qualified`           | `POST /leads/:id/qualify`                                         |
+| RN-LEAD-03 | Duplicata por email/telefone no mesmo tenant                    | Upsert `Contact` + open lead reutilizado no inbound               |
+| RN-LEAD-04 | Conversão cria oportunidade no funil default + `lead.converted` | `POST /leads/:id/convert`                                         |
 
 ## Funil e oportunidades
 
-- RN-OPP-01: Transição de estágio valida regras do pipeline do tenant
-- RN-OPP-02: Oportunidade ganha/perdida emite `opportunity.won` / `opportunity.lost`
-- RN-OPP-03: SLA calculado no backend, não no n8n
+| ID        | Regra                                        | Implementação                                                                 |
+| --------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
+| RN-OPP-01 | Estágio deve pertencer ao pipeline do tenant | `OpportunitiesService.assertStageInPipeline` + `POST /opportunities/:id/move` |
+| RN-OPP-02 | Ganho/perda emite `opportunity.won` / `lost` | `POST /opportunities/:id/won` \| `lost`                                       |
+| RN-OPP-03 | SLA calculado no backend                     | Pendente (worker/fase posterior)                                              |
 
 ## Atendimento
 
-- RN-CONV-01: Conversa vinculada a contato/lead do mesmo tenant
-- RN-CONV-02: Sync unidirecional master Chatwoot para mensagens de canal
+| ID         | Regra                                             | Implementação                                          |
+| ---------- | ------------------------------------------------- | ------------------------------------------------------ |
+| RN-CONV-01 | Conversa vinculada a contato/lead do mesmo tenant | `ConversationsService.syncFromChatwoot` + inbound lead |
+| RN-CONV-02 | Sync master Chatwoot via n8n → API                | Workflows `lead-inbound` + `sync-conversation`         |
 
-## Financeiro
+## Financeiro / Permissões / Auditoria
 
-- RN-INV-01: Emissão de fatura exige humano no loop
-- RN-INV-02: Valores e impostos calculados no backend
+Sem mudança nesta entrega — ver seções anteriores e `seguranca-lgpd.md`.
 
-## Permissões
+## Fluxos n8n (orquestração only)
 
-Regras RBAC por papel — ver [seguranca-lgpd.md](./seguranca-lgpd.md).
+1. **lead-inbound** — webhook Chatwoot → `POST /api/v1/leads/inbound`
+2. **sync-conversation** — webhook → `POST /api/v1/conversations/sync`
+3. **notify-api** — genérico (sem regra de domínio)
 
-## Auditoria
-
-Toda mutação de domínio gera registro auditável + evento quando aplicável.
+Decisões (dedupe, qualify, convert, stage, won/lost) **somente na API NestJS**.

@@ -29,6 +29,18 @@ function formatDate(value: string): string {
 export function LeadsClient() {
   const [items, setItems] = useState<LeadRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  async function load() {
+    const result = await apiFetch<LeadRow[]>('/leads');
+    if (!result.ok) {
+      setError(result.error.message);
+      setItems([]);
+      return;
+    }
+    setError(null);
+    setItems(result.data);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +60,34 @@ export function LeadsClient() {
     };
   }, []);
 
+  async function qualify(id: string) {
+    setBusyId(id);
+    const result = await apiFetch<LeadRow>(`/leads/${id}/qualify`, {
+      method: 'POST',
+      body: { score: 80 },
+    });
+    setBusyId(null);
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+    await load();
+  }
+
+  async function convert(id: string) {
+    setBusyId(id);
+    const result = await apiFetch<{ lead: LeadRow }>(`/leads/${id}/convert`, {
+      method: 'POST',
+      body: {},
+    });
+    setBusyId(null);
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+    await load();
+  }
+
   if (items === null && !error) {
     return (
       <>
@@ -60,7 +100,7 @@ export function LeadsClient() {
     );
   }
 
-  if (error) {
+  if (error && items === null) {
     return (
       <>
         <PageHeader
@@ -79,8 +119,12 @@ export function LeadsClient() {
       <PageHeader
         title="Leads"
         description="Entrada do funil — Chatwoot, formulários e importação."
-        action={<button className="btn-primary">Novo lead</button>}
       />
+      {error ? (
+        <div className="mb-3">
+          <ErrorState message={error} />
+        </div>
+      ) : null}
       {leads.length === 0 ? (
         <EmptyState
           title="Nenhum lead"
@@ -95,7 +139,8 @@ export function LeadsClient() {
                 <th className="py-2 pr-4 font-medium">Origem</th>
                 <th className="py-2 pr-4 font-medium">Status</th>
                 <th className="py-2 pr-4 font-medium">Score</th>
-                <th className="py-2 font-medium">Criado</th>
+                <th className="py-2 pr-4 font-medium">Criado</th>
+                <th className="py-2 font-medium">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -105,7 +150,31 @@ export function LeadsClient() {
                   <td className="py-3 pr-4">{lead.source}</td>
                   <td className="py-3 pr-4">{lead.status}</td>
                   <td className="py-3 pr-4">{lead.score}</td>
-                  <td className="py-3 whitespace-nowrap">{formatDate(lead.createdAt)}</td>
+                  <td className="whitespace-nowrap py-3 pr-4">{formatDate(lead.createdAt)}</td>
+                  <td className="py-3">
+                    <div className="flex flex-wrap gap-2">
+                      {lead.status !== 'QUALIFIED' && lead.status !== 'CONVERTED' ? (
+                        <button
+                          type="button"
+                          className="btn-primary text-xs"
+                          disabled={busyId === lead.id}
+                          onClick={() => void qualify(lead.id)}
+                        >
+                          Qualificar
+                        </button>
+                      ) : null}
+                      {lead.status !== 'CONVERTED' && lead.status !== 'LOST' ? (
+                        <button
+                          type="button"
+                          className="btn-primary text-xs"
+                          disabled={busyId === lead.id}
+                          onClick={() => void convert(lead.id)}
+                        >
+                          Converter
+                        </button>
+                      ) : null}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

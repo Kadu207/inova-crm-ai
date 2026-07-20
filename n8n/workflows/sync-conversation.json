@@ -50,6 +50,24 @@
               "name": "assigneeId",
               "value": "={{ $json.body?.conversation?.meta?.assignee?.id || $json.conversation?.meta?.assignee?.id || null }}",
               "type": "number"
+            },
+            {
+              "id": "name",
+              "name": "contactName",
+              "value": "={{ $json.body?.meta?.sender?.name || $json.body?.conversation?.meta?.sender?.name || $json.meta?.sender?.name || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "name": "contactPhone",
+              "value": "={{ $json.body?.meta?.sender?.phone_number || $json.body?.conversation?.meta?.sender?.phone_number || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "contactEmail",
+              "value": "={{ $json.body?.meta?.sender?.email || $json.body?.conversation?.meta?.sender?.email || '' }}",
+              "type": "string"
             }
           ]
         },
@@ -88,7 +106,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId, name: $json.contactName, phone: $json.contactPhone, email: $json.contactEmail }) }}",
         "options": {}
       },
       "id": "sync-http",

@@ -1,7 +1,13 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { LeadsService } from './leads.service';
-import { CreateLeadDto, InboundLeadDto, UpdateLeadDto } from './dto/lead.dto';
+import {
+  ConvertLeadDto,
+  CreateLeadDto,
+  InboundLeadDto,
+  QualifyLeadDto,
+  UpdateLeadDto,
+} from './dto/lead.dto';
 import { TenantId } from '../common/decorators/tenant.decorator';
 
 @ApiTags('leads')
@@ -41,9 +47,15 @@ export class LeadsController {
   }
 
   @Post(':id/qualify')
-  @ApiOperation({ summary: 'Qualify lead' })
-  qualify(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.leadsService.qualify(tenantId, id);
+  @ApiOperation({ summary: 'Qualify lead (RN-LEAD-02)' })
+  qualify(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: QualifyLeadDto) {
+    return this.leadsService.qualify(tenantId, id, dto);
+  }
+
+  @Post(':id/convert')
+  @ApiOperation({ summary: 'Convert lead to opportunity' })
+  convert(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: ConvertLeadDto) {
+    return this.leadsService.convert(tenantId, id, dto);
   }
 
   @Delete(':id')

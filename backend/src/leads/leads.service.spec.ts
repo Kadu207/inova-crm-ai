@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { LeadStatus, LeadSource } from '@prisma/client';
 import { LeadsService } from './leads.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,7 +13,7 @@ const mockLead = {
   title: 'Test Lead',
   status: LeadStatus.NEW,
   source: LeadSource.MANUAL,
-  contactId: null,
+  contactId: 'contact-1',
   companyId: null,
   assignedToId: null,
   score: 0,
@@ -32,6 +32,10 @@ describe('LeadsService', () => {
       update: jest.Mock;
       delete: jest.Mock;
     };
+    contact: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock };
+    conversation: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock };
+    pipeline: { findFirst: jest.Mock };
+    opportunity: { create: jest.Mock };
   };
   let events: { publish: jest.Mock };
 
@@ -44,6 +48,10 @@ describe('LeadsService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      contact: { findFirst: jest.fn(), create: jest.fn(), update: jest.fn() },
+      conversation: { findFirst: jest.fn(), create: jest.fn(), update: jest.fn() },
+      pipeline: { findFirst: jest.fn() },
+      opportunity: { create: jest.fn() },
     };
     events = { publish: jest.fn().mockResolvedValue(undefined) };
 
@@ -89,12 +97,78 @@ describe('LeadsService', () => {
     const qualified = { ...mockLead, status: LeadStatus.QUALIFIED, score: 80 };
     prisma.lead.update.mockResolvedValue(qualified);
 
-    const result = await service.qualify(tenantId, 'lead-1');
+    const result = await service.qualify(tenantId, 'lead-1', { score: 80 });
     expect(result.status).toBe(LeadStatus.QUALIFIED);
     expect(events.publish).toHaveBeenCalledWith(
       tenantId,
       'lead.qualified',
       expect.objectContaining({ leadId: 'lead-1' }),
     );
+  });
+
+  it('inbound dedupes open lead by phone contact', async () => {
+    prisma.contact.findFirst.mockResolvedValue({
+      id: 'contact-1',
+      name: 'Alice',
+      phone: '+5511999',
+      email: null,
+    });
+    prisma.contact.update.mockResolvedValue({
+      id: 'contact-1',
+      name: 'Alice',
+      phone: '+5511999',
+      email: null,
+    });
+    prisma.lead.findFirst.mockResolvedValue(mockLead);
+    prisma.lead.update.mockResolvedValue({ ...mockLead, notes: 'message=oi' });
+    prisma.conversation.findFirst.mockResolvedValue(null);
+    prisma.conversation.create.mockResolvedValue({ id: 'conv-1' });
+
+    const result = await service.inboundFromChatwoot(tenantId, {
+      name: 'Alice',
+      phone: '+5511999',
+      message: 'oi',
+      conversationId: 42,
+      event: 'message_created',
+    });
+
+    expect(result.id).toBe('lead-1');
+    expect(prisma.lead.create).not.toHaveBeenCalled();
+    expect(events.publish).toHaveBeenCalledWith(
+      tenantId,
+      'lead.updated',
+      expect.objectContaining({ deduped: true }),
+    );
+  });
+
+  it('convert creates opportunity and marks CONVERTED', async () => {
+    prisma.lead.findFirst.mockResolvedValue(mockLead);
+    prisma.pipeline.findFirst.mockResolvedValue({
+      id: 'pipe-1',
+      stages: [{ id: 'stage-1', pipelineId: 'pipe-1', order: 1 }],
+    });
+    prisma.opportunity.create.mockResolvedValue({
+      id: 'opp-1',
+      leadId: 'lead-1',
+      stageId: 'stage-1',
+    });
+    prisma.lead.update.mockResolvedValue({ ...mockLead, status: LeadStatus.CONVERTED });
+
+    const result = await service.convert(tenantId, 'lead-1', {});
+    expect(result.lead.status).toBe(LeadStatus.CONVERTED);
+    expect(result.opportunity.id).toBe('opp-1');
+    expect(events.publish).toHaveBeenCalledWith(
+      tenantId,
+      'lead.converted',
+      expect.objectContaining({ opportunityId: 'opp-1' }),
+    );
+  });
+
+  it('convert rejects already converted lead', async () => {
+    prisma.lead.findFirst.mockResolvedValue({
+      ...mockLead,
+      status: LeadStatus.CONVERTED,
+    });
+    await expect(service.convert(tenantId, 'lead-1', {})).rejects.toThrow(BadRequestException);
   });
 });

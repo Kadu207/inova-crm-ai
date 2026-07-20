@@ -56,6 +56,12 @@
               "name": "messageContent",
               "value": "={{ $json.body?.content || $json.content || ($json.body?.messages && $json.body.messages[0]?.content) || ($json.messages && $json.messages[0]?.content) || '' }}",
               "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "senderEmail",
+              "value": "={{ $json.body?.sender?.email || $json.sender?.email || $json.body?.meta?.sender?.email || $json.meta?.sender?.email || '' }}",
+              "type": "string"
             }
           ]
         },
@@ -94,7 +100,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, message: $json.messageContent }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, email: $json.senderEmail, message: $json.messageContent }) }}",
         "options": {}
       },
       "id": "lead-http",

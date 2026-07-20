@@ -15,6 +15,11 @@ export class PipelineController {
     return this.pipelineService.findAll(tenantId);
   }
 
+  @Get('default')
+  findDefault(@TenantId() tenantId: string) {
+    return this.pipelineService.findDefault(tenantId);
+  }
+
   @Get(':id')
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.pipelineService.findOne(tenantId, id);

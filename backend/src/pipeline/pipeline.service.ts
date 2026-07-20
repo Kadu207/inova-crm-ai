@@ -27,6 +27,13 @@ export class PipelineService {
     return this.prisma.pipeline.create({ data: { tenantId, ...dto } });
   }
 
+  async findDefault(tenantId: string): Promise<(Pipeline & { stages: PipelineStage[] }) | null> {
+    return this.prisma.pipeline.findFirst({
+      where: { tenantId, isDefault: true },
+      include: { stages: { orderBy: { order: 'asc' } } },
+    });
+  }
+
   async addStage(
     tenantId: string,
     pipelineId: string,

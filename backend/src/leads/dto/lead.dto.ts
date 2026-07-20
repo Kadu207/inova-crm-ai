@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsInt, Min } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsInt, IsNumber, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { LeadSource, LeadStatus } from '@prisma/client';
 
@@ -101,4 +101,32 @@ export class InboundLeadDto {
   @IsOptional()
   @IsString()
   message?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  email?: string;
+}
+
+export class ConvertLeadDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  pipelineId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  stageId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  value?: number;
 }

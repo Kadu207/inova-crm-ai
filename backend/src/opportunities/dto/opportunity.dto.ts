@@ -26,6 +26,11 @@ export class CreateOpportunityDto {
   @IsOptional()
   @IsString()
   contactId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  leadId?: string;
 }
 
 export class UpdateOpportunityDto {
@@ -49,4 +54,11 @@ export class UpdateOpportunityDto {
   @IsNumber()
   @Min(0)
   value?: number;
+}
+
+export class MoveOpportunityDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  stageId!: string;
 }

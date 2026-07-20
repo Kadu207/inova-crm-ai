@@ -39,24 +39,70 @@ export class ConversationsService {
     return conv;
   }
 
+  /**
+   * Upsert conversation from Chatwoot; link contact/lead when identifiers present (RN-CONV-01/02).
+   */
   async syncFromChatwoot(tenantId: string, dto: SyncConversationDto): Promise<Conversation> {
     const chatwootId = dto.conversationId;
     const status = mapChatwootStatus(dto.status);
+
+    let contactId = dto.contactId;
+    if (!contactId && (dto.phone || dto.email || dto.name)) {
+      contactId = await this.resolveContactId(tenantId, {
+        name: dto.name,
+        phone: dto.phone,
+        email: dto.email,
+      });
+    }
+
+    let leadId = dto.leadId;
+    if (!leadId && contactId) {
+      const openLead = await this.prisma.lead.findFirst({
+        where: {
+          tenantId,
+          contactId,
+          status: { in: ['NEW', 'CONTACTED', 'QUALIFIED'] },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      leadId = openLead?.id;
+    }
 
     if (chatwootId != null) {
       const existing = await this.prisma.conversation.findFirst({
         where: { tenantId, chatwootId },
       });
       if (existing) {
-        return this.update(tenantId, existing.id, { status });
+        const conv = await this.prisma.conversation.update({
+          where: { id: existing.id },
+          data: {
+            ...(status ? { status } : {}),
+            ...(contactId ? { contactId } : {}),
+            ...(leadId ? { leadId } : {}),
+            lastMessageAt: new Date(),
+            ...(dto.accountId != null ? { chatwootAccountId: dto.accountId } : {}),
+          },
+        });
+        if (status === ConversationStatus.RESOLVED) {
+          await this.events.publish(tenantId, 'conversation.resolved', {
+            conversationId: conv.id,
+          });
+        }
+        return conv;
       }
     }
 
-    return this.create(tenantId, {
+    const conv = await this.create(tenantId, {
       chatwootId: chatwootId ?? undefined,
       channel: 'chatwoot',
       status,
+      contactId,
+      leadId,
       ...(dto.accountId != null ? { chatwootAccountId: dto.accountId } : {}),
+    });
+    return this.prisma.conversation.update({
+      where: { id: conv.id },
+      data: { lastMessageAt: new Date() },
     });
   }
 
@@ -69,6 +115,35 @@ export class ConversationsService {
       });
     }
     return conv;
+  }
+
+  private async resolveContactId(
+    tenantId: string,
+    input: { name?: string; phone?: string; email?: string },
+  ): Promise<string | undefined> {
+    if (input.email) {
+      const byEmail = await this.prisma.contact.findFirst({
+        where: { tenantId, email: input.email },
+      });
+      if (byEmail) return byEmail.id;
+    }
+    if (input.phone) {
+      const byPhone = await this.prisma.contact.findFirst({
+        where: { tenantId, phone: input.phone },
+      });
+      if (byPhone) return byPhone.id;
+    }
+    if (!input.name && !input.phone && !input.email) return undefined;
+
+    const created = await this.prisma.contact.create({
+      data: {
+        tenantId,
+        name: input.name?.trim() || input.phone || input.email || 'Chatwoot contact',
+        phone: input.phone,
+        email: input.email,
+      },
+    });
+    return created.id;
   }
 }
 
