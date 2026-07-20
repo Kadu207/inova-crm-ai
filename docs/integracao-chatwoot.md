@@ -73,6 +73,10 @@ Seed demo: `SEED_CHATWOOT_ACCOUNT_ID=1` (account Chatwoot padrão).
 
 WhatsApp Business, Email, Instagram DM, Facebook Messenger — configurados por tenant no painel Chatwoot.
 
+Setup WhatsApp Cloud API (VPS): `docs/chatwoot-whatsapp-setup.md` + `chatwoot/scripts/create_whatsapp_inbox.rb`.
+
+Agent humano (account demo / id 1): criar com `chatwoot/scripts/create_agent.rb` — usuário `agent@demo.inovatitech.com.br` (role `agent`) + admins vinculados.
+
 ## Webhooks assinados
 
 ### Fluxo
