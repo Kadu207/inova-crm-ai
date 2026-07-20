@@ -1,8 +1,24 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
 import { fetchListStub } from '@/lib/api';
+
+type CrmItem = {
+  id: string;
+  name?: string | null;
+  title?: string | null;
+  email?: string | null;
+  status?: string | null;
+  channel?: string | null;
+  chatwootId?: number | null;
+  source?: string | null;
+  sku?: string | null;
+  document?: string | null;
+};
 
 type CrmPageProps = {
   title: string;
@@ -13,7 +29,29 @@ type CrmPageProps = {
   actionLabel?: string;
 };
 
-export async function CrmPage({
+function itemLabel(item: CrmItem): string {
+  if (item.chatwootId != null) {
+    const parts = [`#${item.chatwootId}`, item.channel, item.status].filter(Boolean);
+    return parts.join(' · ');
+  }
+
+  const primary =
+    item.title?.trim() ||
+    item.name?.trim() ||
+    item.email?.trim() ||
+    item.sku?.trim() ||
+    item.document?.trim();
+
+  if (primary && item.status) {
+    return `${primary} · ${item.status}`;
+  }
+  if (primary && item.source) {
+    return `${primary} · ${item.source}`;
+  }
+  return primary || item.id;
+}
+
+export function CrmPage({
   title,
   description,
   resource,
@@ -21,18 +59,46 @@ export async function CrmPage({
   emptyDescription,
   actionLabel = 'Criar registro',
 }: CrmPageProps) {
-  const result = await fetchListStub<{ id: string; name?: string }>(resource);
+  const [items, setItems] = useState<CrmItem[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!result.ok) {
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const result = await fetchListStub<CrmItem>(resource);
+      if (cancelled) return;
+      if (!result.ok) {
+        setError(result.error.message);
+        setItems([]);
+        return;
+      }
+      setError(null);
+      setItems(result.data);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [resource]);
+
+  if (items === null && !error) {
     return (
       <>
         <PageHeader title={title} description={description} />
-        <ErrorState message={result.error.message} />
+        <LoadingState />
       </>
     );
   }
 
-  const items = result.data;
+  if (error) {
+    return (
+      <>
+        <PageHeader title={title} description={description} />
+        <ErrorState message={error} />
+      </>
+    );
+  }
+
+  const rows = items ?? [];
 
   return (
     <>
@@ -41,14 +107,14 @@ export async function CrmPage({
         description={description}
         action={<button className="btn-primary">{actionLabel}</button>}
       />
-      {items.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : (
         <div className="card-panel">
           <ul className="divide-y divide-line">
-            {items.map((item) => (
+            {rows.map((item) => (
               <li key={item.id} className="break-words py-3 text-sm text-bone">
-                {item.name ?? item.id}
+                {itemLabel(item)}
               </li>
             ))}
           </ul>

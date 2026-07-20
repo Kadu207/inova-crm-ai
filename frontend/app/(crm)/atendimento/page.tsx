@@ -7,7 +7,7 @@ export default function AtendimentoPage() {
       description="Conversas sincronizadas via Chatwoot — canais omnichannel."
       resource="conversations"
       emptyTitle="Nenhuma conversa"
-      emptyDescription="As conversas do Chatwoot aparecerão aqui após a integração Fase 2."
+      emptyDescription="Mensagens no Chatwoot disparam sync-conversation (n8n) e aparecem aqui."
       actionLabel="Abrir Chatwoot"
     />
   );
