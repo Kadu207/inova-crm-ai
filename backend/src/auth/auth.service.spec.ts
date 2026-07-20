@@ -11,12 +11,22 @@ describe('AuthService', () => {
   let prisma: {
     tenant: { findUnique: jest.Mock; create: jest.Mock };
     user: { findUnique: jest.Mock };
+    withTenant: jest.Mock;
   };
 
   beforeEach(async () => {
     prisma = {
       tenant: { findUnique: jest.fn(), create: jest.fn() },
       user: { findUnique: jest.fn() },
+      withTenant: jest.fn((_tenantId: string, fn: (tx: unknown) => Promise<unknown>) =>
+        fn({
+          user: {
+            findUnique: (...args: unknown[]) => prisma.user.findUnique(...args),
+            create: jest.fn(),
+            findFirst: jest.fn(),
+          },
+        }),
+      ),
     };
 
     const module: TestingModule = await Test.createTestingModule({

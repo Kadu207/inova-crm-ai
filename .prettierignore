@@ -7,3 +7,4 @@ reports
 *.min.js
 pnpm-lock.yaml
 package-lock.json
+*.code-workspace

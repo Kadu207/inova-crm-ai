@@ -40,12 +40,21 @@ Modelo de dados multi-tenant, convenções Prisma, RLS, índices, migrações e 
 
 ## RLS (Row Level Security)
 
+Todas as tabelas de domínio com `tenant_id` usam:
+
 ```sql
--- Exemplo (expandir por tabela na Fase 4)
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE leads FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON leads
-  USING (tenant_id = current_setting('app.tenant_id')::text);
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), ''))
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), ''));
 ```
+
+A API Nest define `app.tenant_id` via `set_config(..., true)` na mesma transação de cada query Prisma (ALS + `TenantRlsInterceptor`). A tabela `tenants` **não** tem RLS de linha.
+
+O role de runtime da API é `crm_app` (`POSTGRES_APP_USER`) — **NOSUPERUSER / NOBYPASSRLS**. O role `POSTGRES_USER` (ex. `inova`) permanece superuser para migrations. Ver `infrastructure/scripts/setup-crm-app-role.sh`.
+
+Migration: `backend/prisma/migrations/20260720050000_tenant_rls/`.
 
 ## Entidades principais
 

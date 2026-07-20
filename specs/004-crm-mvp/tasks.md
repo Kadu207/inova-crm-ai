@@ -29,8 +29,8 @@
 | ID   | Pri | Tarefa                             | Status |
 | ---- | --- | ---------------------------------- | ------ |
 | T-10 | P0  | Schema Prisma com todos os modelos | [x]    |
-| T-11 | P0  | RLS policy (migration SQL)         | [ ]    |
-| T-12 | P0  | `prisma generate` + migrate dev    | [ ]    |
+| T-11 | P0  | RLS policy (migration SQL)         | [x]    |
+| T-12 | P0  | `prisma generate` + migrate dev    | [x]    |
 
 ---
 

@@ -23,23 +23,26 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
+    // tenants has no RLS; create tenant first, then user under RLS context.
     const tenant = await this.prisma.tenant.create({
       data: {
         slug: dto.tenantSlug,
         name: dto.tenantName,
-        users: {
-          create: {
-            email: dto.email,
-            name: dto.name,
-            passwordHash,
-            role: UserRole.ADMIN,
-          },
-        },
       },
-      include: { users: true },
     });
 
-    const user = tenant.users[0];
+    const user = await this.prisma.withTenant(tenant.id, (tx) =>
+      tx.user.create({
+        data: {
+          tenantId: tenant.id,
+          email: dto.email,
+          name: dto.name,
+          passwordHash,
+          role: UserRole.ADMIN,
+        },
+      }),
+    );
+
     return this.buildAuthResponse(
       user.id,
       user.email,
@@ -59,11 +62,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        tenantId_email: { tenantId: tenant.id, email: dto.email },
-      },
-    });
+    const user = await this.prisma.withTenant(tenant.id, (tx) =>
+      tx.user.findUnique({
+        where: {
+          tenantId_email: { tenantId: tenant.id, email: dto.email },
+        },
+      }),
+    );
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid credentials');
@@ -86,10 +91,12 @@ export class AuthService {
   }
 
   async me(userId: string, tenantId: string): Promise<AuthResponseDto | null> {
-    const user = await this.prisma.user.findFirst({
-      where: { id: userId, tenantId },
-      include: { tenant: true },
-    });
+    const user = await this.prisma.withTenant(tenantId, (tx) =>
+      tx.user.findFirst({
+        where: { id: userId, tenantId },
+        include: { tenant: true },
+      }),
+    );
     if (!user || !user.isActive) {
       return null;
     }
