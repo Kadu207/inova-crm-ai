@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { BottomNav } from '@/components/BottomNav';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Sidebar } from '@/components/Sidebar';
 import { AuthSession, clearSession, getSession } from '@/lib/auth';
@@ -16,6 +17,7 @@ export function AppShell({ children }: AppShellProps) {
   const [session, setSessionState] = useState<AuthSession | null>(null);
   const [ready, setReady] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const [railExpanded, setRailExpanded] = useState(true);
 
   useEffect(() => {
     const current = getSession();
@@ -68,7 +70,12 @@ export function AppShell({ children }: AppShellProps) {
         />
       ) : null}
 
-      <Sidebar open={navOpen} onNavigate={() => setNavOpen(false)} />
+      <Sidebar
+        open={navOpen}
+        expanded={railExpanded}
+        onNavigate={() => setNavOpen(false)}
+        onToggleExpand={() => setRailExpanded((v) => !v)}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b border-line bg-base/95 px-3 backdrop-blur sm:px-6">
@@ -93,7 +100,10 @@ export function AppShell({ children }: AppShellProps) {
                 <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
               </svg>
             </button>
-            <BrandLogo compact />
+            <div className="lg:hidden">
+              <BrandLogo compact />
+            </div>
+            <p className="hidden truncate text-sm text-smoke lg:block">Inova CRM AI</p>
           </div>
           <div className="flex shrink-0 items-center gap-2 text-sm text-smoke sm:gap-3">
             <span className="hidden max-w-[12rem] truncate md:inline lg:max-w-xs">
@@ -105,7 +115,10 @@ export function AppShell({ children }: AppShellProps) {
             </button>
           </div>
         </header>
-        <main className="page-main">{children}</main>
+
+        <main className="page-main page-main-with-bottom-nav">{children}</main>
+
+        <BottomNav onMore={() => setNavOpen(true)} />
       </div>
     </div>
   );

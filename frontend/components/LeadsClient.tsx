@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/EmptyState';
+import { EntityCard } from '@/components/EntityCard';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
+import { leadStatusTone, StatusBadge } from '@/components/StatusBadge';
 import { apiFetch } from '@/lib/api';
 
 export type LeadRow = {
@@ -24,6 +26,43 @@ function formatDate(value: string): string {
     dateStyle: 'short',
     timeStyle: 'short',
   });
+}
+
+function LeadActions({
+  lead,
+  busyId,
+  onQualify,
+  onConvert,
+}: {
+  lead: LeadRow;
+  busyId: string | null;
+  onQualify: (id: string) => void;
+  onConvert: (id: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {lead.status !== 'QUALIFIED' && lead.status !== 'CONVERTED' ? (
+        <button
+          type="button"
+          className="btn-primary text-xs"
+          disabled={busyId === lead.id}
+          onClick={() => onQualify(lead.id)}
+        >
+          Qualificar
+        </button>
+      ) : null}
+      {lead.status !== 'CONVERTED' && lead.status !== 'LOST' ? (
+        <button
+          type="button"
+          className="btn-ghost text-xs"
+          disabled={busyId === lead.id}
+          onClick={() => onConvert(lead.id)}
+        >
+          Converter
+        </button>
+      ) : null}
+    </div>
+  );
 }
 
 export function LeadsClient() {
@@ -92,6 +131,7 @@ export function LeadsClient() {
     return (
       <>
         <PageHeader
+          eyebrow="CRM"
           title="Leads"
           description="Entrada do funil — Chatwoot, formulários e importação."
         />
@@ -104,6 +144,7 @@ export function LeadsClient() {
     return (
       <>
         <PageHeader
+          eyebrow="CRM"
           title="Leads"
           description="Entrada do funil — Chatwoot, formulários e importação."
         />
@@ -117,8 +158,10 @@ export function LeadsClient() {
   return (
     <>
       <PageHeader
+        eyebrow="CRM"
         title="Leads"
         description="Entrada do funil — Chatwoot, formulários e importação."
+        action={<button className="btn-primary">+ Novo lead</button>}
       />
       {error ? (
         <div className="mb-3">
@@ -131,55 +174,70 @@ export function LeadsClient() {
           description="Leads chegam via Chatwoot, formulários ou importação CSV."
         />
       ) : (
-        <div className="card-panel overflow-x-auto">
-          <table className="w-full min-w-[40rem] text-left text-sm text-bone">
-            <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
-              <tr>
-                <th className="py-2 pr-4 font-medium">Título</th>
-                <th className="py-2 pr-4 font-medium">Origem</th>
-                <th className="py-2 pr-4 font-medium">Status</th>
-                <th className="py-2 pr-4 font-medium">Score</th>
-                <th className="py-2 pr-4 font-medium">Criado</th>
-                <th className="py-2 font-medium">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {leads.map((lead) => (
-                <tr key={lead.id}>
-                  <td className="max-w-md break-words py-3 pr-4">{lead.title}</td>
-                  <td className="py-3 pr-4">{lead.source}</td>
-                  <td className="py-3 pr-4">{lead.status}</td>
-                  <td className="py-3 pr-4">{lead.score}</td>
-                  <td className="whitespace-nowrap py-3 pr-4">{formatDate(lead.createdAt)}</td>
-                  <td className="py-3">
-                    <div className="flex flex-wrap gap-2">
-                      {lead.status !== 'QUALIFIED' && lead.status !== 'CONVERTED' ? (
-                        <button
-                          type="button"
-                          className="btn-primary text-xs"
-                          disabled={busyId === lead.id}
-                          onClick={() => void qualify(lead.id)}
-                        >
-                          Qualificar
-                        </button>
-                      ) : null}
-                      {lead.status !== 'CONVERTED' && lead.status !== 'LOST' ? (
-                        <button
-                          type="button"
-                          className="btn-primary text-xs"
-                          disabled={busyId === lead.id}
-                          onClick={() => void convert(lead.id)}
-                        >
-                          Converter
-                        </button>
-                      ) : null}
-                    </div>
-                  </td>
+        <>
+          {/* Mobile cards */}
+          <div className="space-y-3 md:hidden">
+            {leads.map((lead) => (
+              <EntityCard
+                key={lead.id}
+                title={lead.title}
+                badge={<StatusBadge label={lead.status} tone={leadStatusTone(lead.status)} />}
+                meta={
+                  <p>
+                    {lead.source} · score {lead.score} · {formatDate(lead.createdAt)}
+                  </p>
+                }
+                actions={
+                  <LeadActions
+                    lead={lead}
+                    busyId={busyId}
+                    onQualify={(id) => void qualify(id)}
+                    onConvert={(id) => void convert(id)}
+                  />
+                }
+              />
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <div className="card-panel table-scroll hidden md:block">
+            <table className="w-full min-w-[40rem] text-left text-sm text-bone">
+              <thead className="border-b border-line text-xs uppercase tracking-wide text-faint">
+                <tr>
+                  <th className="py-2 pr-4 font-medium">Título</th>
+                  <th className="py-2 pr-4 font-medium">Origem</th>
+                  <th className="py-2 pr-4 font-medium">Status</th>
+                  <th className="py-2 pr-4 font-medium">Score</th>
+                  <th className="py-2 pr-4 font-medium">Criado</th>
+                  <th className="py-2 font-medium">Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {leads.map((lead) => (
+                  <tr key={lead.id} className="align-top">
+                    <td className="max-w-md break-words py-3 pr-4">{lead.title}</td>
+                    <td className="py-3 pr-4 text-smoke">{lead.source}</td>
+                    <td className="py-3 pr-4">
+                      <StatusBadge label={lead.status} tone={leadStatusTone(lead.status)} />
+                    </td>
+                    <td className="py-3 pr-4">{lead.score}</td>
+                    <td className="whitespace-nowrap py-3 pr-4 text-smoke">
+                      {formatDate(lead.createdAt)}
+                    </td>
+                    <td className="py-3">
+                      <LeadActions
+                        lead={lead}
+                        busyId={busyId}
+                        onQualify={(id) => void qualify(id)}
+                        onConvert={(id) => void convert(id)}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </>
   );

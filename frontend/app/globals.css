@@ -35,9 +35,11 @@
   --shadow-card: 0 12px 40px -12px rgba(0, 0, 0, 0.85);
   --shadow-elevated: 0 40px 90px -40px rgba(0, 0, 0, 1);
 
-  /* Layout */
+  /* Layout — Ember Studio */
   --sidebar-width: 16rem;
+  --sidebar-rail: 4rem;
   --header-height: 3.5rem;
+  --bottom-nav-height: 4rem;
 }
 
 @layer base {
@@ -84,6 +86,10 @@
     @apply flex-1 overflow-y-auto p-4 sm:p-6;
   }
 
+  .page-main-with-bottom-nav {
+    @apply pb-[calc(var(--bottom-nav-height)+env(safe-area-inset-bottom)+1rem)] lg:pb-6;
+  }
+
   .table-scroll {
     @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
   }
@@ -95,6 +101,10 @@
 
   .kanban-column {
     @apply w-[min(85vw,18rem)] shrink-0 snap-start sm:w-72;
+  }
+
+  .deal-card {
+    @apply rounded-md border border-line bg-void p-3;
   }
 }
 

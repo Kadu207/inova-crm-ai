@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
+import { StatusBadge } from '@/components/StatusBadge';
 import { apiFetch, fetchListStub } from '@/lib/api';
 
 type Stage = { id: string; name: string; order: number };
@@ -28,6 +29,12 @@ function isSlaWarning(deal: Opportunity): boolean {
   const entered = new Date(deal.stageEnteredAt).getTime();
   if (Number.isNaN(entered)) return false;
   return Date.now() - entered >= SLA_HOURS * 60 * 60 * 1000;
+}
+
+function formatValue(value: string | number): string {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return String(value);
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 const FALLBACK_COLUMNS = ['Prospecção', 'Qualificação', 'Proposta', 'Negociação', 'Fechado'];
@@ -112,6 +119,7 @@ export function FunilClient() {
     return (
       <>
         <PageHeader
+          eyebrow="CRM"
           title="Funil"
           description="Kanban de oportunidades — mover estágio, ganhar ou perder."
         />
@@ -123,7 +131,7 @@ export function FunilClient() {
   if (error && !columns) {
     return (
       <>
-        <PageHeader title="Funil" description="Kanban de oportunidades." />
+        <PageHeader eyebrow="CRM" title="Funil" description="Kanban de oportunidades." />
         <ErrorState message={error} />
       </>
     );
@@ -134,8 +142,10 @@ export function FunilClient() {
   return (
     <>
       <PageHeader
+        eyebrow="CRM"
         title="Funil"
         description="Kanban de oportunidades — mover estágio, ganhar ou perder."
+        action={<button className="btn-primary">+ Oportunidade</button>}
       />
       {error ? (
         <div className="mb-3">
@@ -147,13 +157,24 @@ export function FunilClient() {
           const deals = byStage[column.key] ?? [];
           const prev = stageOrder[colIdx - 1];
           const next = stageOrder[colIdx + 1];
+          const columnValue = deals.reduce((sum, d) => {
+            const n = typeof d.value === 'number' ? d.value : Number(d.value);
+            return sum + (Number.isFinite(n) ? n : 0);
+          }, 0);
+
           return (
-            <div
+            <section
               key={column.key}
-              className="kanban-column card-panel min-h-[240px] lg:w-auto lg:min-h-[280px]"
+              className="kanban-column card-panel flex min-h-[240px] flex-col lg:w-auto lg:min-h-[280px]"
             >
-              <h3 className="font-display text-sm text-bone">{column.label}</h3>
-              <div className="mt-4 space-y-2">
+              <header className="sticky top-0 z-10 -mx-1 border-b border-line bg-panel px-1 pb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-display text-sm text-bone">{column.label}</h3>
+                  <StatusBadge label={String(deals.length)} tone="neutral" />
+                </div>
+                <p className="mt-1 font-display text-sm text-flame">{formatValue(columnValue)}</p>
+              </header>
+              <div className="mt-4 flex-1 space-y-2">
                 {deals.length === 0 ? (
                   <EmptyState
                     title="Vazio"
@@ -161,24 +182,21 @@ export function FunilClient() {
                   />
                 ) : (
                   deals.map((deal) => (
-                    <div
-                      key={deal.id}
-                      className="border-t border-line pt-2 text-sm text-bone first:border-t-0 first:pt-0"
-                    >
-                      <p className="break-words">{deal.title}</p>
-                      <p className="mt-1 text-xs text-muted">
-                        {deal.status}
-                        {isSlaWarning(deal) ? (
-                          <span className="ml-2 text-amber-400" title="SLA de estágio (>24h)">
-                            SLA
-                          </span>
-                        ) : null}
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-1">
+                    <article key={deal.id} className="deal-card">
+                      <p className="break-words text-sm font-medium text-bone">{deal.title}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <StatusBadge
+                          label={deal.status}
+                          tone={deal.status === 'WON' ? 'ok' : 'neutral'}
+                        />
+                        {isSlaWarning(deal) ? <StatusBadge label="SLA" tone="warn" /> : null}
+                        <span className="text-xs text-flame">{formatValue(deal.value)}</span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-1">
                         {prev ? (
                           <button
                             type="button"
-                            className="btn-primary text-xs"
+                            className="btn-ghost px-2 py-1 text-xs"
                             disabled={busyId === deal.id}
                             onClick={() => void move(deal.id, prev)}
                           >
@@ -188,7 +206,7 @@ export function FunilClient() {
                         {next ? (
                           <button
                             type="button"
-                            className="btn-primary text-xs"
+                            className="btn-ghost px-2 py-1 text-xs"
                             disabled={busyId === deal.id}
                             onClick={() => void move(deal.id, next)}
                           >
@@ -199,7 +217,7 @@ export function FunilClient() {
                           <>
                             <button
                               type="button"
-                              className="btn-primary text-xs"
+                              className="btn-primary px-2 py-1 text-xs"
                               disabled={busyId === deal.id}
                               onClick={() => void mark(deal.id, 'won')}
                             >
@@ -207,7 +225,7 @@ export function FunilClient() {
                             </button>
                             <button
                               type="button"
-                              className="btn-primary text-xs"
+                              className="btn-ghost px-2 py-1 text-xs"
                               disabled={busyId === deal.id}
                               onClick={() => void mark(deal.id, 'lost')}
                             >
@@ -216,11 +234,11 @@ export function FunilClient() {
                           </>
                         ) : null}
                       </div>
-                    </div>
+                    </article>
                   ))
                 )}
               </div>
-            </div>
+            </section>
           );
         })}
       </div>

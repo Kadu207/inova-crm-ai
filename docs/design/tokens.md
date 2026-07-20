@@ -124,4 +124,5 @@ Inova<b>CRM</b> AI
 
 - Origem: Inova-TI `painel-next/app/globals.css`
 - [prompts-claude-design.md](./prompts-claude-design.md)
+- [system.md](./system.md) — Ember Studio (shell + piloto)
 - [arquitetura-frontend.md](../arquitetura-frontend.md)

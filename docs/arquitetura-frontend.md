@@ -44,6 +44,7 @@ frontend/
 ## Design system
 
 - Tokens: [design/tokens.md](./design/tokens.md)
+- System (Ember Studio): [design/system.md](./design/system.md)
 - Prompts Claude Design: [design/prompts-claude-design.md](./design/prompts-claude-design.md)
 - **Marca Inova TI** — flame/void/bone; **não** usar defaults purple/cream de AI
 
