@@ -65,9 +65,9 @@
 
 | ID   | Pri | Tarefa                   | Status |
 | ---- | --- | ------------------------ | ------ |
-| T-40 | P0  | `npm run typecheck` PASS | [ ]    |
-| T-41 | P0  | `npm run test:unit` PASS | [ ]    |
-| T-42 | P0  | `npm run gate` PASS      | [ ]    |
+| T-40 | P0  | `npm run typecheck` PASS | [x]    |
+| T-41 | P0  | `npm run test:unit` PASS | [x]    |
+| T-42 | P0  | `npm run gate` PASS      | [x]    |
 | T-43 | P1  | Atualizar baseline       | [x]    |
 
 ---
@@ -76,4 +76,4 @@
 
 | ID   | Pri | Tarefa                          | Status |
 | ---- | --- | ------------------------------- | ------ |
-| T-50 | P2  | Sync `docs/arquitetura-backend` | [ ]    |
+| T-50 | P2  | Sync `docs/arquitetura-backend` | [x]    |

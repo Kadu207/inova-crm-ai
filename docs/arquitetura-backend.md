@@ -65,6 +65,19 @@ backend/
 - Tenant middleware obrigatório
 - Papéis: `admin`, `manager`, `sales`, `support`, `viewer`
 
+## Endpoints relevantes (pós-MVP)
+
+| Método | Path                                                | Notas                               |
+| ------ | --------------------------------------------------- | ----------------------------------- |
+| GET    | `/api/v1/conversations`                             | Inclui `contact` + `lead` resumidos |
+| POST   | `/api/v1/conversations/sync`                        | n8n ← Chatwoot                      |
+| POST   | `/api/v1/leads/inbound`                             | n8n ← Chatwoot                      |
+| POST   | `/api/v1/leads/:id/qualify` \| `convert`            | Funil comercial                     |
+| POST   | `/api/v1/opportunities/:id/move` \| `won` \| `lost` | Funil                               |
+| POST   | `/api/v1/opportunities/sla/check`                   | RN-OPP-03 (cron n8n)                |
+
+RLS: role runtime `crm_app` + `set_config('app.tenant_id', …)`.
+
 ## Outbox e eventos
 
 Padrão outbox → RabbitMQ. Catálogo: [events/catalog-v0.md](./events/catalog-v0.md).

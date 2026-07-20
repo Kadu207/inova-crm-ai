@@ -19,6 +19,14 @@ export class OpportunitiesController {
     return this.opportunitiesService.findAll(tenantId);
   }
 
+  @Post('sla/check')
+  @ApiOperation({
+    summary: 'Check opportunity stage SLA (RN-OPP-03); n8n/cron may call periodically',
+  })
+  checkSla(@TenantId() tenantId: string) {
+    return this.opportunitiesService.checkSla(tenantId);
+  }
+
   @Get(':id')
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.opportunitiesService.findOne(tenantId, id);

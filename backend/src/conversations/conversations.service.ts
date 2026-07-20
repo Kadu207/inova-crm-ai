@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Conversation, ConversationStatus } from '@prisma/client';
+import { ConversationStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import {
@@ -15,15 +15,25 @@ export class ConversationsService {
     private readonly events: EventsService,
   ) {}
 
-  findAll(tenantId: string): Promise<Conversation[]> {
+  findAll(tenantId: string) {
     return this.prisma.conversation.findMany({
       where: { tenantId },
       orderBy: { lastMessageAt: 'desc' },
+      include: {
+        contact: { select: { id: true, name: true, phone: true, email: true } },
+        lead: { select: { id: true, title: true, status: true } },
+      },
     });
   }
 
-  async findOne(tenantId: string, id: string): Promise<Conversation> {
-    const conv = await this.prisma.conversation.findFirst({ where: { id, tenantId } });
+  async findOne(tenantId: string, id: string) {
+    const conv = await this.prisma.conversation.findFirst({
+      where: { id, tenantId },
+      include: {
+        contact: { select: { id: true, name: true, phone: true, email: true } },
+        lead: { select: { id: true, title: true, status: true } },
+      },
+    });
     if (!conv) throw new NotFoundException(`Conversation ${id} not found`);
     return conv;
   }

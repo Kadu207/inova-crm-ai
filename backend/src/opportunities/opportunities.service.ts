@@ -8,6 +8,9 @@ import {
   UpdateOpportunityDto,
 } from './dto/opportunity.dto';
 
+/** MVP default: 24h without stage advance = SLA breach (RN-OPP-03). */
+export const OPPORTUNITY_STAGE_SLA_HOURS = Number(process.env.OPPORTUNITY_STAGE_SLA_HOURS ?? '24');
+
 @Injectable()
 export class OpportunitiesService {
   constructor(
@@ -40,6 +43,7 @@ export class OpportunitiesService {
         leadId: dto.leadId,
         contactId: dto.contactId,
         value: dto.value !== undefined ? new Prisma.Decimal(dto.value) : undefined,
+        stageEnteredAt: new Date(),
       },
     });
     await this.events.publish(tenantId, 'opportunity.created', { opportunityId: opp.id });
@@ -53,6 +57,8 @@ export class OpportunitiesService {
       await this.assertStageInPipeline(tenantId, existing.pipelineId, dto.stageId);
     }
 
+    const stageChanged = Boolean(dto.stageId && dto.stageId !== existing.stageId);
+
     const opp = await this.prisma.opportunity.update({
       where: { id },
       data: {
@@ -60,10 +66,11 @@ export class OpportunitiesService {
         stageId: dto.stageId,
         status: dto.status,
         value: dto.value !== undefined ? new Prisma.Decimal(dto.value) : undefined,
+        ...(stageChanged ? { stageEnteredAt: new Date(), slaBreachedAt: null } : {}),
       },
     });
 
-    if (dto.stageId && dto.stageId !== existing.stageId) {
+    if (stageChanged) {
       await this.events.publish(tenantId, 'opportunity.stage.changed', {
         opportunityId: opp.id,
         fromStageId: existing.stageId,
@@ -94,6 +101,48 @@ export class OpportunitiesService {
 
   async markLost(tenantId: string, id: string): Promise<Opportunity> {
     return this.update(tenantId, id, { status: OpportunityStatus.LOST });
+  }
+
+  /**
+   * Scan open opportunities past stage SLA; publish opportunity.sla.breached once per stage stay.
+   */
+  async checkSla(tenantId: string): Promise<{ checked: number; breached: string[] }> {
+    const hours = Number.isFinite(OPPORTUNITY_STAGE_SLA_HOURS) ? OPPORTUNITY_STAGE_SLA_HOURS : 24;
+    const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+    const overdue = await this.prisma.opportunity.findMany({
+      where: {
+        tenantId,
+        status: OpportunityStatus.OPEN,
+        slaBreachedAt: null,
+        stageEnteredAt: { lte: cutoff },
+      },
+    });
+
+    const breached: string[] = [];
+    for (const opp of overdue) {
+      const updated = await this.prisma.opportunity.update({
+        where: { id: opp.id },
+        data: { slaBreachedAt: new Date() },
+      });
+      await this.events.publish(tenantId, 'opportunity.sla.breached', {
+        opportunityId: updated.id,
+        stageId: updated.stageId,
+        stageEnteredAt: updated.stageEnteredAt.toISOString(),
+        slaHours: hours,
+      });
+      breached.push(updated.id);
+    }
+
+    return { checked: overdue.length, breached };
+  }
+
+  isSlaBreached(opp: Pick<Opportunity, 'status' | 'stageEnteredAt' | 'slaBreachedAt'>): boolean {
+    if (opp.status !== OpportunityStatus.OPEN) return false;
+    if (opp.slaBreachedAt) return true;
+    const hours = Number.isFinite(OPPORTUNITY_STAGE_SLA_HOURS) ? OPPORTUNITY_STAGE_SLA_HOURS : 24;
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    return opp.stageEnteredAt.getTime() <= cutoff;
   }
 
   private async assertStageInPipeline(

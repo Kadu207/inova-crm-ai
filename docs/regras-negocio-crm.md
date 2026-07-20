@@ -23,11 +23,11 @@ Catálogo de regras de negócio por módulo. **Toda regra vive no backend** — 
 
 ## Funil e oportunidades
 
-| ID        | Regra                                        | Implementação                                                                 |
-| --------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
-| RN-OPP-01 | Estágio deve pertencer ao pipeline do tenant | `OpportunitiesService.assertStageInPipeline` + `POST /opportunities/:id/move` |
-| RN-OPP-02 | Ganho/perda emite `opportunity.won` / `lost` | `POST /opportunities/:id/won` \| `lost`                                       |
-| RN-OPP-03 | SLA calculado no backend                     | Pendente (worker/fase posterior)                                              |
+| ID        | Regra                                        | Implementação                                                                   |
+| --------- | -------------------------------------------- | ------------------------------------------------------------------------------- |
+| RN-OPP-01 | Estágio deve pertencer ao pipeline do tenant | `OpportunitiesService.assertStageInPipeline` + `POST /opportunities/:id/move`   |
+| RN-OPP-02 | Ganho/perda emite `opportunity.won` / `lost` | `POST /opportunities/:id/won` \| `lost`                                         |
+| RN-OPP-03 | SLA estágio 24h (MVP) no backend             | `stageEnteredAt` + `POST /opportunities/sla/check` → `opportunity.sla.breached` |
 
 ## Atendimento
 

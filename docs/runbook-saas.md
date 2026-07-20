@@ -30,6 +30,26 @@ Este runbook cobre operação diária do CRM SaaS multi-tenant na VPS Hetzner co
 3. Revisar alertas Grafana (SLA, quota 80%, disco)
 4. Confirmar backup noturno Postgres + MinIO (log em `/var/log/inova-crm-backup.log`)
 
+### Smoke pós-deploy (checklist)
+
+```bash
+curl -sf https://api-crm.inovatitech.com.br/health
+curl -sf https://crm.inovatitech.com.br/login | head
+# Login demo → /leads, /atendimento, /funil
+# WhatsApp inbound → lead + conversa (docs/e2e-atendimento-crm.md)
+# Qualificar + Converter + mover estágio
+```
+
+### Backup
+
+Script: `infrastructure/scripts/backup.sh` (Postgres CRM + volumes MinIO).  
+Agendar via cron na VPS; validar restore trimestral. Log sugerido: `/var/log/inova-crm-backup.log`.
+
+### SLA funil
+
+Cron n8n: workflow `opportunity-sla-check` → `POST /api/v1/opportunities/sla/check` (Bearer API_TOKEN + tenant).  
+Constante MVP: 24h sem mudança de estágio (`OPPORTUNITY_STAGE_SLA_HOURS`).
+
 ---
 
 ## Provisionar novo tenant

@@ -15,7 +15,20 @@ type Opportunity = {
   stageId: string;
   status: string;
   value: string | number;
+  stageEnteredAt?: string;
+  slaBreachedAt?: string | null;
 };
+
+const SLA_HOURS = 24;
+
+function isSlaWarning(deal: Opportunity): boolean {
+  if (deal.status !== 'OPEN') return false;
+  if (deal.slaBreachedAt) return true;
+  if (!deal.stageEnteredAt) return false;
+  const entered = new Date(deal.stageEnteredAt).getTime();
+  if (Number.isNaN(entered)) return false;
+  return Date.now() - entered >= SLA_HOURS * 60 * 60 * 1000;
+}
 
 const FALLBACK_COLUMNS = ['Prospecção', 'Qualificação', 'Proposta', 'Negociação', 'Fechado'];
 
@@ -153,7 +166,14 @@ export function FunilClient() {
                       className="border-t border-line pt-2 text-sm text-bone first:border-t-0 first:pt-0"
                     >
                       <p className="break-words">{deal.title}</p>
-                      <p className="mt-1 text-xs text-muted">{deal.status}</p>
+                      <p className="mt-1 text-xs text-muted">
+                        {deal.status}
+                        {isSlaWarning(deal) ? (
+                          <span className="ml-2 text-amber-400" title="SLA de estágio (>24h)">
+                            SLA
+                          </span>
+                        ) : null}
+                      </p>
                       <div className="mt-2 flex flex-wrap gap-1">
                         {prev ? (
                           <button

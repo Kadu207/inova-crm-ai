@@ -345,6 +345,7 @@ function stepChatwootN8nArtifacts() {
     'chatwoot/scripts/create_whatsapp_inbox.rb',
     'chatwoot/scripts/setup-evolution-instance.sh',
     'n8n/workflows/lead-inbound.json',
+    'n8n/workflows/opportunity-sla-check.json',
     'docs/integracao-chatwoot.md',
     'docs/integracao-n8n.md',
     'docs/webhook-signing.md',

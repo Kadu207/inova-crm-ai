@@ -325,6 +325,8 @@ model Opportunity {
   value        Decimal           @default(0) @db.Decimal(15, 2)
   status       OpportunityStatus @default(OPEN)
   expectedCloseDate DateTime?    @map("expected_close_date")
+  stageEnteredAt DateTime        @default(now()) @map("stage_entered_at")
+  slaBreachedAt  DateTime?       @map("sla_breached_at")
   createdAt    DateTime          @default(now()) @map("created_at")
   updatedAt    DateTime          @updatedAt @map("updated_at")
 
