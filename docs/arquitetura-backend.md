@@ -74,7 +74,8 @@ backend/
 | POST   | `/api/v1/leads/inbound`                             | n8n ← Chatwoot                      |
 | POST   | `/api/v1/leads/:id/qualify` \| `convert`            | Funil comercial                     |
 | POST   | `/api/v1/opportunities/:id/move` \| `won` \| `lost` | Funil                               |
-| POST   | `/api/v1/opportunities/sla/check`                   | RN-OPP-03 (cron n8n)                |
+| POST   | `/api/v1/opportunities/sla/check`                   | RN-OPP-03 (tenant)                  |
+| POST   | `/api/v1/opportunities/sla/check-all`               | RN-OPP-03 platform (`@PlatformApi`) |
 
 RLS: role runtime `crm_app` + `set_config('app.tenant_id', …)`.
 

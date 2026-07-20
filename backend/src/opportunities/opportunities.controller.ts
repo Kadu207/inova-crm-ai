@@ -7,6 +7,7 @@ import {
   UpdateOpportunityDto,
 } from './dto/opportunity.dto';
 import { TenantId } from '../common/decorators/tenant.decorator';
+import { PlatformApi } from '../common/constants';
 
 @ApiTags('opportunities')
 @ApiBearerAuth()
@@ -21,10 +22,20 @@ export class OpportunitiesController {
 
   @Post('sla/check')
   @ApiOperation({
-    summary: 'Check opportunity stage SLA (RN-OPP-03); n8n/cron may call periodically',
+    summary: 'Check opportunity stage SLA for current tenant (RN-OPP-03)',
   })
   checkSla(@TenantId() tenantId: string) {
     return this.opportunitiesService.checkSla(tenantId);
+  }
+
+  @Post('sla/check-all')
+  @PlatformApi()
+  @ApiOperation({
+    summary:
+      'Platform SLA check for all ACTIVE/TRIAL tenants (API_TOKEN, no x-tenant-id; n8n cron)',
+  })
+  checkSlaAll() {
+    return this.opportunitiesService.checkSlaAll();
   }
 
   @Get(':id')

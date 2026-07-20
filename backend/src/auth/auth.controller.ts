@@ -28,6 +28,9 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Current authenticated user + tenant' })
   async me(@CurrentUser() user: JwtPayload): Promise<AuthResponseDto> {
+    if (!user.tenantId) {
+      throw new UnauthorizedException('Tenant context required');
+    }
     const profile = await this.authService.me(user.sub, user.tenantId);
     if (!profile) {
       throw new UnauthorizedException('User not found');

@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY, JwtPayload, TENANT_HEADER } from '../common/constants';
+import { IS_PUBLIC_KEY, JwtPayload, PLATFORM_API_KEY, TENANT_HEADER } from '../common/constants';
 
 @Injectable()
 export class TenantGuard implements CanActivate {
@@ -12,6 +12,14 @@ export class TenantGuard implements CanActivate {
       context.getClass(),
     ]);
     if (isPublic) {
+      return true;
+    }
+
+    const isPlatformApi = this.reflector.getAllAndOverride<boolean>(PLATFORM_API_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPlatformApi) {
       return true;
     }
 

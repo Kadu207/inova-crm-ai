@@ -102,6 +102,9 @@ Fluxo: **Celular (QR) → Evolution → Chatwoot → n8n → Nest**.
 
 ## Checklist de cutover Evolution → Meta Oficial
 
+> **Status (2026-07-20): BLOCKED — aguardando credenciais WABA** (App Meta / Phone Number ID / token).  
+> Caminho operacional ativo: **Evolution (QR)** — ver seção B. Não iniciar cutover sem WABA.
+
 - [ ] Pausar novas campanhas no número QR
 - [ ] Documentar `inbox_id` Evolution a desativar
 - [ ] `docker compose ... --profile whatsapp-evolution down` (e volumes se não precisar da sessão)

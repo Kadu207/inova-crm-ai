@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Opportunity, OpportunityStatus, Prisma } from '@prisma/client';
+import { Opportunity, OpportunityStatus, Prisma, TenantStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import {
@@ -135,6 +135,33 @@ export class OpportunitiesService {
     }
 
     return { checked: overdue.length, breached };
+  }
+
+  /**
+   * Platform job: run SLA check for all ACTIVE + TRIAL tenants (n8n cron one-shot).
+   */
+  async checkSlaAll(): Promise<{
+    tenants: number;
+    checked: number;
+    breached: Array<{ tenantId: string; opportunityId: string }>;
+  }> {
+    const tenants = await this.prisma.tenant.findMany({
+      where: { status: { in: [TenantStatus.ACTIVE, TenantStatus.TRIAL] } },
+      select: { id: true },
+    });
+
+    let checked = 0;
+    const breached: Array<{ tenantId: string; opportunityId: string }> = [];
+
+    for (const tenant of tenants) {
+      const result = await this.checkSla(tenant.id);
+      checked += result.checked;
+      for (const opportunityId of result.breached) {
+        breached.push({ tenantId: tenant.id, opportunityId });
+      }
+    }
+
+    return { tenants: tenants.length, checked, breached };
   }
 
   isSlaBreached(opp: Pick<Opportunity, 'status' | 'stageEnteredAt' | 'slaBreachedAt'>): boolean {

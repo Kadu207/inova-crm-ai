@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OpportunityStatus } from '@prisma/client';
+import { OpportunityStatus, TenantStatus } from '@prisma/client';
 import { OpportunitiesService } from './opportunities.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
@@ -14,6 +14,7 @@ describe('OpportunitiesService SLA', () => {
       create: jest.Mock;
     };
     pipelineStage: { findFirst: jest.Mock };
+    tenant: { findMany: jest.Mock };
   };
   let events: { publish: jest.Mock };
 
@@ -26,6 +27,7 @@ describe('OpportunitiesService SLA', () => {
         create: jest.fn(),
       },
       pipelineStage: { findFirst: jest.fn() },
+      tenant: { findMany: jest.fn() },
     };
     events = { publish: jest.fn().mockResolvedValue(undefined) };
 
@@ -66,6 +68,38 @@ describe('OpportunitiesService SLA', () => {
       'opportunity.sla.breached',
       expect.objectContaining({ opportunityId: 'opp-1' }),
     );
+  });
+
+  it('checkSlaAll runs checkSla for ACTIVE and TRIAL tenants', async () => {
+    prisma.tenant.findMany.mockResolvedValue([{ id: 't1' }, { id: 't2' }]);
+    const old = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    prisma.opportunity.findMany
+      .mockResolvedValueOnce([
+        {
+          id: 'opp-1',
+          tenantId: 't1',
+          stageId: 's1',
+          status: OpportunityStatus.OPEN,
+          stageEnteredAt: old,
+          slaBreachedAt: null,
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    prisma.opportunity.update.mockResolvedValue({
+      id: 'opp-1',
+      stageId: 's1',
+      stageEnteredAt: old,
+      slaBreachedAt: new Date(),
+    });
+
+    const result = await service.checkSlaAll();
+    expect(prisma.tenant.findMany).toHaveBeenCalledWith({
+      where: { status: { in: [TenantStatus.ACTIVE, TenantStatus.TRIAL] } },
+      select: { id: true },
+    });
+    expect(result.tenants).toBe(2);
+    expect(result.checked).toBe(1);
+    expect(result.breached).toEqual([{ tenantId: 't1', opportunityId: 'opp-1' }]);
   });
 
   it('moveStage resets slaBreachedAt via update', async () => {

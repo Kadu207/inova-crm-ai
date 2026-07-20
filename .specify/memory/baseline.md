@@ -20,23 +20,25 @@
 
 ## Operacional (2026-07-20)
 
-- **WhatsApp dual-path:** Evolution API (QR/pareamento) atrás do Chatwoot; Meta Cloud API pronto (ADR 005).
+- **WhatsApp dual-path:** Evolution API (QR/pareamento) atrás do Chatwoot; Meta Cloud API **BLOCKED** (sem WABA).
 - **E2E:** WhatsApp → Evolution → Chatwoot → n8n → Lead + Conversa no CRM.
 - **Atendimento UI:** `/atendimento` lista conversas enriquecidas; resposta no Chatwoot.
-- **SLA funil (RN-OPP-03):** `stageEnteredAt` + `POST /opportunities/sla/check` (24h MVP).
+- **SLA funil (RN-OPP-03):** `stageEnteredAt` + `POST /opportunities/sla/check` (tenant) + `POST /opportunities/sla/check-all` (platform, ACTIVE/TRIAL).
+- **Backup:** `backup.sh` (`inova-crm-postgres` / DB `crm`) + `restore-smoke.sh` + cron 03:00 UTC na VPS.
 - **RLS:** role `crm_app` + migration tenant RLS.
 
 ## Artefatos-chave
 
 - Constitution: `.specify/memory/constitution.md`
-- Spec atual: `specs/006-atendimento-crm/`
+- Spec atual: `specs/007-ops-hardening/`
 - Ports: `docs/ports.md` (9400–9419; 9416 Evolution localhost)
 - Events: `docs/events/catalog-v0.md`
 - Gate: `npm run gate`
 - Smoke atendimento: `docs/e2e-atendimento-crm.md`
+- WhatsApp: `docs/chatwoot-whatsapp-setup.md`
 
 ## Próximo passo
 
-1. Cutover Meta Cloud API quando credenciais WABA existirem (`docs/chatwoot-whatsapp-setup.md`)
-2. Backup noturno validado em produção (`infrastructure/scripts/backup.sh`)
-3. Multi-tenant SLA cron por todos os tenants (hoje demo via n8n env)
+1. **Cutover Meta Cloud API** — BLOCKED até credenciais WABA (`docs/chatwoot-whatsapp-setup.md`)
+2. Opcional: instalar `mc` e incluir MinIO no backup noturno
+3. Drill trimestral de restore de produção (incidente)

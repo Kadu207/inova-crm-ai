@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # backup.sh — Postgres pg_dump + MinIO mirror notes
-# Cron: 0 3 * * * deploy /opt/inova-crm-ai/infrastructure/scripts/backup.sh
+# Cron: 0 3 * * * gestaoti /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /var/log/inova-crm-backup.log 2>&1
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -18,8 +18,8 @@ if [ -f "${ROOT_DIR}/infrastructure/.env" ]; then
 fi
 
 POSTGRES_USER="${POSTGRES_USER:-inova}"
-POSTGRES_DB="${POSTGRES_DB:-inova_crm}"
-POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-inova-postgres}"
+POSTGRES_DB="${POSTGRES_DB:-crm}"
+POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-inova-crm-postgres}"
 
 mkdir -p "${BACKUP_ROOT}/postgres" "${BACKUP_ROOT}/minio"
 

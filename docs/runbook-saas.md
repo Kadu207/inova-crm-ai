@@ -42,12 +42,19 @@ curl -sf https://crm.inovatitech.com.br/login | head
 
 ### Backup
 
-Script: `infrastructure/scripts/backup.sh` (Postgres CRM + volumes MinIO).  
-Agendar via cron na VPS; validar restore trimestral. Log sugerido: `/var/log/inova-crm-backup.log`.
+Script: `infrastructure/scripts/backup.sh` (container `inova-crm-postgres`, DB `crm` + MinIO se `mc` instalado).
+
+```cron
+0 3 * * * gestaoti /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /var/log/inova-crm-backup.log 2>&1
+```
+
+Smoke não destrutivo: `bash infrastructure/scripts/restore-smoke.sh` (DB temp `crm_restore_smoke`).  
+Drill trimestral de restore de produção — ver [manual-implantacao-producao.md](./manual-implantacao-producao.md).
 
 ### SLA funil
 
-Cron n8n: workflow `opportunity-sla-check` → `POST /api/v1/opportunities/sla/check` (Bearer API_TOKEN + tenant).  
+Cron n8n: workflow `opportunity-sla-check` → `POST /api/v1/opportunities/sla/check-all` (Bearer `API_TOKEN`, sem `x-tenant-id` — `@PlatformApi`).  
+Varre tenants `ACTIVE` + `TRIAL`. Single-tenant: `POST .../sla/check` com `x-tenant-id`.  
 Constante MVP: 24h sem mudança de estágio (`OPPORTUNITY_STAGE_SLA_HOURS`).
 
 ---
@@ -113,7 +120,7 @@ docker compose ... restart api
 
 ### Postgres disco cheio
 
-- `docker exec inova-postgres psql -U $USER -c "SELECT pg_size_pretty(pg_database_size(current_database()));"`
+- `docker exec inova-crm-postgres psql -U $USER -d crm -c "SELECT pg_size_pretty(pg_database_size(current_database()));"`
 - Executar `VACUUM` agendado
 - Expandir volume ou purge de logs antigos (com ADR)
 

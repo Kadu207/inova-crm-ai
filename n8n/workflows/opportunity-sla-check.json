@@ -16,17 +16,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.API_BASE_URL || 'https://api-crm.inovatitech.com.br' }}/api/v1/opportunities/sla/check",
+        "url": "={{ $env.API_BASE_URL || 'https://api-crm.inovatitech.com.br' }}/api/v1/opportunities/sla/check-all",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
               "value": "=Bearer {{ $env.API_TOKEN }}"
-            },
-            {
-              "name": "x-tenant-id",
-              "value": "={{ $env.DEMO_TENANT_ID }}"
             },
             {
               "name": "Content-Type",
@@ -37,7 +33,7 @@
         "options": {}
       },
       "id": "sla-http",
-      "name": "POST SLA Check",
+      "name": "POST SLA Check All",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [480, 300]
@@ -45,7 +41,7 @@
   ],
   "connections": {
     "Every hour": {
-      "main": [[{ "node": "POST SLA Check", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "POST SLA Check All", "type": "main", "index": 0 }]]
     }
   },
   "settings": { "executionOrder": "v1" },

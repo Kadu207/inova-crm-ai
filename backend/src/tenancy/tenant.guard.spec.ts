@@ -2,7 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ExecutionContext } from '@nestjs/common/interfaces';
 import { TenantGuard } from './tenant.guard';
-import { IS_PUBLIC_KEY } from '../common/constants';
+import { IS_PUBLIC_KEY, PLATFORM_API_KEY } from '../common/constants';
 
 describe('TenantGuard', () => {
   let guard: TenantGuard;
@@ -22,6 +22,7 @@ describe('TenantGuard', () => {
     guard = new TenantGuard(reflector);
     jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key) => {
       if (key === IS_PUBLIC_KEY) return false;
+      if (key === PLATFORM_API_KEY) return false;
       return undefined;
     });
   });
@@ -35,6 +36,16 @@ describe('TenantGuard', () => {
   it('rejects request without tenant context', () => {
     const req = { headers: {} };
     expect(() => guard.canActivate(createContext(req))).toThrow(ForbiddenException);
+  });
+
+  it('allows PlatformApi without tenant', () => {
+    jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key) => {
+      if (key === IS_PUBLIC_KEY) return false;
+      if (key === PLATFORM_API_KEY) return true;
+      return undefined;
+    });
+    const req = { headers: {} };
+    expect(guard.canActivate(createContext(req))).toBe(true);
   });
 
   it('rejects tenant mismatch when JWT differs from resolved tenant', () => {
