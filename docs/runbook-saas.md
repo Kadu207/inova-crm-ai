@@ -42,10 +42,11 @@ curl -sf https://crm.inovatitech.com.br/login | head
 
 ### Backup
 
-Script: `infrastructure/scripts/backup.sh` (container `inova-crm-postgres`, DB `crm` + MinIO se `mc` instalado).
+Script: `infrastructure/scripts/backup.sh` (container `inova-crm-postgres`, DB `crm` + MinIO se `mc` instalado).  
+Default: `BACKUP_ROOT=/opt/inova-crm-ai/backups` (sem sudo na VPS).
 
 ```cron
-0 3 * * * gestaoti /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /var/log/inova-crm-backup.log 2>&1
+0 3 * * * gestaoti BACKUP_ROOT=/opt/inova-crm-ai/backups /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /opt/inova-crm-ai/logs/backup.log 2>&1
 ```
 
 Smoke não destrutivo: `bash infrastructure/scripts/restore-smoke.sh` (DB temp `crm_restore_smoke`).  

@@ -256,13 +256,13 @@ Registrar resultado em `reports/deploy/<date>.md`.
 Cron diário (exemplo):
 
 ```cron
-0 3 * * * gestaoti /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /var/log/inova-crm-backup.log 2>&1
+0 3 * * * gestaoti BACKUP_ROOT=/opt/inova-crm-ai/backups /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /opt/inova-crm-ai/logs/backup.log 2>&1
 ```
 
 O script `backup.sh` executa:
 
-1. `pg_dump` do container `inova-crm-postgres` (DB `crm`) → `/var/backups/inova-crm/postgres/`
-2. `mc mirror` do MinIO → `/var/backups/inova-crm/minio/` (skip se `mc` ausente)
+1. `pg_dump` do container `inova-crm-postgres` (DB `crm`) → `${BACKUP_ROOT}/postgres/` (default `/opt/inova-crm-ai/backups`)
+2. `mc mirror` do MinIO → `${BACKUP_ROOT}/minio/` (skip se `mc` ausente)
 3. Rotação 30 dias
 
 Smoke de restore (não destrutivo — DB temporário `crm_restore_smoke`):
@@ -274,7 +274,7 @@ bash infrastructure/scripts/restore-smoke.sh
 Restore Postgres (produção — só em incidente):
 
 ```bash
-gunzip -c /var/backups/inova-crm/postgres/latest.sql.gz | \
+gunzip -c /opt/inova-crm-ai/backups/postgres/latest.sql.gz | \
   docker exec -i inova-crm-postgres psql -U $POSTGRES_USER -d crm
 ```
 

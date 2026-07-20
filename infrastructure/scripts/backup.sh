@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # backup.sh — Postgres pg_dump + MinIO mirror notes
-# Cron: 0 3 * * * gestaoti /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /var/log/inova-crm-backup.log 2>&1
+# Cron: 0 3 * * * gestaoti /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /opt/inova-crm-ai/logs/backup.log 2>&1
+# Override: BACKUP_ROOT=/var/backups/inova-crm (requires writable dir)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-BACKUP_ROOT="${BACKUP_ROOT:-/var/backups/inova-crm}"
+BACKUP_ROOT="${BACKUP_ROOT:-/opt/inova-crm-ai/backups}"
 DATE_STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
 

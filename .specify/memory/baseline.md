@@ -24,7 +24,7 @@
 - **E2E:** WhatsApp → Evolution → Chatwoot → n8n → Lead + Conversa no CRM.
 - **Atendimento UI:** `/atendimento` lista conversas enriquecidas; resposta no Chatwoot.
 - **SLA funil (RN-OPP-03):** `stageEnteredAt` + `POST /opportunities/sla/check` (tenant) + `POST /opportunities/sla/check-all` (platform, ACTIVE/TRIAL).
-- **Backup:** `backup.sh` (`inova-crm-postgres` / DB `crm`) + `restore-smoke.sh` + cron 03:00 UTC na VPS.
+- **Backup:** `backup.sh` (`inova-crm-postgres` / DB `crm`) + `restore-smoke.sh` + cron 03:00 em `/opt/inova-crm-ai/backups`.
 - **RLS:** role `crm_app` + migration tenant RLS.
 
 ## Artefatos-chave

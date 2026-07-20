@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-BACKUP_ROOT="${BACKUP_ROOT:-/var/backups/inova-crm}"
+BACKUP_ROOT="${BACKUP_ROOT:-/opt/inova-crm-ai/backups}"
 SMOKE_DB="${SMOKE_DB:-crm_restore_smoke}"
 
 if [ -f "${ROOT_DIR}/infrastructure/.env" ]; then
