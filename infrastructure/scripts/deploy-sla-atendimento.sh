@@ -13,14 +13,13 @@ docker compose --env-file infrastructure/.env \
   -f infrastructure/docker-compose.yml -f infrastructure/docker-compose.vps.yml \
   --profile apps up -d --force-recreate --no-deps api
 
-for i in $(seq 1 30); do
+for i in $(seq 1 45); do
   st=$(docker inspect inova-crm-api --format '{{.State.Health.Status}}' 2>/dev/null || echo starting)
   echo "api $i $st"
   if [ "$st" = "healthy" ]; then break; fi
   sleep 4
 done
 
-# migrate as table owner (inova), not crm_app
 PGUSER=$(grep ^POSTGRES_USER= infrastructure/.env | cut -d= -f2- | tr -d '\r')
 PGPASS=$(grep ^POSTGRES_PASSWORD= infrastructure/.env | cut -d= -f2- | tr -d '\r')
 
@@ -49,4 +48,5 @@ echo "=== columns check ==="
 docker exec -e PGPASSWORD="$PGPASS" inova-crm-postgres \
   psql -U "$PGUSER" -d crm -c "\d opportunities" | grep -E 'stage_entered|sla_breached' || true
 
+curl -fsS http://127.0.0.1:9401/health >/dev/null && echo API_HEALTH_OK
 echo DEPLOY_SLA_ATENDIMENTO_OK
