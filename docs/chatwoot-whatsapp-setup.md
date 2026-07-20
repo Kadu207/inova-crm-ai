@@ -69,10 +69,10 @@ Token de verificação: o configurado no canal Chatwoot.
 
 ```bash
 cd chatwoot
-cp evolution.env.example evolution.env   # editar AUTHENTICATION_API_KEY
+cp evolution.env.example evolution.env   # editar keys; aspas em CHATWOOT_INBOX_NAME
 docker compose -f docker-compose.yml -f docker-compose.vps.yml \
   -f docker-compose.evolution.yml --profile whatsapp-evolution \
-  --env-file evolution.env up -d
+  --env-file .env --env-file evolution.env up -d
 ```
 
 Compose: [`chatwoot/docker-compose.evolution.yml`](../chatwoot/docker-compose.evolution.yml).

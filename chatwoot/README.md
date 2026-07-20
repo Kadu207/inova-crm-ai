@@ -82,10 +82,10 @@ Ajuste e-mail/senha. Em produção, force troca de senha no primeiro login.
 
 ```powershell
 copy evolution.env.example evolution.env
-# editar EVOLUTION_API_KEY e CHATWOOT_TOKEN
+# editar EVOLUTION_API_KEY e CHATWOOT_TOKEN (aspas em CHATWOOT_INBOX_NAME)
 docker compose -f docker-compose.yml -f docker-compose.vps.yml `
   -f docker-compose.evolution.yml --profile whatsapp-evolution `
-  --env-file evolution.env up -d
+  --env-file .env --env-file evolution.env up -d
 
 # Linux/macOS/VPS
 # ./scripts/setup-evolution-instance.sh
