@@ -11,12 +11,16 @@ SMOKE_DB="${SMOKE_DB:-crm_restore_smoke}"
 if [ -f "${ROOT_DIR}/infrastructure/.env" ]; then
   set -a
   # shellcheck disable=SC1091
-  source "${ROOT_DIR}/infrastructure/.env"
+  # shellcheck disable=SC1090
+  source <(sed 's/\r$//' "${ROOT_DIR}/infrastructure/.env")
   set +a
 fi
 
 POSTGRES_USER="${POSTGRES_USER:-inova}"
-POSTGRES_DB="${POSTGRES_DB:-crm}"
+POSTGRES_DB="${POSTGRES_APP_DB:-${POSTGRES_DB:-crm}}"
+if [ "${POSTGRES_DB}" = "postgres" ]; then
+  POSTGRES_DB="crm"
+fi
 POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-inova-crm-postgres}"
 PG_FILE="${1:-${BACKUP_ROOT}/postgres/latest.sql.gz}"
 
@@ -25,8 +29,8 @@ if [ ! -f "${PG_FILE}" ]; then
   exit 1
 fi
 
-if [ "${SMOKE_DB}" = "${POSTGRES_DB}" ] || [ "${SMOKE_DB}" = "crm" ]; then
-  echo "ERROR: SMOKE_DB must not be the production database" >&2
+if [ "${SMOKE_DB}" = "${POSTGRES_DB}" ] || [ "${SMOKE_DB}" = "crm" ] || [ "${SMOKE_DB}" = "postgres" ]; then
+  echo "ERROR: SMOKE_DB must not be a production/system database" >&2
   exit 1
 fi
 

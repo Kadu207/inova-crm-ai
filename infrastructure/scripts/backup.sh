@@ -10,16 +10,21 @@ BACKUP_ROOT="${BACKUP_ROOT:-/opt/inova-crm-ai/backups}"
 DATE_STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
 
-# Load env if present
+# Load env if present (strip CRLF from Windows-edited .env)
 if [ -f "${ROOT_DIR}/infrastructure/.env" ]; then
   set -a
   # shellcheck disable=SC1091
-  source "${ROOT_DIR}/infrastructure/.env"
+  # shellcheck disable=SC1090
+  source <(sed 's/\r$//' "${ROOT_DIR}/infrastructure/.env")
   set +a
 fi
 
 POSTGRES_USER="${POSTGRES_USER:-inova}"
-POSTGRES_DB="${POSTGRES_DB:-crm}"
+# App data lives in POSTGRES_APP_DB (crm); POSTGRES_DB may be the bootstrap DB (postgres).
+POSTGRES_DB="${POSTGRES_APP_DB:-${POSTGRES_DB:-crm}}"
+if [ "${POSTGRES_DB}" = "postgres" ]; then
+  POSTGRES_DB="crm"
+fi
 POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-inova-crm-postgres}"
 
 mkdir -p "${BACKUP_ROOT}/postgres" "${BACKUP_ROOT}/minio"
@@ -41,9 +46,12 @@ MINIO_DIR="${BACKUP_ROOT}/minio/${DATE_STAMP}"
 
 if command -v mc >/dev/null 2>&1; then
   echo "==> mc mirror ${MINIO_ALIAS}/${MINIO_BUCKET} -> ${MINIO_DIR}"
-  mc mirror --overwrite "${MINIO_ALIAS}/${MINIO_BUCKET}" "${MINIO_DIR}"
-  ln -sfn "${DATE_STAMP}" "${BACKUP_ROOT}/minio/latest"
-  echo "    MinIO mirror OK"
+  if mc mirror --overwrite "${MINIO_ALIAS}/${MINIO_BUCKET}" "${MINIO_DIR}"; then
+    ln -sfn "${DATE_STAMP}" "${BACKUP_ROOT}/minio/latest"
+    echo "    MinIO mirror OK"
+  else
+    echo "    WARN: MinIO mirror failed — Postgres backup kept; configure mc alias if needed"
+  fi
 else
   echo "==> mc not installed — MinIO backup skipped"
   echo "    Install: https://min.io/docs/minio/linux/reference/minio-mc.html"
