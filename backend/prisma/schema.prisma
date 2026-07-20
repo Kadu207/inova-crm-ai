@@ -228,15 +228,17 @@ model Company {
 }
 
 model Contact {
-  id        String   @id @default(cuid())
-  tenantId  String   @map("tenant_id")
-  companyId String?  @map("company_id")
-  name      String
-  email     String?
-  phone     String?
-  title     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                  String   @id @default(cuid())
+  tenantId            String   @map("tenant_id")
+  companyId           String?  @map("company_id")
+  name                String
+  email               String?
+  phone               String?
+  /// WhatsApp identity: Evolution jid/wa_id or future Meta BSUID
+  whatsappExternalId  String?  @map("whatsapp_external_id")
+  title               String?
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
@@ -246,6 +248,7 @@ model Contact {
 
   @@index([tenantId])
   @@index([tenantId, email])
+  @@index([tenantId, whatsappExternalId])
   @@map("contacts")
 }
 

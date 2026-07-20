@@ -47,11 +47,12 @@ export class ConversationsService {
     const status = mapChatwootStatus(dto.status);
 
     let contactId = dto.contactId;
-    if (!contactId && (dto.phone || dto.email || dto.name)) {
+    if (!contactId && (dto.phone || dto.email || dto.name || dto.whatsappExternalId)) {
       contactId = await this.resolveContactId(tenantId, {
         name: dto.name,
         phone: dto.phone,
         email: dto.email,
+        whatsappExternalId: dto.whatsappExternalId,
       });
     }
 
@@ -119,28 +120,72 @@ export class ConversationsService {
 
   private async resolveContactId(
     tenantId: string,
-    input: { name?: string; phone?: string; email?: string },
+    input: { name?: string; phone?: string; email?: string; whatsappExternalId?: string },
   ): Promise<string | undefined> {
+    if (input.whatsappExternalId) {
+      const byWa = await this.prisma.contact.findFirst({
+        where: { tenantId, whatsappExternalId: input.whatsappExternalId },
+      });
+      if (byWa) {
+        await this.prisma.contact.update({
+          where: { id: byWa.id },
+          data: {
+            name: input.name?.trim() || byWa.name,
+            phone: input.phone ?? byWa.phone,
+            email: input.email ?? byWa.email,
+          },
+        });
+        return byWa.id;
+      }
+    }
     if (input.email) {
       const byEmail = await this.prisma.contact.findFirst({
         where: { tenantId, email: input.email },
       });
-      if (byEmail) return byEmail.id;
+      if (byEmail) {
+        await this.prisma.contact.update({
+          where: { id: byEmail.id },
+          data: {
+            whatsappExternalId: input.whatsappExternalId ?? byEmail.whatsappExternalId,
+            phone: input.phone ?? byEmail.phone,
+            name: input.name?.trim() || byEmail.name,
+          },
+        });
+        return byEmail.id;
+      }
     }
     if (input.phone) {
       const byPhone = await this.prisma.contact.findFirst({
         where: { tenantId, phone: input.phone },
       });
-      if (byPhone) return byPhone.id;
+      if (byPhone) {
+        await this.prisma.contact.update({
+          where: { id: byPhone.id },
+          data: {
+            whatsappExternalId: input.whatsappExternalId ?? byPhone.whatsappExternalId,
+            email: input.email ?? byPhone.email,
+            name: input.name?.trim() || byPhone.name,
+          },
+        });
+        return byPhone.id;
+      }
     }
-    if (!input.name && !input.phone && !input.email) return undefined;
+    if (!input.name && !input.phone && !input.email && !input.whatsappExternalId) {
+      return undefined;
+    }
 
     const created = await this.prisma.contact.create({
       data: {
         tenantId,
-        name: input.name?.trim() || input.phone || input.email || 'Chatwoot contact',
+        name:
+          input.name?.trim() ||
+          input.phone ||
+          input.email ||
+          input.whatsappExternalId ||
+          'Chatwoot contact',
         phone: input.phone,
         email: input.email,
+        whatsappExternalId: input.whatsappExternalId,
       },
     });
     return created.id;

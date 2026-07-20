@@ -341,10 +341,15 @@ function stepAiPytest() {
 function stepChatwootN8nArtifacts() {
   const required = [
     'chatwoot/docker-compose.yml',
+    'chatwoot/docker-compose.evolution.yml',
+    'chatwoot/scripts/create_whatsapp_inbox.rb',
+    'chatwoot/scripts/setup-evolution-instance.sh',
     'n8n/workflows/lead-inbound.json',
     'docs/integracao-chatwoot.md',
     'docs/integracao-n8n.md',
     'docs/webhook-signing.md',
+    'docs/chatwoot-whatsapp-setup.md',
+    'docs/adr/005-whatsapp-evolution-transitional.md',
   ];
   const missing = required.filter((p) => !exists(p));
   if (missing.length === 0) {

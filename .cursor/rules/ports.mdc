@@ -30,7 +30,8 @@ Documentação completa: `docs/ports.md`
 | 9413 | worker-crm-billing | interno | health |
 | 9414 | worker-crm-ai | interno | health |
 | 9415 | worker-crm-audit | interno | health |
-| 9416–9419 | Reservado | — | expansão |
+| 9416 | Evolution API (QR transitório) | localhost only | 8080 |
+| 9417–9419 | Reservado | — | expansão |
 
 ## Sem publish público
 

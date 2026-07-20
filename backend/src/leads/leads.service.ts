@@ -76,7 +76,12 @@ export class LeadsService {
    * upsert Conversation linked to lead (RN-LEAD-01/03, RN-CONV-01).
    */
   async inboundFromChatwoot(tenantId: string, dto: InboundLeadDto): Promise<Lead> {
-    const who = dto.name?.trim() || dto.phone?.trim() || dto.email?.trim() || 'Chatwoot contact';
+    const who =
+      dto.name?.trim() ||
+      dto.phone?.trim() ||
+      dto.email?.trim() ||
+      dto.whatsappExternalId?.trim() ||
+      'Chatwoot contact';
     const snippet = dto.message?.trim().slice(0, 80);
     const title = snippet ? `Lead Chatwoot: ${who} — ${snippet}` : `Lead Chatwoot: ${who}`;
     const noteLine = [
@@ -85,6 +90,7 @@ export class LeadsService {
       dto.conversationId != null ? `conversationId=${dto.conversationId}` : null,
       dto.phone ? `phone=${dto.phone}` : null,
       dto.email ? `email=${dto.email}` : null,
+      dto.whatsappExternalId ? `whatsappExternalId=${dto.whatsappExternalId}` : null,
       dto.message ? `message=${dto.message}` : null,
     ]
       .filter(Boolean)
@@ -94,6 +100,7 @@ export class LeadsService {
       name: dto.name?.trim() || who,
       phone: dto.phone?.trim() || undefined,
       email: dto.email?.trim() || undefined,
+      whatsappExternalId: dto.whatsappExternalId?.trim() || undefined,
     });
 
     const existing = await this.findOpenLeadByContact(tenantId, contact.id);
@@ -263,8 +270,24 @@ export class LeadsService {
 
   private async findOrCreateContact(
     tenantId: string,
-    input: { name: string; phone?: string; email?: string },
+    input: { name: string; phone?: string; email?: string; whatsappExternalId?: string },
   ): Promise<Contact> {
+    if (input.whatsappExternalId) {
+      const byWa = await this.prisma.contact.findFirst({
+        where: { tenantId, whatsappExternalId: input.whatsappExternalId },
+      });
+      if (byWa) {
+        return this.prisma.contact.update({
+          where: { id: byWa.id },
+          data: {
+            name: input.name || byWa.name,
+            phone: input.phone ?? byWa.phone,
+            email: input.email ?? byWa.email,
+          },
+        });
+      }
+    }
+
     if (input.email) {
       const byEmail = await this.prisma.contact.findFirst({
         where: { tenantId, email: input.email },
@@ -275,6 +298,7 @@ export class LeadsService {
           data: {
             name: input.name || byEmail.name,
             phone: input.phone ?? byEmail.phone,
+            whatsappExternalId: input.whatsappExternalId ?? byEmail.whatsappExternalId,
           },
         });
       }
@@ -290,6 +314,7 @@ export class LeadsService {
           data: {
             name: input.name || byPhone.name,
             email: input.email ?? byPhone.email,
+            whatsappExternalId: input.whatsappExternalId ?? byPhone.whatsappExternalId,
           },
         });
       }
@@ -301,6 +326,7 @@ export class LeadsService {
         name: input.name,
         phone: input.phone,
         email: input.email,
+        whatsappExternalId: input.whatsappExternalId,
       },
     });
   }

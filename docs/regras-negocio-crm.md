@@ -35,6 +35,7 @@ Catálogo de regras de negócio por módulo. **Toda regra vive no backend** — 
 | ---------- | ------------------------------------------------- | ------------------------------------------------------ |
 | RN-CONV-01 | Conversa vinculada a contato/lead do mesmo tenant | `ConversationsService.syncFromChatwoot` + inbound lead |
 | RN-CONV-02 | Sync master Chatwoot via n8n → API                | Workflows `lead-inbound` + `sync-conversation`         |
+| RN-CONV-03 | Identidade WhatsApp por `whatsappExternalId`      | Contact upsert (Evolution jid / futuro Meta BSUID)     |
 
 ## Financeiro / Permissões / Auditoria
 

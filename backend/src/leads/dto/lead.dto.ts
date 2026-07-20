@@ -106,6 +106,12 @@ export class InboundLeadDto {
   @IsOptional()
   @IsString()
   email?: string;
+
+  /** Evolution jid / Chatwoot identifier / future Meta BSUID */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  whatsappExternalId?: string;
 }
 
 export class ConvertLeadDto {

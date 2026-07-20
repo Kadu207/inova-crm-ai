@@ -1,0 +1,110 @@
+# Inova CRM AI — Evolution API (WhatsApp QR transitório)
+# Uso: compose overlay + profile whatsapp-evolution
+# NÃO sobe no stack Chatwoot padrão — ativar explicitamente.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.vps.yml \
+#     -f docker-compose.evolution.yml --profile whatsapp-evolution \
+#     --env-file evolution.env up -d
+#
+# Porta host: 127.0.0.1:9416 → 8080 (docs/ports.md). Sem publish público.
+# ADR: docs/adr/005-whatsapp-evolution-transitional.md
+
+services:
+  evolution-postgres:
+    profiles: ['whatsapp-evolution']
+    image: postgres:16-alpine
+    container_name: crm_evolution_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${EVOLUTION_POSTGRES_DB:-evolution}
+      POSTGRES_USER: ${EVOLUTION_POSTGRES_USER:-evolution}
+      POSTGRES_PASSWORD: ${EVOLUTION_POSTGRES_PASSWORD:-change_me_evolution_pg}
+    volumes:
+      - crm_evolution_pg:/var/lib/postgresql/data
+    networks:
+      - cw
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  evolution-redis:
+    profiles: ['whatsapp-evolution']
+    image: redis:7-alpine
+    container_name: crm_evolution_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${EVOLUTION_REDIS_PASSWORD:-change_me_evolution_redis}
+    volumes:
+      - crm_evolution_redis:/data
+    networks:
+      - cw
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      REDIS_PASSWORD: ${EVOLUTION_REDIS_PASSWORD:-change_me_evolution_redis}
+
+  evolution-api:
+    profiles: ['whatsapp-evolution']
+    image: atendai/evolution-api:v2.2.3
+    container_name: crm_evolution_api
+    restart: unless-stopped
+    depends_on:
+      evolution-postgres:
+        condition: service_healthy
+      evolution-redis:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:9416:8080'
+    environment:
+      SERVER_URL: ${EVOLUTION_SERVER_URL:-http://127.0.0.1:9416}
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-change_me_evolution_api_key}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: 'true'
+      DATABASE_ENABLED: 'true'
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://${EVOLUTION_POSTGRES_USER:-evolution}:${EVOLUTION_POSTGRES_PASSWORD:-change_me_evolution_pg}@evolution-postgres:5432/${EVOLUTION_POSTGRES_DB:-evolution}?schema=public
+      DATABASE_CONNECTION_CLIENT_NAME: inova_crm_evolution
+      REDIS_ENABLED: 'true'
+      REDIS_URI: redis://:${EVOLUTION_REDIS_PASSWORD:-change_me_evolution_redis}@evolution-redis:6379
+      REDIS_PREFIX_KEY: evolution_crm
+      CACHE_REDIS_ENABLED: 'true'
+      CACHE_REDIS_URI: redis://:${EVOLUTION_REDIS_PASSWORD:-change_me_evolution_redis}@evolution-redis:6379
+      CACHE_REDIS_PREFIX_KEY: evolution_crm_cache
+      CACHE_LOCAL_ENABLED: 'false'
+      LOG_LEVEL: ERROR,WARN,INFO
+      LOG_COLOR: 'true'
+      LOG_BAILEYS: error
+      CONFIG_SESSION_PHONE_CLIENT: InovaCRM
+      CONFIG_SESSION_PHONE_NAME: Chrome
+      CONFIG_SESSION_PHONE_VERSION: ${EVOLUTION_PHONE_VERSION:-2.3000.1023204200}
+      QRCODE_LIMIT: 30
+      QRCODE_COLOR: '#0047AB'
+      CHATWOOT_ENABLED: 'true'
+      CHATWOOT_MESSAGE_READ: 'true'
+      CHATWOOT_MESSAGE_DELETE: 'true'
+      CHATWOOT_BOT_CONTACT: 'true'
+      DEL_INSTANCE: 'false'
+      LANGUAGE: pt-BR
+    volumes:
+      - crm_evolution_instances:/evolution/instances
+    networks:
+      - cw
+      - inova-crm
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8080/ || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  crm_evolution_pg:
+  crm_evolution_redis:
+  crm_evolution_instances:

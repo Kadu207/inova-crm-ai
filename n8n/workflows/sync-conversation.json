@@ -68,6 +68,12 @@
               "name": "contactEmail",
               "value": "={{ $json.body?.meta?.sender?.email || $json.body?.conversation?.meta?.sender?.email || '' }}",
               "type": "string"
+            },
+            {
+              "id": "waExt",
+              "name": "whatsappExternalId",
+              "value": "={{ $json.body?.meta?.sender?.identifier || $json.body?.conversation?.meta?.sender?.identifier || $json.body?.meta?.sender?.source_id || '' }}",
+              "type": "string"
             }
           ]
         },
@@ -106,7 +112,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId, name: $json.contactName, phone: $json.contactPhone, email: $json.contactEmail }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId, name: $json.contactName, phone: $json.contactPhone, email: $json.contactEmail, whatsappExternalId: $json.whatsappExternalId || undefined }) }}",
         "options": {}
       },
       "id": "sync-http",

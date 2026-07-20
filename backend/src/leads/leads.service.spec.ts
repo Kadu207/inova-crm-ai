@@ -141,6 +141,41 @@ describe('LeadsService', () => {
     );
   });
 
+  it('inbound upserts by whatsappExternalId when phone missing', async () => {
+    prisma.contact.findFirst.mockResolvedValue(null);
+    prisma.contact.create.mockResolvedValue({
+      id: 'contact-wa',
+      name: 'Sem Telefone',
+      phone: null,
+      email: null,
+      whatsappExternalId: '5511999999999',
+    });
+    prisma.lead.findFirst.mockResolvedValue(null);
+    prisma.lead.create.mockResolvedValue({
+      ...mockLead,
+      id: 'lead-wa',
+      contactId: 'contact-wa',
+      source: LeadSource.CHATWOOT,
+    });
+    prisma.conversation.findFirst.mockResolvedValue(null);
+    prisma.conversation.create.mockResolvedValue({ id: 'conv-wa' });
+
+    const result = await service.inboundFromChatwoot(tenantId, {
+      name: 'Sem Telefone',
+      whatsappExternalId: '5511999999999',
+      message: 'oi sem phone',
+      conversationId: 99,
+    });
+
+    expect(result.id).toBe('lead-wa');
+    expect(prisma.contact.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        whatsappExternalId: '5511999999999',
+        phone: undefined,
+      }),
+    });
+  });
+
   it('convert creates opportunity and marks CONVERTED', async () => {
     prisma.lead.findFirst.mockResolvedValue(mockLead);
     prisma.pipeline.findFirst.mockResolvedValue({

@@ -102,4 +102,10 @@ export class SyncConversationDto {
   @IsOptional()
   @IsString()
   leadId?: string;
+
+  /** Evolution jid / Chatwoot identifier / future Meta BSUID */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  whatsappExternalId?: string;
 }

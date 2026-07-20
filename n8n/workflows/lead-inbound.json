@@ -62,6 +62,12 @@
               "name": "senderEmail",
               "value": "={{ $json.body?.sender?.email || $json.sender?.email || $json.body?.meta?.sender?.email || $json.meta?.sender?.email || '' }}",
               "type": "string"
+            },
+            {
+              "id": "waExt",
+              "name": "whatsappExternalId",
+              "value": "={{ $json.body?.sender?.identifier || $json.sender?.identifier || $json.body?.meta?.sender?.identifier || $json.meta?.sender?.identifier || $json.body?.sender?.source_id || $json.sender?.source_id || '' }}",
+              "type": "string"
             }
           ]
         },
@@ -100,7 +106,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, email: $json.senderEmail, message: $json.messageContent }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, email: $json.senderEmail, whatsappExternalId: $json.whatsappExternalId || undefined, message: $json.messageContent }) }}",
         "options": {}
       },
       "id": "lead-http",

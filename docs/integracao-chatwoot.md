@@ -73,7 +73,14 @@ Seed demo: `SEED_CHATWOOT_ACCOUNT_ID=1` (account Chatwoot padrão).
 
 WhatsApp Business, Email, Instagram DM, Facebook Messenger — configurados por tenant no painel Chatwoot.
 
-Setup WhatsApp Cloud API (VPS): `docs/chatwoot-whatsapp-setup.md` + `chatwoot/scripts/create_whatsapp_inbox.rb`.
+WhatsApp dual-path (ADR 005):
+
+| Provedor               | Status       | Doc                                                                                                                          |
+| ---------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Meta Cloud API**     | Alvo oficial | [`docs/chatwoot-whatsapp-setup.md`](chatwoot-whatsapp-setup.md) § A + `chatwoot/scripts/create_whatsapp_inbox.rb`            |
+| **Evolution API (QR)** | Transitório  | [`docs/chatwoot-whatsapp-setup.md`](chatwoot-whatsapp-setup.md) § B + `chatwoot/docker-compose.evolution.yml` (porta `9416`) |
+
+Ambos terminam no Chatwoot; CRM continua com `source=CHATWOOT`. Evolution **não** chama a API Nest diretamente.
 
 Agent humano (account demo / id 1): criar com `chatwoot/scripts/create_agent.rb` — usuário `agent@demo.inovatitech.com.br` (role `agent`) + admins vinculados.
 

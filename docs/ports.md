@@ -41,11 +41,16 @@ Roteamento externo via **Cloudflare Tunnel** — sem bind público em 80/443/543
 | **9414**   | worker-crm-ai       | `ai.*` consumer (Fase 6)      |
 | **9415**   | worker-crm-audit    | Outbox + auditoria async      |
 
+## WhatsApp transitório (Evolution)
+
+| Porta host | Serviço       | Bind                    | Notas                                                                                                     |
+| ---------- | ------------- | ----------------------- | --------------------------------------------------------------------------------------------------------- |
+| **9416**   | Evolution API | `127.0.0.1:9416` → 8080 | Profile `whatsapp-evolution` — **sem** publish público; cutover Meta em `docs/chatwoot-whatsapp-setup.md` |
+
 ## Reservado para expansão
 
 | Porta host | Uso                           |
 | ---------- | ----------------------------- |
-| **9416**   | Reservado                     |
 | **9417**   | Reservado                     |
 | **9418**   | Reservado                     |
 | **9419**   | Sentinel / check-ports anchor |

@@ -75,6 +75,24 @@ Ajuste e-mail/senha. Em produção, force troca de senha no primeiro login.
 
 `FRONTEND_URL` em `.env` deve coincidir com o hostname público.
 
+## WhatsApp dual-path
+
+- **Meta Oficial (alvo):** `docs/chatwoot-whatsapp-setup.md` § A + `scripts/create_whatsapp_inbox.rb`
+- **Evolution QR (transitório):** profile opcional — **não** sobe com o compose padrão
+
+```powershell
+copy evolution.env.example evolution.env
+# editar EVOLUTION_API_KEY e CHATWOOT_TOKEN
+docker compose -f docker-compose.yml -f docker-compose.vps.yml `
+  -f docker-compose.evolution.yml --profile whatsapp-evolution `
+  --env-file evolution.env up -d
+
+# Linux/macOS/VPS
+# ./scripts/setup-evolution-instance.sh
+```
+
+Porta Evolution: `127.0.0.1:9416` (ADR 005). Cutover Meta no mesmo doc § checklist.
+
 ## Webhooks → n8n
 
 Configure no Chatwoot (Settings → Integrations → Webhooks):
