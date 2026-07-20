@@ -88,7 +88,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId, payload: $('Webhook Sync Conversation').first().json.body || $('Webhook Sync Conversation').first().json }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId }) }}",
         "options": {}
       },
       "id": "sync-http",
