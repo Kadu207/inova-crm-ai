@@ -19,6 +19,13 @@ Sem o App instalado, o YAML **não** gera comentários.
 | `@coderabbitai summary`       | Summary na descrição       |
 | `@coderabbitai configuration` | Mostra config resolvida    |
 
+## Fora do escopo (não revisar)
+
+- **`.cursor/**`** — rules, skills e agentes do Cursor
+- **`**/SKILL.md`** — skills Spec Kit / Cursor
+
+O CodeRabbit continua revisando código de produto (`backend/`, `frontend/`, `ai-services/app/agents/` do CRM, etc.).
+
 ## Path instructions (resumo)
 
 - **backend/** — tenantId/RLS, DTOs, sem stack em prod

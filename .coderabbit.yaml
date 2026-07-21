@@ -13,6 +13,9 @@ reviews:
   collapse_walkthrough: true
 
   path_filters:
+    # Cursor skills / agents — CodeRabbit NÃO revisa (só produto do CRM)
+    - '!.cursor/**'
+    - '!**/SKILL.md'
     - '!reports/**'
     - '!**/coverage/**'
     - '!**/.next/**'
