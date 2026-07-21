@@ -1,0 +1,84 @@
+# CodeRabbit — Inova CRM AI
+# Docs: docs/security/coderabbit.md
+# Schema: https://docs.coderabbit.ai/reference/configuration
+
+language: pt-BR
+
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+
+  path_filters:
+    - '!reports/**'
+    - '!**/coverage/**'
+    - '!**/.next/**'
+    - '!**/dist/**'
+    - '!**/node_modules/**'
+    - '!**/*.lock'
+    - '!evolution-qr.png'
+
+  path_instructions:
+    - path: 'backend/**'
+      instructions: |
+        Tenant-first: toda query de domínio DEVE filtrar por tenantId; proibido findMany cross-tenant.
+        Validar DTOs com class-validator; não desabilitar ValidationPipe whitelist.
+        Não vazar stack traces ou secrets em respostas HTTP.
+        Webhooks: validar HMAC; rawBody quando necessário.
+        n8n/workers só via API_TOKEN — nunca credencial de usuário humano.
+    - path: 'frontend/**'
+      instructions: |
+        Sem secrets no client (NEXT_PUBLIC_* não pode carregar JWT_SECRET/API_TOKEN).
+        Auth via cookie httpOnly ou Bearer; tenant derivado do token.
+        Manter design Ember Studio (flame/void/bone); sem purple/cream defaults.
+        Preferir componentes existentes (CrmPage, modais create, StatusBadge).
+    - path: 'n8n/**'
+      instructions: |
+        Orquestrador only (ADR 003): sem Function/Code com regra de negócio CRM.
+        Sem acesso direto a Postgres/Redis/RabbitMQ/MinIO.
+        Toda mutação via HTTP na API NestJS; Chatwoot-only para canais.
+    - path: 'infrastructure/**'
+      instructions: |
+        Portas host 9400–9419; sem publish público de Postgres/Redis/RabbitMQ AMQP.
+        Não expor 80/443 no host — Cloudflare Tunnel.
+        Scripts de backup/restore não devem logar senhas.
+    - path: 'ai-services/**'
+      instructions: |
+        Agentes só via toolbelt/API Nest — sem DB/MinIO direto.
+        Manter guardrails; não logar PII em claro.
+    - path: 'docs/**'
+      instructions: |
+        Manter sincronizado com API/eventos/portas quando mudarem.
+        Referenciar ADRs em docs/adr/ para decisões arquiteturais.
+    - path: '.github/workflows/**'
+      instructions: |
+        Não imprimir secrets; preferir OIDC/secrets do GitHub.
+        Quality Gate deve permanecer hard-stop em FAIL.
+
+  tools:
+    semgrep:
+      enabled: true
+    opengrep:
+      enabled: true
+    trivy:
+      enabled: true
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    gitleaks:
+      enabled: true
+    eslint:
+      enabled: true
+    ruff:
+      enabled: true
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: auto

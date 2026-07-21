@@ -214,6 +214,7 @@ Detalhe: [docs/roadmap.md](docs/roadmap.md)
 
 - **Tenant-first** — `tenantId` + RLS desde a primeira migration
 - **Quality Gate hard-stop** — sem avanço com lint/testes vermelhos
+- **CodeRabbit** — review AI em PRs ([docs/security/coderabbit.md](docs/security/coderabbit.md)); instalar [GitHub App](https://github.com/apps/coderabbitai)
 - **n8n orquestrador** — regras de negócio no backend
 - **Canais via Chatwoot** — sem bypass
 - **RabbitMQ** para eventos · **Redis** para cache/sessão/filas n8n

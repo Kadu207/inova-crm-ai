@@ -4,12 +4,13 @@ Pacote corporativo de documentação do projeto.
 
 ## Índice
 
-| Área         | Documento                                                                |
-| ------------ | ------------------------------------------------------------------------ |
-| Arquitetura  | [overview.md](./architecture/overview.md)                                |
-| Operações    | [quality-gate.md](./operations/quality-gate.md)                          |
-| Constituição | [../.specify/memory/constitution.md](../.specify/memory/constitution.md) |
-| Plano Mestre | [../Plano_Mestre_Inova_CRM_AI.md](../Plano_Mestre_Inova_CRM_AI.md)       |
+| Área         | Documento                                                                                     |
+| ------------ | --------------------------------------------------------------------------------------------- |
+| Arquitetura  | [overview.md](./architecture/overview.md)                                                     |
+| Operações    | [quality-gate.md](./operations/quality-gate.md)                                               |
+| Segurança    | [seguranca-lgpd.md](./seguranca-lgpd.md) · [security/coderabbit.md](./security/coderabbit.md) |
+| Constituição | [../.specify/memory/constitution.md](../.specify/memory/constitution.md)                      |
+| Plano Mestre | [../Plano_Mestre_Inova_CRM_AI.md](../Plano_Mestre_Inova_CRM_AI.md)                            |
 
 ## Estrutura
 
