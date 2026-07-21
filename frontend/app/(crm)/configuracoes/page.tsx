@@ -11,6 +11,7 @@ export default function ConfiguracoesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Sistema"
         title="Configurações"
         description="Preferências do tenant e integrações."
         action={<button className="btn-primary">Salvar</button>}

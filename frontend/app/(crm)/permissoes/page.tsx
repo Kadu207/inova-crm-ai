@@ -1,17 +1,19 @@
 import { PageHeader } from '@/components/PageHeader';
+import { StatusBadge } from '@/components/StatusBadge';
 
 const ROLES = [
-  { name: 'admin', description: 'Acesso total ao tenant' },
-  { name: 'vendas', description: 'Leads, funil e propostas' },
-  { name: 'atendimento', description: 'Conversas e tarefas' },
-  { name: 'financeiro', description: 'Faturas e cobrança' },
-  { name: 'readonly', description: 'Somente leitura' },
+  { name: 'admin', description: 'Acesso total ao tenant', tone: 'flame' as const },
+  { name: 'vendas', description: 'Leads, funil e propostas', tone: 'ok' as const },
+  { name: 'atendimento', description: 'Conversas e tarefas', tone: 'warn' as const },
+  { name: 'financeiro', description: 'Faturas e cobrança', tone: 'neutral' as const },
+  { name: 'readonly', description: 'Somente leitura', tone: 'neutral' as const },
 ];
 
 export default function PermissoesPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Sistema"
         title="Permissões"
         description="Papéis RBAC por tenant — sincronizado com JWT claims."
       />
@@ -21,11 +23,16 @@ export default function PermissoesPage() {
             key={role.name}
             className="flex items-center justify-between border-b border-line pb-4 last:border-0 last:pb-0"
           >
-            <div>
-              <p className="font-medium text-bone">{role.name}</p>
-              <p className="text-sm text-smoke">{role.description}</p>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium text-bone">{role.name}</p>
+                <StatusBadge label={role.name} tone={role.tone} />
+              </div>
+              <p className="mt-1 text-sm text-smoke">{role.description}</p>
             </div>
-            <button className="btn-ghost text-xs">Editar</button>
+            <button type="button" className="btn-ghost text-xs">
+              Editar
+            </button>
           </div>
         ))}
       </div>

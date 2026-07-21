@@ -1,9 +1,9 @@
 # Design System — Ember Studio (Inova CRM AI)
 
-**Versão:** 1.1  
+**Versão:** 1.2  
 **Modelo:** B — Ember Studio  
 **Tema:** dark only  
-**Rollout 008:** Dashboard (KPIs API) · Leads · Funil · Atendimento · Contatos · Oportunidades
+**Rollout:** completo (009) — todas as rotas Crm + stubs Sistema/SaaS/Insights
 
 Tokens base: [tokens.md](./tokens.md)
 

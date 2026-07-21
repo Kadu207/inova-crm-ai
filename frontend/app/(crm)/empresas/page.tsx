@@ -3,6 +3,7 @@ import { CrmPage } from '@/components/CrmPage';
 export default function EmpresasPage() {
   return (
     <CrmPage
+      eyebrow="CRM"
       title="Empresas"
       description="Contas e organizações vinculadas ao tenant."
       resource="companies"

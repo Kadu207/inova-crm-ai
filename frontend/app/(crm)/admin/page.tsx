@@ -1,4 +1,5 @@
 import { PageHeader } from '@/components/PageHeader';
+import { StatusBadge } from '@/components/StatusBadge';
 
 const TENANT_STUBS = [
   { id: 'tenant-demo', name: 'Demo Inova', plan: 'trial', status: 'active' },
@@ -9,6 +10,7 @@ export default function AdminPage() {
   return (
     <>
       <PageHeader
+        eyebrow="SaaS"
         title="Admin SaaS"
         description="Super-tenant Fase 7 — provisionamento, quotas e suspensão."
         action={<button className="btn-primary">Novo tenant</button>}
@@ -34,9 +36,7 @@ export default function AdminPage() {
                 <td className="py-3 pr-4 text-bone">{tenant.name}</td>
                 <td className="py-3 pr-4 text-smoke">{tenant.plan}</td>
                 <td className="py-3">
-                  <span className="rounded-full bg-ok/15 px-2 py-0.5 text-xs text-ok">
-                    {tenant.status}
-                  </span>
+                  <StatusBadge label={tenant.status} tone="ok" />
                 </td>
               </tr>
             ))}

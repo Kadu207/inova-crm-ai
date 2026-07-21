@@ -3,6 +3,7 @@ import { CrmPage } from '@/components/CrmPage';
 export default function PropostasPage() {
   return (
     <CrmPage
+      eyebrow="Comercial"
       title="Propostas"
       description="Propostas comerciais enviadas e em elaboração."
       resource="proposals"

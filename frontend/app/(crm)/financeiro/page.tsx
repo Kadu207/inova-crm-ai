@@ -3,6 +3,7 @@ import { CrmPage } from '@/components/CrmPage';
 export default function FinanceiroPage() {
   return (
     <CrmPage
+      eyebrow="Financeiro"
       title="Financeiro"
       description="Receitas, despesas e fluxo de caixa do tenant."
       resource="finance"

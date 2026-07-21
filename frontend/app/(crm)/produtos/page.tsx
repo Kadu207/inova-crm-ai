@@ -3,11 +3,12 @@ import { CrmPage } from '@/components/CrmPage';
 export default function ProdutosPage() {
   return (
     <CrmPage
+      eyebrow="Cat?logo"
       title="Produtos"
-      description="Catálogo de produtos para propostas e contratos."
+      description="Cat?logo de produtos para propostas e contratos."
       resource="products"
-      emptyTitle="Catálogo vazio"
-      emptyDescription="Cadastre produtos com preço e SKU para uso comercial."
+      emptyTitle="Cat?logo vazio"
+      emptyDescription="Cadastre produtos com pre?o e SKU para uso comercial."
       actionLabel="Novo produto"
     />
   );

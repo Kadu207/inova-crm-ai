@@ -3,6 +3,7 @@ import { CrmPage } from '@/components/CrmPage';
 export default function ContratosPage() {
   return (
     <CrmPage
+      eyebrow="Comercial"
       title="Contratos"
       description="Contratos assinados e vigência por cliente."
       resource="contracts"

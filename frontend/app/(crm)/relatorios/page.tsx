@@ -12,6 +12,7 @@ export default function RelatoriosPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Insights"
         title="Relatórios"
         description="Insights comerciais e operacionais — exportação CSV/PDF na Fase 5+."
       />

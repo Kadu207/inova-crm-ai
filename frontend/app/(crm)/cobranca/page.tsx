@@ -3,6 +3,7 @@ import { CrmPage } from '@/components/CrmPage';
 export default function CobrancaPage() {
   return (
     <CrmPage
+      eyebrow="Financeiro"
       title="Cobrança"
       description="Faturas, boletos e inadimplência."
       resource="invoices"
