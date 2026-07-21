@@ -1,5 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -26,10 +28,34 @@ import { EventsModule } from './events/events.module';
 import { AiToolbeltModule } from './ai-toolbelt/ai-toolbelt.module';
 import { SaasModule } from './saas/saas.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const ttl = Number(config.get('THROTTLE_TTL_MS', 60_000));
+        const limit = Number(config.get('THROTTLE_LIMIT', 100));
+        const redisUrl = config.get<string>('REDIS_URL');
+        const throttlers = [
+          {
+            name: 'default',
+            ttl: Number.isFinite(ttl) ? ttl : 60_000,
+            limit: Number.isFinite(limit) ? limit : 100,
+          },
+        ];
+        if (redisUrl) {
+          return {
+            throttlers,
+            storage: new RedisThrottlerStorage(redisUrl),
+          };
+        }
+        return throttlers;
+      },
+    }),
     PrismaModule,
     HealthModule,
     AuthModule,
@@ -55,6 +81,12 @@ import { DashboardModule } from './dashboard/dashboard.module';
     AiToolbeltModule,
     SaasModule,
     DashboardModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {

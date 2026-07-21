@@ -47,8 +47,16 @@ Políticas de segurança, RBAC, auditoria, LGPD, retenção de dados e resposta 
 - JWT curta duração + refresh
 - `API_TOKEN` para n8n/workers (rotacionável)
 - Webhooks externos: HMAC `X-Inova-Signature` — ver [webhook-signing.md](./webhook-signing.md)
-- Rate-limit em login (Redis)
+- Rate-limit global (`@nestjs/throttler`, default 100/min) + login/register 10/min
+- Storage: Redis quando `REDIS_URL` está definido; senão in-memory (dev)
+- Headers HTTP: `helmet` na API; security headers + CSP no Next ([next.config.ts](../frontend/next.config.ts))
+- Swagger: desligado em `NODE_ENV=production` salvo `SWAGGER_ENABLED=true`
+- Erros: filtro global sem stack em produção
 - MFA para admin (Fase posterior)
+
+## Review de código (CodeRabbit)
+
+Ver [security/coderabbit.md](./security/coderabbit.md) — instalar GitHub App e manter `.coderabbit.yaml`.
 
 ## Auditoria
 

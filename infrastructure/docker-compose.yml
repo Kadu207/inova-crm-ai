@@ -190,6 +190,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-false}
+      BODY_SIZE_LIMIT: ${BODY_SIZE_LIMIT:-1mb}
+      THROTTLE_TTL_MS: ${THROTTLE_TTL_MS:-60000}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-100}
       # Non-superuser app role so FORCE RLS applies (create via setup-crm-app-role / init).
       DATABASE_URL: postgresql://${POSTGRES_APP_USER:-crm_app}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_APP_DB:-crm}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0

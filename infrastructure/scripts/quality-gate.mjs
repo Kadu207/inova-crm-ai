@@ -372,6 +372,8 @@ function stepDeliveryArtifacts() {
     'infrastructure/cloudflare-tunnel-ingress.example.yml',
     'infrastructure/scripts/backup.sh',
     'infrastructure/scripts/deploy-vps.ps1',
+    '.coderabbit.yaml',
+    'docs/security/coderabbit.md',
   ];
   const missing = required.filter((p) => !exists(p));
   if (missing.length === 0) {
