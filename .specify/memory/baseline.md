@@ -5,28 +5,21 @@
 
 ## Estado por fase
 
-| Fase     | Escopo                          | Status              |
-| -------- | ------------------------------- | ------------------- |
-| 0–7 + QA | Fundação até SaaS packing       | DONE                |
-| Delivery | VPS Tunnel CRM/API/Chatwoot/n8n | DONE (ops contínuo) |
-| 013      | CodeRabbit + Security P0        | DONE                |
+| Fase     | Escopo                           | Status              |
+| -------- | -------------------------------- | ------------------- |
+| 0–7 + QA | Fundação até SaaS packing        | DONE                |
+| Delivery | VPS Tunnel CRM/API/Chatwoot/n8n  | DONE (ops contínuo) |
+| 013      | CodeRabbit + Security P0         | DONE                |
+| 014      | Create produtos/serviços/tarefas | DONE                |
 
 ## Operacional
 
-- **UI Ember Studio:** Dashboard KPIs + timeline (011); leads/empresas/contatos create+detail.
-- **Security P0:** Helmet, Throttler (+ Redis se `REDIS_URL`), Swagger gate, error filter, Next CSP/headers, gitleaks CI, CodeRabbit YAML.
+- **UI Ember:** create/detail leads, empresas, contatos, produtos, serviços, tarefas; Funil DnD; Dashboard timeline.
+- **Security P0:** Helmet, Throttler, Swagger gate, CSP, gitleaks, CodeRabbit (exclui `.cursor/**`).
 - **WhatsApp:** Evolution ativo; Meta **BLOCKED** (sem WABA).
-- **Backup:** Postgres + MinIO via `mc`.
-
-## Artefatos-chave
-
-- Specs: `013-coderabbit-security`
-- CodeRabbit: `.coderabbit.yaml` + `docs/security/coderabbit.md`
-- Gate: `npm run gate`
 
 ## Próximo passo
 
-1. Instalar GitHub App CodeRabbit no repo (ação humana)
-2. Meta Cloud API — BLOCKED até WABA
-3. CRUD create produtos/serviços/tarefas (padrão 010/012)
-4. Edit/patch nas entidades com detalhe
+1. Validar CodeRabbit em um PR (App já instalado pelo owner)
+2. **Spec 015:** edit/patch nas entidades com detalhe
+3. Meta Cloud API — BLOCKED até WABA
