@@ -1,9 +1,11 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/EmptyState';
 import { EntityCard } from '@/components/EntityCard';
 import { ErrorState } from '@/components/ErrorState';
+import { LeadCreateModal } from '@/components/LeadCreateModal';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
 import { leadStatusTone, StatusBadge } from '@/components/StatusBadge';
@@ -41,6 +43,9 @@ function LeadActions({
 }) {
   return (
     <div className="flex flex-wrap gap-2">
+      <Link href={`/leads/${lead.id}`} className="btn-ghost text-xs">
+        Detalhe
+      </Link>
       {lead.status !== 'QUALIFIED' && lead.status !== 'CONVERTED' ? (
         <button
           type="button"
@@ -69,6 +74,8 @@ export function LeadsClient() {
   const [items, setItems] = useState<LeadRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   async function load() {
     const result = await apiFetch<LeadRow[]>('/leads');
@@ -127,6 +134,21 @@ export function LeadsClient() {
     await load();
   }
 
+  async function createLead(input: { title: string; notes?: string; source: string }) {
+    setCreating(true);
+    const result = await apiFetch<LeadRow>('/leads', {
+      method: 'POST',
+      body: input,
+    });
+    setCreating(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+    setCreateOpen(false);
+    await load();
+  }
+
   if (items === null && !error) {
     return (
       <>
@@ -161,7 +183,17 @@ export function LeadsClient() {
         eyebrow="CRM"
         title="Leads"
         description="Entrada do funil — Chatwoot, formulários e importação."
-        action={<button className="btn-primary">+ Novo lead</button>}
+        action={
+          <button type="button" className="btn-primary" onClick={() => setCreateOpen(true)}>
+            + Novo lead
+          </button>
+        }
+      />
+      <LeadCreateModal
+        open={createOpen}
+        busy={creating}
+        onClose={() => setCreateOpen(false)}
+        onSubmit={(input) => void createLead(input)}
       />
       {error ? (
         <div className="mb-3">
@@ -171,11 +203,10 @@ export function LeadsClient() {
       {leads.length === 0 ? (
         <EmptyState
           title="Nenhum lead"
-          description="Leads chegam via Chatwoot, formulários ou importação CSV."
+          description="Crie um lead ou aguarde sync via Chatwoot / importação."
         />
       ) : (
         <>
-          {/* Mobile cards */}
           <div className="space-y-3 md:hidden">
             {leads.map((lead) => (
               <EntityCard
@@ -199,7 +230,6 @@ export function LeadsClient() {
             ))}
           </div>
 
-          {/* Desktop table */}
           <div className="card-panel table-scroll hidden md:block">
             <table className="w-full min-w-[40rem] text-left text-sm text-bone">
               <thead className="border-b border-line text-xs uppercase tracking-wide text-faint">
@@ -215,7 +245,11 @@ export function LeadsClient() {
               <tbody className="divide-y divide-line">
                 {leads.map((lead) => (
                   <tr key={lead.id} className="align-top">
-                    <td className="max-w-md break-words py-3 pr-4">{lead.title}</td>
+                    <td className="max-w-md break-words py-3 pr-4">
+                      <Link href={`/leads/${lead.id}`} className="text-bone hover:text-flame">
+                        {lead.title}
+                      </Link>
+                    </td>
                     <td className="py-3 pr-4 text-smoke">{lead.source}</td>
                     <td className="py-3 pr-4">
                       <StatusBadge label={lead.status} tone={leadStatusTone(lead.status)} />

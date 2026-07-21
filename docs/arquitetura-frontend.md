@@ -58,6 +58,16 @@ frontend/
 
 Dashboard, Leads, Funil Kanban, Contatos, Oportunidades, Atendimento, Configurações — ver [regras de negócio](./regras-negocio-crm.md).
 
+### Rotas CRM (App Router)
+
+| Rota          | Cliente            | Notas                                             |
+| ------------- | ------------------ | ------------------------------------------------- |
+| `/leads`      | `LeadsClient`      | Lista + modal create (`POST /leads`)              |
+| `/leads/[id]` | `LeadDetailClient` | Detalhe, qualificar, converter                    |
+| `/funil`      | `FunilClient`      | Kanban HTML5 DnD → `POST /opportunities/:id/move` |
+
+Shell Ember: `CrmPage` + `eyebrow` em todas as rotas; stubs Sistema/SaaS/Insights com `PageHeader` + `StatusBadge`.
+
 ## Testes e Quality Gate
 
 - Vitest + Testing Library

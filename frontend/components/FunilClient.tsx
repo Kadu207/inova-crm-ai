@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { DragEvent, useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -21,6 +21,7 @@ type Opportunity = {
 };
 
 const SLA_HOURS = 24;
+const DRAG_TYPE = 'application/x-inova-opportunity-id';
 
 function isSlaWarning(deal: Opportunity): boolean {
   if (deal.status !== 'OPEN') return false;
@@ -45,6 +46,7 @@ export function FunilClient() {
   const [byStage, setByStage] = useState<Record<string, Opportunity[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [pipelinesResult, oppsResult] = await Promise.all([
@@ -97,6 +99,7 @@ export function FunilClient() {
       body: { stageId },
     });
     setBusyId(null);
+    setDropTarget(null);
     if (!result.ok) {
       setError(result.error.message);
       return;
@@ -115,13 +118,40 @@ export function FunilClient() {
     await load();
   }
 
+  function onDragStart(e: DragEvent, oppId: string) {
+    e.dataTransfer.setData(DRAG_TYPE, oppId);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function onDragOver(e: DragEvent, stageId: string) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDropTarget(stageId);
+  }
+
+  function onDragLeave(stageId: string) {
+    setDropTarget((current) => (current === stageId ? null : current));
+  }
+
+  function onDrop(e: DragEvent, stageId: string) {
+    e.preventDefault();
+    const oppId = e.dataTransfer.getData(DRAG_TYPE);
+    setDropTarget(null);
+    if (!oppId) return;
+    const currentStage = Object.entries(byStage).find(([, deals]) =>
+      deals.some((d) => d.id === oppId),
+    )?.[0];
+    if (currentStage === stageId) return;
+    void move(oppId, stageId);
+  }
+
   if (columns === null && !error) {
     return (
       <>
         <PageHeader
           eyebrow="CRM"
           title="Funil"
-          description="Kanban de oportunidades — mover estágio, ganhar ou perder."
+          description="Kanban de oportunidades — arraste cards ou use os botões."
         />
         <LoadingState />
       </>
@@ -144,7 +174,7 @@ export function FunilClient() {
       <PageHeader
         eyebrow="CRM"
         title="Funil"
-        description="Kanban de oportunidades — mover estágio, ganhar ou perder."
+        description="Kanban de oportunidades — arraste cards entre colunas (desktop) ou use ←/→."
         action={<button className="btn-primary">+ Oportunidade</button>}
       />
       {error ? (
@@ -161,11 +191,18 @@ export function FunilClient() {
             const n = typeof d.value === 'number' ? d.value : Number(d.value);
             return sum + (Number.isFinite(n) ? n : 0);
           }, 0);
+          const isTarget = dropTarget === column.key;
 
           return (
             <section
               key={column.key}
-              className="kanban-column card-panel flex min-h-[240px] flex-col lg:w-auto lg:min-h-[280px]"
+              onDragOver={(e) => onDragOver(e, column.key)}
+              onDragLeave={() => onDragLeave(column.key)}
+              onDrop={(e) => onDrop(e, column.key)}
+              className={[
+                'kanban-column card-panel flex min-h-[240px] flex-col transition-colors lg:w-auto lg:min-h-[280px]',
+                isTarget ? 'border-flame ring-1 ring-flame' : '',
+              ].join(' ')}
             >
               <header className="sticky top-0 z-10 -mx-1 border-b border-line bg-panel px-1 pb-3">
                 <div className="flex items-center justify-between gap-2">
@@ -182,7 +219,15 @@ export function FunilClient() {
                   />
                 ) : (
                   deals.map((deal) => (
-                    <article key={deal.id} className="deal-card">
+                    <article
+                      key={deal.id}
+                      draggable={deal.status === 'OPEN'}
+                      onDragStart={(e) => onDragStart(e, deal.id)}
+                      className={[
+                        'deal-card',
+                        deal.status === 'OPEN' ? 'cursor-grab active:cursor-grabbing' : '',
+                      ].join(' ')}
+                    >
                       <p className="break-words text-sm font-medium text-bone">{deal.title}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <StatusBadge
@@ -243,7 +288,7 @@ export function FunilClient() {
         })}
       </div>
       <p className="mt-2 text-xs text-faint lg:hidden">
-        Deslize horizontalmente para ver os estágios.
+        Deslize horizontalmente. Em telas touch use os botões ←/→.
       </p>
     </>
   );
