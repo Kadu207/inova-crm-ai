@@ -53,15 +53,16 @@ X-Tenant-Id: <uuid>               # somente service accounts multi-tenant audita
 
 ## Módulos API
 
-| Prefixo             | Módulo         |
-| ------------------- | -------------- |
-| `/v1/leads`         | Leads          |
-| `/v1/contacts`      | Contatos       |
-| `/v1/companies`     | Empresas       |
-| `/v1/opportunities` | Oportunidades  |
-| `/v1/conversations` | Atendimento    |
-| `/v1/invoices`      | Financeiro     |
-| `/v1/platform`      | Tenants, users |
+| Prefixo             | Módulo          |
+| ------------------- | --------------- |
+| `/v1/dashboard`     | KPIs + activity |
+| `/v1/leads`         | Leads           |
+| `/v1/contacts`      | Contatos        |
+| `/v1/companies`     | Empresas        |
+| `/v1/opportunities` | Oportunidades   |
+| `/v1/conversations` | Atendimento     |
+| `/v1/invoices`      | Financeiro      |
+| `/v1/platform`      | Tenants, users  |
 
 ## Erros
 

@@ -12,20 +12,20 @@
 
 ## Operacional
 
-- **UI Ember Studio:** shell + todas as rotas Crm/stubs (009); Dashboard KPIs (008).
-- **Leads:** create modal + detalhe `/leads/[id]` + qualify/convert; Funil HTML5 DnD (010).
+- **UI Ember Studio:** shell + rotas Crm/stubs (009); Dashboard KPIs + timeline (008/011).
+- **Leads:** create/detail + Funil DnD (010).
+- **Empresas / Contatos:** create modal + detalhe (012).
 - **WhatsApp:** Evolution ativo; Meta **BLOCKED** (sem WABA).
-- **Backup:** Postgres + MinIO via `mc` (`setup-minio-mc.sh` + alias no `backup.sh`).
-- **SLA / RLS:** check-all multi-tenant; `crm_app` RLS.
+- **Backup:** Postgres + MinIO via `mc`.
 
 ## Artefatos-chave
 
-- Specs: `009-ember-studio-remaining`, `010-lead-detail-funil-dnd`
+- Specs: `011-dashboard-activity`, `012-company-contact-create`
 - Design: `docs/design/system.md`
 - Gate: `npm run gate`
 
 ## Próximo passo
 
 1. Meta Cloud API — BLOCKED até WABA
-2. Timeline de atividade no Dashboard
-3. CRUD create nas demais entidades (empresas, contatos, …)
+2. CRUD create produtos/serviços/tarefas (mesmo padrão 010/012)
+3. Edit/patch nas entidades com detalhe
