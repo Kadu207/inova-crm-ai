@@ -4,12 +4,12 @@ export default function CobrancaPage() {
   return (
     <CrmPage
       eyebrow="Financeiro"
-      title="Cobrança"
-      description="Faturas, boletos e inadimplência."
+      title={'Cobran\u00e7a'}
+      description={'Faturas, boletos e inadimpl\u00eancia.'}
       resource="invoices"
-      emptyTitle="Nenhuma cobrança"
-      emptyDescription="Faturas são geradas a partir de contratos e eventos invoice.*."
-      actionLabel="Nova cobrança"
+      emptyTitle={'Nenhuma cobran\u00e7a'}
+      emptyDescription="Faturas sao geradas a partir de contratos e eventos invoice.*"
+      actionLabel={'Nova cobran\u00e7a'}
     />
   );
 }

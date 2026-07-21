@@ -12,12 +12,12 @@ export default function AdminPage() {
       <PageHeader
         eyebrow="SaaS"
         title="Admin SaaS"
-        description="Super-tenant Fase 7 — provisionamento, quotas e suspensão."
+        description={'Super-tenant Fase 7 \u2014 provisionamento, quotas e suspens\u00e3o.'}
         action={<button className="btn-primary">Novo tenant</button>}
       />
       <div className="mb-6 rounded-lg border border-flame/30 bg-flame/5 p-4 text-sm text-smoke">
-        Acesso restrito ao super-admin. Tenants listados abaixo são stubs até a API admin
-        (`/v1/admin/tenants`) estar disponível.
+        Acesso restrito ao super-admin. Tenants listados abaixo sao stubs ate a API admin
+        (`/v1/admin/tenants`) estar disponivel.
       </div>
       <div className="card-panel table-scroll overflow-x-auto">
         <table className="w-full min-w-[36rem] text-left text-sm">

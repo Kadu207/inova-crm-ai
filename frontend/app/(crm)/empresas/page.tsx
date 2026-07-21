@@ -5,7 +5,7 @@ export default function EmpresasPage() {
     <CrmPage
       eyebrow="CRM"
       title="Empresas"
-      description="Contas e organizações vinculadas ao tenant."
+      description={'Contas e organiza\u00e7\u00f5es vinculadas ao tenant.'}
       resource="companies"
       emptyTitle="Nenhuma empresa cadastrada"
       emptyDescription="Cadastre empresas para vincular contatos, oportunidades e contratos."

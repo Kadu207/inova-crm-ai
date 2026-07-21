@@ -5,7 +5,7 @@ export default function ContratosPage() {
     <CrmPage
       eyebrow="Comercial"
       title="Contratos"
-      description="Contratos assinados e vigência por cliente."
+      description={'Contratos assinados e vig\u00eancia por cliente.'}
       resource="contracts"
       emptyTitle="Nenhum contrato"
       emptyDescription="Converta propostas aceitas em contratos com anexos no MinIO."

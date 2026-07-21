@@ -2,8 +2,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { PageHeader } from '@/components/PageHeader';
 
 const REPORTS = [
-  { id: 'pipeline', name: 'Pipeline por estágio' },
-  { id: 'conversion', name: 'Conversão de leads' },
+  { id: 'pipeline', name: 'Pipeline por estagio' },
+  { id: 'conversion', name: 'Conversao de leads' },
   { id: 'revenue', name: 'Receita prevista vs. realizada' },
   { id: 'sla', name: 'SLA de atendimento' },
 ];
@@ -13,8 +13,10 @@ export default function RelatoriosPage() {
     <>
       <PageHeader
         eyebrow="Insights"
-        title="Relatórios"
-        description="Insights comerciais e operacionais — exportação CSV/PDF na Fase 5+."
+        title={'Relat\u00f3rios'}
+        description={
+          'Insights comerciais e operacionais \u2014 exporta\u00e7\u00e3o CSV/PDF na Fase 5+.'
+        }
       />
       <div className="grid gap-4 md:grid-cols-2">
         {REPORTS.map((report) => (
@@ -22,7 +24,7 @@ export default function RelatoriosPage() {
             <h3 className="font-display text-bone">{report.name}</h3>
             <EmptyState
               title="Sem dados"
-              description="Execute a API e agregue eventos para popular este relatório."
+              description={'Execute a API e agregue eventos para popular este relat\u00f3rio.'}
             />
           </div>
         ))}

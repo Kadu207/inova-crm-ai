@@ -2,8 +2,8 @@ import { PageHeader } from '@/components/PageHeader';
 
 const SETTINGS = [
   { key: 'tenant', label: 'Dados do tenant', value: 'tenant-demo' },
-  { key: 'timezone', label: 'Fuso horário', value: 'America/Sao_Paulo' },
-  { key: 'chatwoot', label: 'Chatwoot account_id', value: '—' },
+  { key: 'timezone', label: 'Fuso horario', value: 'America/Sao_Paulo' },
+  { key: 'chatwoot', label: 'Chatwoot account_id', value: '\u2014' },
   { key: 'webhooks', label: 'Webhooks ativos', value: '0' },
 ];
 
@@ -12,8 +12,8 @@ export default function ConfiguracoesPage() {
     <>
       <PageHeader
         eyebrow="Sistema"
-        title="Configurações"
-        description="Preferências do tenant e integrações."
+        title={'Configura\u00e7\u00f5es'}
+        description={'Prefer\u00eancias do tenant e integra\u00e7\u00f5es.'}
         action={<button className="btn-primary">Salvar</button>}
       />
       <div className="card-panel divide-y divide-line">

@@ -5,7 +5,7 @@ const ROLES = [
   { name: 'admin', description: 'Acesso total ao tenant', tone: 'flame' as const },
   { name: 'vendas', description: 'Leads, funil e propostas', tone: 'ok' as const },
   { name: 'atendimento', description: 'Conversas e tarefas', tone: 'warn' as const },
-  { name: 'financeiro', description: 'Faturas e cobrança', tone: 'neutral' as const },
+  { name: 'financeiro', description: 'Faturas e cobranca', tone: 'neutral' as const },
   { name: 'readonly', description: 'Somente leitura', tone: 'neutral' as const },
 ];
 
@@ -14,8 +14,8 @@ export default function PermissoesPage() {
     <>
       <PageHeader
         eyebrow="Sistema"
-        title="Permissões"
-        description="Papéis RBAC por tenant — sincronizado com JWT claims."
+        title={'Permiss\u00f5es'}
+        description={'Pap\u00e9is RBAC por tenant \u2014 sincronizado com JWT claims.'}
       />
       <div className="card-panel space-y-4">
         {ROLES.map((role) => (

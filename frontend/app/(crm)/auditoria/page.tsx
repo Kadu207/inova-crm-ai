@@ -5,10 +5,12 @@ export default function AuditoriaPage() {
     <CrmPage
       eyebrow="Sistema"
       title="Auditoria"
-      description="Trilha de auditoria — worker-crm-audit e eventos de domínio."
+      description={'Trilha de auditoria \u2014 worker-crm-audit e eventos de dom\u00ednio.'}
       resource="audit-logs"
       emptyTitle="Nenhum evento auditado"
-      emptyDescription="Ações sensíveis e acessos cross-tenant são registrados aqui."
+      emptyDescription={
+        'A\u00e7\u00f5es sens\u00edveis e acessos cross-tenant s\u00e3o registrados aqui.'
+      }
     />
   );
 }
