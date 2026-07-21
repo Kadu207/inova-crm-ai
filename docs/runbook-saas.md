@@ -49,7 +49,9 @@ Default: `BACKUP_ROOT=/opt/inova-crm-ai/backups` (sem sudo na VPS).
 0 3 * * * gestaoti BACKUP_ROOT=/opt/inova-crm-ai/backups /opt/inova-crm-ai/infrastructure/scripts/backup.sh >> /opt/inova-crm-ai/logs/backup.log 2>&1
 ```
 
-Smoke não destrutivo: `bash infrastructure/scripts/restore-smoke.sh` (DB temp `crm_restore_smoke`).  
+Smoke não destrutivo: `bash infrastructure/scripts/restore-smoke.sh` (DB temp `crm_restore_smoke`).
+
+MinIO: uma vez na VPS rode `bash infrastructure/scripts/setup-minio-mc.sh` (alias `inova` → `http://127.0.0.1:9405`). O `backup.sh` reaplica o alias se `MINIO_ROOT_*` estiver no `.env`.  
 Drill trimestral de restore de produção — ver [manual-implantacao-producao.md](./manual-implantacao-producao.md).
 
 ### SLA funil

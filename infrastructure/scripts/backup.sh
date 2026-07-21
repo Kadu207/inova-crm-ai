@@ -39,25 +39,25 @@ ln -sf "$(basename "${PG_FILE}")" "${BACKUP_ROOT}/postgres/latest.sql.gz"
 echo "    Postgres backup OK ($(du -h "${PG_FILE}" | cut -f1))"
 
 # --- MinIO ---
-# Requires mc (MinIO Client) configured: mc alias set inova http://127.0.0.1:9405 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://127.0.0.1:9405}"
 MINIO_ALIAS="${MINIO_ALIAS:-inova}"
 MINIO_BUCKET="${MINIO_BUCKET:-inova-crm}"
 MINIO_DIR="${BACKUP_ROOT}/minio/${DATE_STAMP}"
 
 if command -v mc >/dev/null 2>&1; then
+  if [ -n "${MINIO_ROOT_USER:-}" ] && [ -n "${MINIO_ROOT_PASSWORD:-}" ]; then
+    mc alias set "${MINIO_ALIAS}" "${MINIO_ENDPOINT}" "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}" >/dev/null
+  fi
   echo "==> mc mirror ${MINIO_ALIAS}/${MINIO_BUCKET} -> ${MINIO_DIR}"
   if mc mirror --overwrite "${MINIO_ALIAS}/${MINIO_BUCKET}" "${MINIO_DIR}"; then
     ln -sfn "${DATE_STAMP}" "${BACKUP_ROOT}/minio/latest"
     echo "    MinIO mirror OK"
   else
-    echo "    WARN: MinIO mirror failed — Postgres backup kept; configure mc alias if needed"
+    echo "    WARN: MinIO mirror failed — Postgres backup kept; run infrastructure/scripts/setup-minio-mc.sh"
   fi
 else
   echo "==> mc not installed — MinIO backup skipped"
-  echo "    Install: https://min.io/docs/minio/linux/reference/minio-mc.html"
-  echo "    Example:"
-  echo "      mc alias set ${MINIO_ALIAS} http://127.0.0.1:9405 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD"
-  echo "      mc mirror ${MINIO_ALIAS}/${MINIO_BUCKET} ${MINIO_DIR}"
+  echo "    Run: bash infrastructure/scripts/setup-minio-mc.sh"
 fi
 
 # --- Retention ---

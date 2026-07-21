@@ -262,7 +262,7 @@ Cron diário (exemplo):
 O script `backup.sh` executa:
 
 1. `pg_dump` do container `inova-crm-postgres` (DB `crm`) → `${BACKUP_ROOT}/postgres/` (default `/opt/inova-crm-ai/backups`)
-2. `mc mirror` do MinIO → `${BACKUP_ROOT}/minio/` (skip se `mc` ausente)
+2. `mc mirror` do MinIO → `${BACKUP_ROOT}/minio/` (endpoint default `http://127.0.0.1:9405`; alias reaplicado se `MINIO_ROOT_*` no `.env`). Setup: `bash infrastructure/scripts/setup-minio-mc.sh`
 3. Rotação 30 dias
 
 Smoke de restore (não destrutivo — DB temporário `crm_restore_smoke`):
