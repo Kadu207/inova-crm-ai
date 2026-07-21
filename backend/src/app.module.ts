@@ -25,6 +25,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 import { EventsModule } from './events/events.module';
 import { AiToolbeltModule } from './ai-toolbelt/ai-toolbelt.module';
 import { SaasModule } from './saas/saas.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { SaasModule } from './saas/saas.module';
     EventsModule,
     AiToolbeltModule,
     SaasModule,
+    DashboardModule,
   ],
 })
 export class AppModule implements NestModule {

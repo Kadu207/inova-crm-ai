@@ -3,6 +3,7 @@ import { CrmPage } from '@/components/CrmPage';
 export default function OportunidadesPage() {
   return (
     <CrmPage
+      eyebrow="CRM"
       title="Oportunidades"
       description="Deals em andamento com valor, estágio e responsável."
       resource="opportunities"

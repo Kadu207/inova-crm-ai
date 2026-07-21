@@ -1,9 +1,9 @@
 # Design System — Ember Studio (Inova CRM AI)
 
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Modelo:** B — Ember Studio  
 **Tema:** dark only  
-**Piloto:** Dashboard · Leads · Funil
+**Rollout 008:** Dashboard (KPIs API) · Leads · Funil · Atendimento · Contatos · Oportunidades
 
 Tokens base: [tokens.md](./tokens.md)
 
@@ -91,6 +91,12 @@ Tokens base: [tokens.md](./tokens.md)
 - Grid de colunas no `lg+`.
 - Card deal: título, status badge, SLA badge, ações ghost/primary compactas.
 
+### Atendimento / Contatos / Oportunidades
+
+- `< md`: `EntityCard` + `StatusBadge`.
+- `≥ md`: tabela em `card-panel`.
+- CTAs: `btn-primary` / `btn-ghost` (Chatwoot no atendimento).
+
 ---
 
 ## Acessibilidade
@@ -102,9 +108,13 @@ Tokens base: [tokens.md](./tokens.md)
 
 ---
 
-## Checklist visual (piloto)
+## Checklist visual (008)
 
-- [ ] 375px — bottom nav + drawer + cards
-- [ ] 768px — tabela leads + kanban scroll
-- [ ] 1280px — rail + KPI 4 + kanban grid
-- [ ] Dark only — sem toggle light
+Implementação alinhada aos breakpoints Tailwind do shell/piloto (verificado em código + smoke Playwright):
+
+- [x] 375px — bottom nav + drawer + cards (`md:hidden` EntityCard; `BottomNav` `lg:hidden`)
+- [x] 768px — tabelas Leads/Atendimento/CrmPage (`hidden md:block`) + kanban scroll
+- [x] 1280px — rail permanente + KPI `xl:grid-cols-4` + kanban `lg:grid`
+- [x] Dark only — sem toggle light (`bg-void` / tokens Inova)
+
+Smoke: `frontend/e2e/smoke.spec.ts` (login + viewports 375 / 768).

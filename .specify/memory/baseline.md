@@ -22,23 +22,22 @@
 
 - **WhatsApp dual-path:** Evolution API (QR/pareamento) atrás do Chatwoot; Meta Cloud API **BLOCKED** (sem WABA).
 - **E2E:** WhatsApp → Evolution → Chatwoot → n8n → Lead + Conversa no CRM.
-- **Atendimento UI:** `/atendimento` lista conversas enriquecidas; resposta no Chatwoot.
-- **SLA funil (RN-OPP-03):** `stageEnteredAt` + `POST /opportunities/sla/check` (tenant) + `POST /opportunities/sla/check-all` (platform, ACTIVE/TRIAL).
-- **Backup:** `backup.sh` (`inova-crm-postgres` / DB `crm`) + `restore-smoke.sh` + cron 03:00 em `/opt/inova-crm-ai/backups`.
+- **UI Ember Studio:** shell híbrido + Dashboard KPIs (`GET /dashboard/summary`) + Leads/Funil/Atendimento/Contatos/Oportunidades.
+- **SLA funil (RN-OPP-03):** `stageEnteredAt` + check tenant + check-all platform.
+- **Backup:** Postgres `crm` + restore-smoke + cron 03:00 em `/opt/inova-crm-ai/backups`.
 - **RLS:** role `crm_app` + migration tenant RLS.
 
 ## Artefatos-chave
 
 - Constitution: `.specify/memory/constitution.md`
-- Spec atual: `specs/007-ops-hardening/`
+- Spec atual: `specs/008-ember-studio-rollout/`
+- Design: `docs/design/system.md` (Ember Studio)
 - Ports: `docs/ports.md` (9400–9419; 9416 Evolution localhost)
 - Events: `docs/events/catalog-v0.md`
 - Gate: `npm run gate`
-- Smoke atendimento: `docs/e2e-atendimento-crm.md`
-- WhatsApp: `docs/chatwoot-whatsapp-setup.md`
 
 ## Próximo passo
 
-1. **Cutover Meta Cloud API** — BLOCKED até credenciais WABA (`docs/chatwoot-whatsapp-setup.md`)
-2. Opcional: instalar `mc` e incluir MinIO no backup noturno
-3. Drill trimestral de restore de produção (incidente)
+1. **Cutover Meta Cloud API** — BLOCKED até credenciais WABA
+2. Spec 009 — rollout Ember nas demais rotas CrmPage (Empresas, Tarefas, …)
+3. Opcional: `mc` MinIO no backup; detalhe/create lead; drag-and-drop funil

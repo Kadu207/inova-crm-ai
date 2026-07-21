@@ -3,6 +3,7 @@ import { CrmPage } from '@/components/CrmPage';
 export default function ContatosPage() {
   return (
     <CrmPage
+      eyebrow="CRM"
       title="Contatos"
       description="Pessoas e decisores do pipeline comercial."
       resource="contacts"
