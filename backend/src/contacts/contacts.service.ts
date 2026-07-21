@@ -25,4 +25,9 @@ export class ContactsService {
     await this.findOne(tenantId, id);
     return this.prisma.contact.update({ where: { id }, data: dto });
   }
+
+  async remove(tenantId: string, id: string): Promise<void> {
+    await this.findOne(tenantId, id);
+    await this.prisma.contact.delete({ where: { id } });
+  }
 }

@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { OpportunitiesService } from './opportunities.service';
 import {
@@ -69,5 +79,12 @@ export class OpportunitiesController {
   @ApiOperation({ summary: 'Mark opportunity as lost (RN-OPP-02)' })
   lost(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.opportunitiesService.markLost(tenantId, id);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete opportunity' })
+  remove(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.opportunitiesService.remove(tenantId, id);
   }
 }

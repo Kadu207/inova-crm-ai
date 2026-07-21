@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import type { OpportunityRow } from '@/components/OpportunitiesClient';
 import type { PipelineOption } from '@/components/OpportunityCreateModal';
+import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
@@ -38,11 +39,13 @@ function statusTone(status: string): 'ok' | 'warn' | 'bad' {
 
 export function OpportunityDetailClient() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = params.id;
   const [opp, setOpp] = useState<OpportunityRow | null>(null);
   const [pipelines, setPipelines] = useState<PipelineOption[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [value, setValue] = useState('');
@@ -81,6 +84,19 @@ export function OpportunityDetailClient() {
   }, [pipelines, opp]);
 
   const stageName = stages.find((s) => s.id === (editing ? stageId : opp?.stageId))?.name;
+
+  async function removeOpportunity() {
+    if (!opp) return;
+    setBusy(true);
+    const result = await apiFetch<void>(`/opportunities/${opp.id}`, { method: 'DELETE' });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push('/oportunidades');
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -181,6 +197,14 @@ export function OpportunityDetailClient() {
               }}
             >
               {editing ? 'Cancelar' : 'Editar'}
+            </button>
+            <button
+              type="button"
+              className="btn-ghost text-bad"
+              disabled={busy}
+              onClick={() => setConfirmDelete(true)}
+            >
+              Excluir
             </button>
           </div>
         }
@@ -284,6 +308,13 @@ export function OpportunityDetailClient() {
           </>
         )}
       </div>
+      <ConfirmDeleteModal
+        open={confirmDelete}
+        busy={busy}
+        entityLabel={opp.title}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => void removeOpportunity()}
+      />
     </>
   );
 }

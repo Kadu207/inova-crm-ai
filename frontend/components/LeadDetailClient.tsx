@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import type { LeadRow } from '@/components/LeadsClient';
 import { LoadingState } from '@/components/LoadingState';
@@ -23,6 +24,7 @@ export function LeadDetailClient() {
   const [lead, setLead] = useState<LeadRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
@@ -77,6 +79,19 @@ export function LeadDetailClient() {
     }
     setLead(result.data.lead);
     router.push('/funil');
+  }
+
+  async function removeLead() {
+    if (!lead) return;
+    setBusy(true);
+    const result = await apiFetch<void>(`/leads/${lead.id}`, { method: 'DELETE' });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push('/leads');
   }
 
   async function save(e: FormEvent) {
@@ -151,6 +166,14 @@ export function LeadDetailClient() {
               onClick={() => setEditing((v) => !v)}
             >
               {editing ? 'Cancelar' : 'Editar'}
+            </button>
+            <button
+              type="button"
+              className="btn-ghost text-bad"
+              disabled={busy}
+              onClick={() => setConfirmDelete(true)}
+            >
+              Excluir
             </button>
             {lead.status !== 'QUALIFIED' && lead.status !== 'CONVERTED' ? (
               <button
@@ -261,6 +284,13 @@ export function LeadDetailClient() {
           </section>
         </div>
       )}
+      <ConfirmDeleteModal
+        open={confirmDelete}
+        busy={busy}
+        entityLabel={lead.title}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => void removeLead()}
+      />
     </>
   );
 }

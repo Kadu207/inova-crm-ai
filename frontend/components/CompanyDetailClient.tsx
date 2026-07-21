@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import type { CompanyRow } from '@/components/CompaniesClient';
+import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
@@ -17,10 +18,12 @@ function formatDate(value: string): string {
 
 export function CompanyDetailClient() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = params.id;
   const [company, setCompany] = useState<CompanyRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [document, setDocument] = useState('');
@@ -45,6 +48,19 @@ export function CompanyDetailClient() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function removeCompany() {
+    if (!company) return;
+    setBusy(true);
+    const result = await apiFetch<void>(`/companies/${company.id}`, { method: 'DELETE' });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push('/empresas');
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -117,6 +133,14 @@ export function CompanyDetailClient() {
             >
               {editing ? 'Cancelar' : 'Editar'}
             </button>
+            <button
+              type="button"
+              className="btn-ghost text-bad"
+              disabled={busy}
+              onClick={() => setConfirmDelete(true)}
+            >
+              Excluir
+            </button>
           </div>
         }
       />
@@ -184,6 +208,13 @@ export function CompanyDetailClient() {
           </p>
         </div>
       )}
+      <ConfirmDeleteModal
+        open={confirmDelete}
+        busy={busy}
+        entityLabel={company.name}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => void removeCompany()}
+      />
     </>
   );
 }

@@ -12,8 +12,9 @@
 | 014 Create produtos/serviços/tarefas | DONE (UI validada) |
 | 015 Edit/patch detalhe               | DONE               |
 | 016 Oportunidades create/edit        | DONE               |
+| 017 Delete com confirmação           | DONE               |
 
 ## Próximo passo
 
 1. Meta Cloud API — BLOCKED até WABA
-2. **017** Delete com confirmação / soft-delete
+2. Soft-delete + purge LGPD (follow-up de 017)

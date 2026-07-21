@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import type { ProductRow } from '@/components/ProductsClient';
+import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
@@ -24,10 +25,12 @@ function formatMoney(value: string | number | null | undefined): string {
 
 export function ProductDetailClient() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = params.id;
   const [product, setProduct] = useState<ProductRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -50,6 +53,19 @@ export function ProductDetailClient() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function removeProduct() {
+    if (!product) return;
+    setBusy(true);
+    const result = await apiFetch<void>(`/products/${product.id}`, { method: 'DELETE' });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push('/produtos');
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -122,6 +138,14 @@ export function ProductDetailClient() {
             >
               {editing ? 'Cancelar' : 'Editar'}
             </button>
+            <button
+              type="button"
+              className="btn-ghost text-bad"
+              disabled={busy}
+              onClick={() => setConfirmDelete(true)}
+            >
+              Excluir
+            </button>
           </div>
         }
       />
@@ -192,6 +216,13 @@ export function ProductDetailClient() {
           </p>
         </div>
       )}
+      <ConfirmDeleteModal
+        open={confirmDelete}
+        busy={busy}
+        entityLabel={product.name}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => void removeProduct()}
+      />
     </>
   );
 }

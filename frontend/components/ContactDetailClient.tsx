@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import type { ContactRow } from '@/components/ContactsClient';
+import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
@@ -17,10 +18,12 @@ function formatDate(value: string): string {
 
 export function ContactDetailClient() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = params.id;
   const [contact, setContact] = useState<ContactRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,6 +48,19 @@ export function ContactDetailClient() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function removeContact() {
+    if (!contact) return;
+    setBusy(true);
+    const result = await apiFetch<void>(`/contacts/${contact.id}`, { method: 'DELETE' });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push('/contatos');
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -116,6 +132,14 @@ export function ContactDetailClient() {
               onClick={() => setEditing((v) => !v)}
             >
               {editing ? 'Cancelar' : 'Editar'}
+            </button>
+            <button
+              type="button"
+              className="btn-ghost text-bad"
+              disabled={busy}
+              onClick={() => setConfirmDelete(true)}
+            >
+              Excluir
             </button>
           </div>
         }
@@ -195,6 +219,13 @@ export function ContactDetailClient() {
           </p>
         </div>
       )}
+      <ConfirmDeleteModal
+        open={confirmDelete}
+        busy={busy}
+        entityLabel={contact.name}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => void removeContact()}
+      />
     </>
   );
 }

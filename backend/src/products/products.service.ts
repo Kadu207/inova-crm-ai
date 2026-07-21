@@ -40,4 +40,9 @@ export class ProductsService {
       },
     });
   }
+
+  async remove(tenantId: string, id: string): Promise<void> {
+    await this.findOne(tenantId, id);
+    await this.prisma.product.delete({ where: { id } });
+  }
 }

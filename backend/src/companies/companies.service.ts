@@ -25,4 +25,9 @@ export class CompaniesService {
     await this.findOne(tenantId, id);
     return this.prisma.company.update({ where: { id }, data: dto });
   }
+
+  async remove(tenantId: string, id: string): Promise<void> {
+    await this.findOne(tenantId, id);
+    await this.prisma.company.delete({ where: { id } });
+  }
 }

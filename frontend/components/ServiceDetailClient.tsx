@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import type { ServiceRow } from '@/components/ServicesClient';
+import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
@@ -24,10 +25,12 @@ function formatMoney(value: string | number | null | undefined): string {
 
 export function ServiceDetailClient() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = params.id;
   const [service, setService] = useState<ServiceRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -50,6 +53,19 @@ export function ServiceDetailClient() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function removeService() {
+    if (!service) return;
+    setBusy(true);
+    const result = await apiFetch<void>(`/services/${service.id}`, { method: 'DELETE' });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      setConfirmDelete(false);
+      return;
+    }
+    router.push('/servicos');
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -126,6 +142,14 @@ export function ServiceDetailClient() {
             >
               {editing ? 'Cancelar' : 'Editar'}
             </button>
+            <button
+              type="button"
+              className="btn-ghost text-bad"
+              disabled={busy}
+              onClick={() => setConfirmDelete(true)}
+            >
+              Excluir
+            </button>
           </div>
         }
       />
@@ -196,6 +220,13 @@ export function ServiceDetailClient() {
           </p>
         </div>
       )}
+      <ConfirmDeleteModal
+        open={confirmDelete}
+        busy={busy}
+        entityLabel={service.name}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={() => void removeService()}
+      />
     </>
   );
 }

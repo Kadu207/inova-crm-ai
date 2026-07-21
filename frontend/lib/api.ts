@@ -78,8 +78,17 @@ export async function apiFetch<T>(
       return { ok: true, data: undefined as T };
     }
 
-    const data = (await response.json()) as T;
-    return { ok: true, data };
+    const text = await response.text();
+    if (!text) {
+      return { ok: true, data: undefined as T };
+    }
+
+    try {
+      const data = JSON.parse(text) as T;
+      return { ok: true, data };
+    } catch {
+      return { ok: false, error: { status: response.status, message: 'Invalid JSON response' } };
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Network error';
     return { ok: false, error: { status: 0, message } };

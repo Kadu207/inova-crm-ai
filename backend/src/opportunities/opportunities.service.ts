@@ -103,6 +103,12 @@ export class OpportunitiesService {
     return this.update(tenantId, id, { status: OpportunityStatus.LOST });
   }
 
+  async remove(tenantId: string, id: string): Promise<void> {
+    await this.findOne(tenantId, id);
+    await this.prisma.opportunity.delete({ where: { id } });
+    await this.events.publish(tenantId, 'opportunity.deleted', { opportunityId: id });
+  }
+
   /**
    * Scan open opportunities past stage SLA; publish opportunity.sla.breached once per stage stay.
    */

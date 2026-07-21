@@ -25,13 +25,13 @@ Todo evento **deve** incluir: `eventType`, `tenantId`, `correlationId`, `idempot
 
 ## lead.*
 
-| Evento           | Publisher         | Consumers                          | Descrição               |
-| ---------------- | ----------------- | ---------------------------------- | ----------------------- |
-| `lead.created`   | API (POST /leads) | worker-crm-leads, worker-crm-audit | Novo lead capturado     |
-| `lead.updated`   | API               | worker-crm-leads                   | Dados do lead alterados |
-| `lead.qualified` | API               | worker-crm-pipeline, worker-crm-ai | Lead qualificado        |
-| `lead.converted` | API               | worker-crm-pipeline                | Lead virou oportunidade |
-| `lead.deleted`   | API               | worker-crm-audit                   | Soft delete (LGPD)      |
+| Evento           | Publisher         | Consumers                          | Descrição                                            |
+| ---------------- | ----------------- | ---------------------------------- | ---------------------------------------------------- |
+| `lead.created`   | API (POST /leads) | worker-crm-leads, worker-crm-audit | Novo lead capturado                                  |
+| `lead.updated`   | API               | worker-crm-leads                   | Dados do lead alterados                              |
+| `lead.qualified` | API               | worker-crm-pipeline, worker-crm-ai | Lead qualificado                                     |
+| `lead.converted` | API               | worker-crm-pipeline                | Lead virou oportunidade                              |
+| `lead.deleted`   | API               | worker-crm-audit                   | Hard delete (confirm UI); soft-delete LGPD follow-up |
 
 ### Payload exemplo — `lead.created`
 
@@ -67,6 +67,7 @@ Todo evento **deve** incluir: `eventType`, `tenantId`, `correlationId`, `idempot
 | `opportunity.stage.changed` | API                 | worker-crm-pipeline                  | Mudança no funil Kanban |
 | `opportunity.won`           | API                 | worker-crm-billing, worker-crm-audit | Ganha                   |
 | `opportunity.lost`          | API                 | worker-crm-audit                     | Perdida                 |
+| `opportunity.deleted`       | API                 | worker-crm-audit                     | Exclusao confirmada     |
 | `opportunity.sla.breached`  | worker-crm-pipeline | n8n (notify only)                    | SLA estourado           |
 
 ---
