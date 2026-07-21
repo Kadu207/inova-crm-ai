@@ -207,23 +207,25 @@ model TenantConfig {
 // ─── CRM Core ────────────────────────────────────────────────────────────────
 
 model Company {
-  id        String   @id @default(cuid())
-  tenantId  String   @map("tenant_id")
+  id        String    @id @default(cuid())
+  tenantId  String    @map("tenant_id")
   name      String
   document  String?
   website   String?
   industry  String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  contacts    Contact[]
-  leads       Lead[]
-  proposals   Proposal[]
-  contracts   Contract[]
-  invoices    Invoice[]
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contacts  Contact[]
+  leads     Lead[]
+  proposals Proposal[]
+  contracts Contract[]
+  invoices  Invoice[]
 
   @@index([tenantId])
+  @@index([tenantId, deletedAt])
   @@map("companies")
 }
 
@@ -237,8 +239,9 @@ model Contact {
   /// WhatsApp identity: Evolution jid/wa_id or future Meta BSUID
   whatsappExternalId  String?  @map("whatsapp_external_id")
   title               String?
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
 
   tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
@@ -249,6 +252,7 @@ model Contact {
   @@index([tenantId])
   @@index([tenantId, email])
   @@index([tenantId, whatsappExternalId])
+  @@index([tenantId, deletedAt])
   @@map("contacts")
 }
 
@@ -265,6 +269,7 @@ model Lead {
   notes        String?
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
 
   tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   contact       Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
@@ -276,6 +281,7 @@ model Lead {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, contactId])
+  @@index([tenantId, deletedAt])
   @@map("leads")
 }
 
@@ -329,6 +335,7 @@ model Opportunity {
   slaBreachedAt  DateTime?       @map("sla_breached_at")
   createdAt    DateTime          @default(now()) @map("created_at")
   updatedAt    DateTime          @updatedAt @map("updated_at")
+  deletedAt    DateTime?         @map("deleted_at")
 
   tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
@@ -342,6 +349,7 @@ model Opportunity {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, leadId])
+  @@index([tenantId, deletedAt])
   @@map("opportunities")
 }
 
@@ -357,6 +365,7 @@ model Task {
   dueDate       DateTime?    @map("due_date")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
+  deletedAt     DateTime?    @map("deleted_at")
 
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
@@ -364,40 +373,45 @@ model Task {
 
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([tenantId, deletedAt])
   @@map("tasks")
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  tenantId    String   @map("tenant_id")
+  id          String    @id @default(cuid())
+  tenantId    String    @map("tenant_id")
   name        String
   sku         String?
-  price       Decimal  @default(0) @db.Decimal(15, 2)
+  price       Decimal   @default(0) @db.Decimal(15, 2)
   description String?
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([tenantId, deletedAt])
   @@map("products")
 }
 
 model Service {
-  id          String   @id @default(cuid())
-  tenantId    String   @map("tenant_id")
+  id          String    @id @default(cuid())
+  tenantId    String    @map("tenant_id")
   name        String
   code        String?
-  price       Decimal  @default(0) @db.Decimal(15, 2)
+  price       Decimal   @default(0) @db.Decimal(15, 2)
   description String?
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@index([tenantId, deletedAt])
   @@map("services")
 }
 

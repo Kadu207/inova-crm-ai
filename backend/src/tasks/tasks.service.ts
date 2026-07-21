@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Task } from '@prisma/client';
+import { notDeleted } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
 
@@ -8,11 +9,16 @@ export class TasksService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll(tenantId: string): Promise<Task[]> {
-    return this.prisma.task.findMany({ where: { tenantId }, orderBy: { dueDate: 'asc' } });
+    return this.prisma.task.findMany({
+      where: { tenantId, ...notDeleted },
+      orderBy: { dueDate: 'asc' },
+    });
   }
 
   async findOne(tenantId: string, id: string): Promise<Task> {
-    const task = await this.prisma.task.findFirst({ where: { id, tenantId } });
+    const task = await this.prisma.task.findFirst({
+      where: { id, tenantId, ...notDeleted },
+    });
     if (!task) throw new NotFoundException(`Task ${id} not found`);
     return task;
   }
@@ -37,6 +43,6 @@ export class TasksService {
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.task.delete({ where: { id } });
+    await this.prisma.task.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 }

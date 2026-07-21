@@ -28,6 +28,7 @@ import { EventsModule } from './events/events.module';
 import { AiToolbeltModule } from './ai-toolbelt/ai-toolbelt.module';
 import { SaasModule } from './saas/saas.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { LgpdModule } from './lgpd/lgpd.module';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 
 @Module({
@@ -81,6 +82,7 @@ import { RedisThrottlerStorage } from './common/security/redis-throttler.storage
     AiToolbeltModule,
     SaasModule,
     DashboardModule,
+    LgpdModule,
   ],
   providers: [
     {

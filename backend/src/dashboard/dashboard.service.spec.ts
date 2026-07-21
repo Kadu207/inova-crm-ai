@@ -46,13 +46,14 @@ describe('DashboardService', () => {
     expect(prisma.lead.count).toHaveBeenCalledWith({
       where: {
         tenantId: 't1',
+        deletedAt: null,
         status: {
           notIn: [LeadStatus.CONVERTED, LeadStatus.LOST, LeadStatus.UNQUALIFIED],
         },
       },
     });
     expect(prisma.opportunity.count).toHaveBeenCalledWith({
-      where: { tenantId: 't1', status: OpportunityStatus.OPEN },
+      where: { tenantId: 't1', deletedAt: null, status: OpportunityStatus.OPEN },
     });
     expect(prisma.conversation.count).toHaveBeenCalledWith({
       where: {
@@ -86,7 +87,7 @@ describe('DashboardService', () => {
       href: '/leads/l1',
     });
     expect(prisma.lead.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { tenantId: 't1' } }),
+      expect.objectContaining({ where: { tenantId: 't1', deletedAt: null } }),
     );
   });
 });

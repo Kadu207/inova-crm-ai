@@ -62,6 +62,14 @@ describe('OpportunitiesService SLA', () => {
     });
 
     const result = await service.checkSla('t1');
+    expect(prisma.opportunity.findMany).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        tenantId: 't1',
+        deletedAt: null,
+        status: OpportunityStatus.OPEN,
+        slaBreachedAt: null,
+      }),
+    });
     expect(result.breached).toEqual(['opp-1']);
     expect(events.publish).toHaveBeenCalledWith(
       't1',

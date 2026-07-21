@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Contact, Lead, LeadSource, LeadStatus, Opportunity, Prisma } from '@prisma/client';
+import { notDeleted } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import {
@@ -25,14 +26,14 @@ export class LeadsService {
 
   async findAll(tenantId: string): Promise<Lead[]> {
     return this.prisma.lead.findMany({
-      where: { tenantId },
+      where: { tenantId, ...notDeleted },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findOne(tenantId: string, id: string): Promise<Lead> {
     const lead = await this.prisma.lead.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId, ...notDeleted },
     });
     if (!lead) {
       throw new NotFoundException(`Lead ${id} not found`);
@@ -252,7 +253,7 @@ export class LeadsService {
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.lead.delete({ where: { id } });
+    await this.prisma.lead.update({ where: { id }, data: { deletedAt: new Date() } });
 
     await this.events.publish(tenantId, 'lead.deleted', { leadId: id });
   }
@@ -262,6 +263,7 @@ export class LeadsService {
       where: {
         tenantId,
         contactId,
+        ...notDeleted,
         status: { in: OPEN_LEAD_STATUSES },
       },
       orderBy: { createdAt: 'desc' },
@@ -274,7 +276,7 @@ export class LeadsService {
   ): Promise<Contact> {
     if (input.whatsappExternalId) {
       const byWa = await this.prisma.contact.findFirst({
-        where: { tenantId, whatsappExternalId: input.whatsappExternalId },
+        where: { tenantId, whatsappExternalId: input.whatsappExternalId, ...notDeleted },
       });
       if (byWa) {
         return this.prisma.contact.update({
@@ -290,7 +292,7 @@ export class LeadsService {
 
     if (input.email) {
       const byEmail = await this.prisma.contact.findFirst({
-        where: { tenantId, email: input.email },
+        where: { tenantId, email: input.email, ...notDeleted },
       });
       if (byEmail) {
         return this.prisma.contact.update({
@@ -306,7 +308,7 @@ export class LeadsService {
 
     if (input.phone) {
       const byPhone = await this.prisma.contact.findFirst({
-        where: { tenantId, phone: input.phone },
+        where: { tenantId, phone: input.phone, ...notDeleted },
       });
       if (byPhone) {
         return this.prisma.contact.update({

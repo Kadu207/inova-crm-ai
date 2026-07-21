@@ -64,13 +64,15 @@ Log estruturado: `who`, `what`, `when`, `tenantId`, `correlationId`. Worker `wor
 
 ## LGPD
 
-| Direito       | Implementação                 |
-| ------------- | ----------------------------- |
-| Acesso        | Export por titular (auditado) |
-| Retificação   | Via CRM com log               |
-| Exclusão      | Soft delete + purge agendado  |
-| Portabilidade | Export JSON/CSV               |
-| Oposição      | Flag de consentimento         |
+| Direito       | Implementação                                                                    |
+| ------------- | -------------------------------------------------------------------------------- |
+| Acesso        | Export por titular (auditado)                                                    |
+| Retificação   | Via CRM com log                                                                  |
+| Exclusão      | Soft delete (`deletedAt`) + purge agendado `POST /api/v1/lgpd/purge` (API_TOKEN) |
+| Portabilidade | Export JSON/CSV                                                                  |
+| Oposição      | Flag de consentimento                                                            |
+
+Retenção padrão: `LGPD_PURGE_RETENTION_DAYS=30` (env). Cron n8n chama o purge diário — ver `n8n/workflows/lgpd-purge.json`.
 
 Retenção documentada por tipo de dado. DPO e política de privacidade — links externos.
 

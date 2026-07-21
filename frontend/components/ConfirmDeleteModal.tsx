@@ -38,8 +38,9 @@ export function ConfirmDeleteModal({
           {title}
         </h2>
         <p className="mt-3 text-sm text-smoke">
-          Tem certeza que deseja excluir <span className="text-bone">{entityLabel}</span>? Esta acao
-          nao pode ser desfeita.
+          Tem certeza que deseja excluir <span className="text-bone">{entityLabel}</span>? O
+          registro sai da listagem agora e sera apagado definitivamente apos o periodo de retencao
+          LGPD.
         </p>
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
           <button type="button" className="btn-ghost" onClick={onClose} disabled={busy}>

@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Conversation, ConversationStatus } from '@prisma/client';
+import { notDeleted } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import {
@@ -72,6 +73,7 @@ export class ConversationsService {
         where: {
           tenantId,
           contactId,
+          ...notDeleted,
           status: { in: ['NEW', 'CONTACTED', 'QUALIFIED'] },
         },
         orderBy: { createdAt: 'desc' },
@@ -134,7 +136,7 @@ export class ConversationsService {
   ): Promise<string | undefined> {
     if (input.whatsappExternalId) {
       const byWa = await this.prisma.contact.findFirst({
-        where: { tenantId, whatsappExternalId: input.whatsappExternalId },
+        where: { tenantId, whatsappExternalId: input.whatsappExternalId, ...notDeleted },
       });
       if (byWa) {
         await this.prisma.contact.update({
@@ -150,7 +152,7 @@ export class ConversationsService {
     }
     if (input.email) {
       const byEmail = await this.prisma.contact.findFirst({
-        where: { tenantId, email: input.email },
+        where: { tenantId, email: input.email, ...notDeleted },
       });
       if (byEmail) {
         await this.prisma.contact.update({
@@ -166,7 +168,7 @@ export class ConversationsService {
     }
     if (input.phone) {
       const byPhone = await this.prisma.contact.findFirst({
-        where: { tenantId, phone: input.phone },
+        where: { tenantId, phone: input.phone, ...notDeleted },
       });
       if (byPhone) {
         await this.prisma.contact.update({

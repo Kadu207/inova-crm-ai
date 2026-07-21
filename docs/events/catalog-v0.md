@@ -25,13 +25,13 @@ Todo evento **deve** incluir: `eventType`, `tenantId`, `correlationId`, `idempot
 
 ## lead.*
 
-| Evento           | Publisher         | Consumers                          | Descrição                                            |
-| ---------------- | ----------------- | ---------------------------------- | ---------------------------------------------------- |
-| `lead.created`   | API (POST /leads) | worker-crm-leads, worker-crm-audit | Novo lead capturado                                  |
-| `lead.updated`   | API               | worker-crm-leads                   | Dados do lead alterados                              |
-| `lead.qualified` | API               | worker-crm-pipeline, worker-crm-ai | Lead qualificado                                     |
-| `lead.converted` | API               | worker-crm-pipeline                | Lead virou oportunidade                              |
-| `lead.deleted`   | API               | worker-crm-audit                   | Hard delete (confirm UI); soft-delete LGPD follow-up |
+| Evento           | Publisher         | Consumers                          | Descrição                                          |
+| ---------------- | ----------------- | ---------------------------------- | -------------------------------------------------- |
+| `lead.created`   | API (POST /leads) | worker-crm-leads, worker-crm-audit | Novo lead capturado                                |
+| `lead.updated`   | API               | worker-crm-leads                   | Dados do lead alterados                            |
+| `lead.qualified` | API               | worker-crm-pipeline, worker-crm-ai | Lead qualificado                                   |
+| `lead.converted` | API               | worker-crm-pipeline                | Lead virou oportunidade                            |
+| `lead.deleted`   | API               | worker-crm-audit                   | Soft delete (`deletedAt`); purge via `/lgpd/purge` |
 
 ### Payload exemplo — `lead.created`
 
@@ -61,14 +61,22 @@ Todo evento **deve** incluir: `eventType`, `tenantId`, `correlationId`, `idempot
 
 ## opportunity.*
 
-| Evento                      | Publisher           | Consumers                            | Descrição               |
-| --------------------------- | ------------------- | ------------------------------------ | ----------------------- |
-| `opportunity.created`       | API                 | worker-crm-pipeline                  | Nova oportunidade       |
-| `opportunity.stage.changed` | API                 | worker-crm-pipeline                  | Mudança no funil Kanban |
-| `opportunity.won`           | API                 | worker-crm-billing, worker-crm-audit | Ganha                   |
-| `opportunity.lost`          | API                 | worker-crm-audit                     | Perdida                 |
-| `opportunity.deleted`       | API                 | worker-crm-audit                     | Exclusao confirmada     |
-| `opportunity.sla.breached`  | worker-crm-pipeline | n8n (notify only)                    | SLA estourado           |
+| Evento                      | Publisher           | Consumers                            | Descrição                 |
+| --------------------------- | ------------------- | ------------------------------------ | ------------------------- |
+| `opportunity.created`       | API                 | worker-crm-pipeline                  | Nova oportunidade         |
+| `opportunity.stage.changed` | API                 | worker-crm-pipeline                  | Mudança no funil Kanban   |
+| `opportunity.won`           | API                 | worker-crm-billing, worker-crm-audit | Ganha                     |
+| `opportunity.lost`          | API                 | worker-crm-audit                     | Perdida                   |
+| `opportunity.deleted`       | API                 | worker-crm-audit                     | Soft delete (`deletedAt`) |
+| `opportunity.sla.breached`  | worker-crm-pipeline | n8n (notify only)                    | SLA estourado             |
+
+---
+
+## lgpd.*
+
+| Evento             | Publisher                   | Consumers | Descrição                                    |
+| ------------------ | --------------------------- | --------- | -------------------------------------------- |
+| _(purge via HTTP)_ | `POST /lgpd/purge` Platform | n8n cron  | Hard-delete apos `LGPD_PURGE_RETENTION_DAYS` |
 
 ---
 

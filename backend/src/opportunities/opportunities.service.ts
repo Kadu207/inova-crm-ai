@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Opportunity, OpportunityStatus, Prisma, TenantStatus } from '@prisma/client';
+import { notDeleted } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import {
@@ -20,13 +21,15 @@ export class OpportunitiesService {
 
   findAll(tenantId: string): Promise<Opportunity[]> {
     return this.prisma.opportunity.findMany({
-      where: { tenantId },
+      where: { tenantId, ...notDeleted },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findOne(tenantId: string, id: string): Promise<Opportunity> {
-    const opp = await this.prisma.opportunity.findFirst({ where: { id, tenantId } });
+    const opp = await this.prisma.opportunity.findFirst({
+      where: { id, tenantId, ...notDeleted },
+    });
     if (!opp) throw new NotFoundException(`Opportunity ${id} not found`);
     return opp;
   }
@@ -105,7 +108,7 @@ export class OpportunitiesService {
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.opportunity.delete({ where: { id } });
+    await this.prisma.opportunity.update({ where: { id }, data: { deletedAt: new Date() } });
     await this.events.publish(tenantId, 'opportunity.deleted', { opportunityId: id });
   }
 
@@ -119,6 +122,7 @@ export class OpportunitiesService {
     const overdue = await this.prisma.opportunity.findMany({
       where: {
         tenantId,
+        ...notDeleted,
         status: OpportunityStatus.OPEN,
         slaBreachedAt: null,
         stageEnteredAt: { lte: cutoff },

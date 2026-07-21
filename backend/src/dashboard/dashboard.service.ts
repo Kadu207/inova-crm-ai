@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConversationStatus, LeadStatus, OpportunityStatus, Prisma } from '@prisma/client';
+import { notDeleted } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 
 export type DashboardSummary = {
@@ -28,13 +29,14 @@ export class DashboardService {
       this.prisma.lead.count({
         where: {
           tenantId,
+          ...notDeleted,
           status: {
             notIn: [LeadStatus.CONVERTED, LeadStatus.LOST, LeadStatus.UNQUALIFIED],
           },
         },
       }),
       this.prisma.opportunity.count({
-        where: { tenantId, status: OpportunityStatus.OPEN },
+        where: { tenantId, ...notDeleted, status: OpportunityStatus.OPEN },
       }),
       this.prisma.conversation.count({
         where: {
@@ -43,7 +45,7 @@ export class DashboardService {
         },
       }),
       this.prisma.opportunity.aggregate({
-        where: { tenantId, status: OpportunityStatus.OPEN },
+        where: { tenantId, ...notDeleted, status: OpportunityStatus.OPEN },
         _sum: { value: true },
       }),
     ]);
@@ -66,13 +68,13 @@ export class DashboardService {
 
     const [leads, opportunities, conversations, companies, contacts] = await Promise.all([
       this.prisma.lead.findMany({
-        where: { tenantId },
+        where: { tenantId, ...notDeleted },
         orderBy: { updatedAt: 'desc' },
         take: perSource,
         select: { id: true, title: true, updatedAt: true },
       }),
       this.prisma.opportunity.findMany({
-        where: { tenantId },
+        where: { tenantId, ...notDeleted },
         orderBy: { updatedAt: 'desc' },
         take: perSource,
         select: { id: true, title: true, updatedAt: true },
@@ -84,13 +86,13 @@ export class DashboardService {
         select: { id: true, channel: true, chatwootId: true, updatedAt: true },
       }),
       this.prisma.company.findMany({
-        where: { tenantId },
+        where: { tenantId, ...notDeleted },
         orderBy: { updatedAt: 'desc' },
         take: perSource,
         select: { id: true, name: true, updatedAt: true },
       }),
       this.prisma.contact.findMany({
-        where: { tenantId },
+        where: { tenantId, ...notDeleted },
         orderBy: { updatedAt: 'desc' },
         take: perSource,
         select: { id: true, name: true, updatedAt: true },

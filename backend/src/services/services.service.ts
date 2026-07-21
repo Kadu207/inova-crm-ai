@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Service, Prisma } from '@prisma/client';
+import { notDeleted } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/service.dto';
 
@@ -8,11 +9,16 @@ export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll(tenantId: string): Promise<Service[]> {
-    return this.prisma.service.findMany({ where: { tenantId }, orderBy: { name: 'asc' } });
+    return this.prisma.service.findMany({
+      where: { tenantId, ...notDeleted },
+      orderBy: { name: 'asc' },
+    });
   }
 
   async findOne(tenantId: string, id: string): Promise<Service> {
-    const service = await this.prisma.service.findFirst({ where: { id, tenantId } });
+    const service = await this.prisma.service.findFirst({
+      where: { id, tenantId, ...notDeleted },
+    });
     if (!service) throw new NotFoundException(`Service ${id} not found`);
     return service;
   }
@@ -43,6 +49,6 @@ export class ServicesService {
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.service.delete({ where: { id } });
+    await this.prisma.service.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 }

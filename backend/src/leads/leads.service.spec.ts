@@ -71,7 +71,7 @@ describe('LeadsService', () => {
     const result = await service.findAll(tenantId);
     expect(result).toHaveLength(1);
     expect(prisma.lead.findMany).toHaveBeenCalledWith({
-      where: { tenantId },
+      where: { tenantId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
   });
