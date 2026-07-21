@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import type { ProductRow } from '@/components/ProductsClient';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -27,6 +27,11 @@ export function ProductDetailClient() {
   const id = params.id;
   const [product, setProduct] = useState<ProductRow | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [isActive, setIsActive] = useState(true);
 
   const load = useCallback(async () => {
     const result = await apiFetch<ProductRow>(`/products/${id}`);
@@ -37,11 +42,39 @@ export function ProductDetailClient() {
     }
     setError(null);
     setProduct(result.data);
+    setName(result.data.name);
+    setPrice(String(result.data.price ?? 0));
+    setIsActive(result.data.isActive !== false);
   }, [id]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    if (!product) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const parsed = Number(price);
+    setBusy(true);
+    const result = await apiFetch<ProductRow>(`/products/${product.id}`, {
+      method: 'PATCH',
+      body: {
+        name: trimmed,
+        price: Number.isFinite(parsed) ? parsed : 0,
+        isActive,
+      },
+    });
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+    setProduct(result.data);
+    setEditing(false);
+    setError(null);
+  }
 
   if (!product && !error) {
     return (
@@ -77,37 +110,88 @@ export function ProductDetailClient() {
         title={product.name}
         description="Detalhe do produto"
         action={
-          <Link href="/produtos" className="btn-ghost">
-            Voltar
-          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link href="/produtos" className="btn-ghost">
+              Voltar
+            </Link>
+            <button
+              type="button"
+              className="btn-ghost"
+              disabled={busy}
+              onClick={() => setEditing((v) => !v)}
+            >
+              {editing ? 'Cancelar' : 'Editar'}
+            </button>
+          </div>
         }
       />
-      <div className="card-panel space-y-3 text-sm">
-        <p>
-          <span className="text-faint">SKU:</span>{' '}
-          <span className="text-bone">{product.sku || '\u2014'}</span>
-        </p>
-        <p>
-          <span className="text-faint">Preco:</span>{' '}
-          <span className="text-bone">{formatMoney(product.price)}</span>
-        </p>
-        <p>
-          <span className="text-faint">Status:</span>{' '}
-          {product.isActive === false ? (
-            <StatusBadge label="INATIVO" tone="bad" />
-          ) : (
-            <StatusBadge label="ATIVO" tone="ok" />
-          )}
-        </p>
-        <p>
-          <span className="text-faint">Descricao:</span>{' '}
-          <span className="text-bone">{product.description || '\u2014'}</span>
-        </p>
-        <p>
-          <span className="text-faint">Atualizado:</span>{' '}
-          <span className="text-bone">{formatDate(product.updatedAt)}</span>
-        </p>
-      </div>
+      {error ? (
+        <div className="mb-3">
+          <ErrorState message={error} />
+        </div>
+      ) : null}
+      {editing ? (
+        <form className="card-panel space-y-4" onSubmit={(e) => void save(e)}>
+          <label className="block text-sm text-smoke">
+            Nome
+            <input
+              className="input-field mt-1"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </label>
+          <label className="block text-sm text-smoke">
+            Preco
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              className="input-field mt-1"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
+          </label>
+          <label className="flex items-center gap-2 text-sm text-smoke">
+            <input
+              type="checkbox"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+            />
+            Ativo
+          </label>
+          <button type="submit" className="btn-primary" disabled={busy || !name.trim()}>
+            {busy ? 'Salvando\u2026' : 'Salvar'}
+          </button>
+        </form>
+      ) : (
+        <div className="card-panel space-y-3 text-sm">
+          <p>
+            <span className="text-faint">SKU:</span>{' '}
+            <span className="text-bone">{product.sku || '\u2014'}</span>
+          </p>
+          <p>
+            <span className="text-faint">Preco:</span>{' '}
+            <span className="text-bone">{formatMoney(product.price)}</span>
+          </p>
+          <p>
+            <span className="text-faint">Status:</span>{' '}
+            {product.isActive === false ? (
+              <StatusBadge label="INATIVO" tone="bad" />
+            ) : (
+              <StatusBadge label="ATIVO" tone="ok" />
+            )}
+          </p>
+          <p>
+            <span className="text-faint">Descricao:</span>{' '}
+            <span className="text-bone">{product.description || '\u2014'}</span>
+          </p>
+          <p>
+            <span className="text-faint">Atualizado:</span>{' '}
+            <span className="text-bone">{formatDate(product.updatedAt)}</span>
+          </p>
+        </div>
+      )}
     </>
   );
 }
