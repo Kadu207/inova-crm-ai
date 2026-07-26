@@ -190,6 +190,7 @@ model Tenant {
   webhookSubscriptions    WebhookSubscription[]
   bulkJobs                BulkJob[]
   customFieldDefinitions  CustomFieldDefinition[]
+  blueprintTransitions    BlueprintTransition[]
 
   @@map("tenants")
 }
@@ -352,8 +353,9 @@ model Pipeline {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   tenant        Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  stages        PipelineStage[]
-  opportunities Opportunity[]
+  stages               PipelineStage[]
+  opportunities        Opportunity[]
+  blueprintTransitions BlueprintTransition[]
 
   @@index([tenantId])
   @@map("pipelines")
@@ -369,12 +371,36 @@ model PipelineStage {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  pipeline      Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
-  opportunities Opportunity[]
+  pipeline             Pipeline              @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  opportunities        Opportunity[]
+  transitionsFrom      BlueprintTransition[] @relation("BlueprintFromStage")
+  transitionsTo        BlueprintTransition[] @relation("BlueprintToStage")
 
   @@index([tenantId])
   @@index([pipelineId])
   @@map("pipeline_stages")
+}
+
+/// Opt-in stage transition graph (Spec 026 Blueprint light). Empty = legacy free move.
+model BlueprintTransition {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  pipelineId        String   @map("pipeline_id")
+  fromStageId       String   @map("from_stage_id")
+  toStageId         String   @map("to_stage_id")
+  requiredFieldKeys String[] @default([]) @map("required_field_keys")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  pipeline Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  fromStage PipelineStage @relation("BlueprintFromStage", fields: [fromStageId], references: [id], onDelete: Cascade)
+  toStage   PipelineStage @relation("BlueprintToStage", fields: [toStageId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, pipelineId, fromStageId, toStageId])
+  @@index([tenantId])
+  @@index([pipelineId])
+  @@map("blueprint_transitions")
 }
 
 model Opportunity {

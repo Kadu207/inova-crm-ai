@@ -21,6 +21,7 @@ import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
 import { JwtPayload, PlatformApi } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { ListQueryInput } from '../common/list-query';
+import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 
 @ApiTags('opportunities')
 @ApiBearerAuth()
@@ -31,6 +32,12 @@ export class OpportunitiesController {
   @Get()
   findAll(@TenantId() tenantId: string, @Query() query: ListQueryInput) {
     return this.opportunitiesService.findAll(tenantId, query);
+  }
+
+  @Post('search')
+  @ApiOperation({ summary: 'Advanced filter search (AND/OR)' })
+  search(@TenantId() tenantId: string, @Body() body: AdvancedSearchDto) {
+    return this.opportunitiesService.search(tenantId, body);
   }
 
   @Post('sla/check')

@@ -3,6 +3,8 @@ import { Contact, Lead, LeadSource, LeadStatus, Opportunity, Prisma } from '@pri
 import { actorCreateFields, actorUpdateFields, detailOwnerInclude } from '../common/audit-fields';
 import { listResult, ListQueryInput, ListResult, parseListQuery } from '../common/list-query';
 import { notDeleted } from '../common/soft-delete';
+import { compileFilterToPrisma, parseSearchBody } from '../common/filter-engine/filter-engine';
+import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
@@ -52,6 +54,21 @@ export class LeadsService {
           }
         : {}),
     };
+    const [data, total] = await Promise.all([
+      this.prisma.lead.findMany({
+        where,
+        orderBy: { [q.sortField]: q.sortDir },
+        skip: q.skip,
+        take: q.pageSize,
+      }),
+      this.prisma.lead.count({ where }),
+    ]);
+    return listResult(data, total, q.page, q.pageSize);
+  }
+
+  async search(tenantId: string, body: AdvancedSearchDto): Promise<ListResult<Lead>> {
+    const q = parseSearchBody(body);
+    const where = compileFilterToPrisma('lead', tenantId, q.filter) as Prisma.LeadWhereInput;
     const [data, total] = await Promise.all([
       this.prisma.lead.findMany({
         where,

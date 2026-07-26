@@ -1,7 +1,8 @@
 # Constituição — Inova CRM AI
 
 Princípios inegociáveis do projeto. Todo spec, plano, implementação e deploy deve respeitar esta constituição.
-Alinhada ao Plano Mestre v1.1 e ao pacote corporativo em `docs/`.
+Alinhada ao Plano Mestre v1.2 e ao pacote corporativo em `docs/`.
+Fases 0–7 do escopo 1C estão **DONE**; trabalho contínuo via Specs `026+` (ver baseline + `docs/historico-versoes.md`).
 
 ---
 

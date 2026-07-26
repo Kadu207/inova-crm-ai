@@ -53,16 +53,20 @@ X-Tenant-Id: <uuid>               # somente service accounts multi-tenant audita
 
 ## Módulos API
 
-| Prefixo             | Módulo          |
-| ------------------- | --------------- |
-| `/v1/dashboard`     | KPIs + activity |
-| `/v1/leads`         | Leads           |
-| `/v1/contacts`      | Contatos        |
-| `/v1/companies`     | Empresas        |
-| `/v1/opportunities` | Oportunidades   |
-| `/v1/conversations` | Atendimento     |
-| `/v1/invoices`      | Financeiro      |
-| `/v1/platform`      | Tenants, users  |
+| Prefixo                                   | Módulo                           |
+| ----------------------------------------- | -------------------------------- |
+| `/v1/dashboard`                           | KPIs + activity                  |
+| `/v1/leads`                               | Leads (+ `POST /search`)         |
+| `/v1/contacts`                            | Contatos (+ `POST /search`)      |
+| `/v1/companies`                           | Empresas                         |
+| `/v1/opportunities`                       | Oportunidades (+ `POST /search`) |
+| `/v1/pipelines/:id/blueprint/transitions` | Blueprint light (admin)          |
+| `/v1/coql/query`                          | COQL read-only (admin)           |
+| `/v1/conversations`                       | Atendimento                      |
+| `/v1/invoices`                            | Financeiro                       |
+| `/v1/platform`                            | Tenants, users                   |
+
+Detalhe Spec 026: [`docs/architecture/spec-026-query-blueprint.md`](./architecture/spec-026-query-blueprint.md).
 
 ## Erros
 

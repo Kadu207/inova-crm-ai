@@ -23,6 +23,7 @@ import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
 import { JwtPayload } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { ListQueryInput } from '../common/list-query';
+import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 
 @ApiTags('leads')
 @ApiBearerAuth()
@@ -34,6 +35,12 @@ export class LeadsController {
   @ApiOperation({ summary: 'List leads for tenant' })
   findAll(@TenantId() tenantId: string, @Query() query: ListQueryInput) {
     return this.leadsService.findAll(tenantId, query);
+  }
+
+  @Post('search')
+  @ApiOperation({ summary: 'Advanced filter search (AND/OR + custom fields)' })
+  search(@TenantId() tenantId: string, @Body() body: AdvancedSearchDto) {
+    return this.leadsService.search(tenantId, body);
   }
 
   @Post('inbound')

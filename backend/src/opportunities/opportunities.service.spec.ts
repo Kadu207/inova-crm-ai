@@ -3,6 +3,7 @@ import { OpportunityStatus, TenantStatus } from '@prisma/client';
 import { OpportunitiesService } from './opportunities.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
+import { BlueprintService } from '../blueprint/blueprint.service';
 
 describe('OpportunitiesService SLA', () => {
   let service: OpportunitiesService;
@@ -36,6 +37,10 @@ describe('OpportunitiesService SLA', () => {
         OpportunitiesService,
         { provide: PrismaService, useValue: prisma },
         { provide: EventsService, useValue: events },
+        {
+          provide: BlueprintService,
+          useValue: { assertStageTransitionAllowed: jest.fn().mockResolvedValue(undefined) },
+        },
       ],
     }).compile();
 

@@ -2,22 +2,25 @@
 
 Plataforma CRM SaaS da **Inova TI** — omnichannel (Chatwoot dedicado), automação (n8n dedicado), event-driven (RabbitMQ + Workers), multi-tenant desde o dia 1 e IA especializada.
 
-**Versão do plano:** 1.1 · **Fases ativas:** 4 (frontend), 6 (AI), 7 (SaaS/deploy)
+**Versão do sistema:** [1.1.0](./docs/historico-versoes.md) · **Plano Mestre:** [1.2](./Plano_Mestre_Inova_CRM_AI.md) · **Próximo:** Spec **027** (Meta/WABA)
 
 ---
 
 ## Status
 
-| Componente                   | Status         |
-| ---------------------------- | -------------- |
-| Spec Kit (`.specify/`)       | ✅ Fase 0      |
-| Constitution + regras Cursor | ✅ Fase 0      |
-| Docs corporativos (`docs/`)  | ✅ ativo       |
-| Frontend Next.js             | ✅ Fase 4 MVP  |
-| AI FastAPI                   | ✅ Fase 6 stub |
-| Deploy Hetzner / SaaS docs   | ✅ Fase 7      |
-| Backend NestJS               | ⏳ Fase 4+     |
-| Quality Gate script          | ✅ Fase 1      |
+| Componente                       | Status                           |
+| -------------------------------- | -------------------------------- |
+| Fases 0–7 + Delivery             | ✅ DONE                          |
+| Spec Kit + constitution          | ✅ ativo                         |
+| Docs corporativos (`docs/`)      | ✅ alinhados ao baseline         |
+| Frontend Next.js                 | ✅ produção                      |
+| Backend NestJS + Prisma          | ✅ produção                      |
+| AI FastAPI                       | ✅ produção (agentes + RAG stub) |
+| Deploy Hetzner / CI images       | ✅ `:ci` via docker load         |
+| Specs 019–025 (Zoho onda 1)      | ✅ DONE                          |
+| Spec **026** Zoho Blueprint/COQL | ✅ DONE (v1.1.0)                 |
+| Spec **027** Meta Cloud API      | ⏳ QUEUED · BLOCKED até WABA     |
+| Quality Gate                     | ✅ PASS (ver baseline)           |
 
 ---
 
@@ -158,7 +161,9 @@ Guia completo: [DEPLOY-HETZNER.md](DEPLOY-HETZNER.md) · [docs/manual-implantaca
 
 ---
 
-## Spec Kit (Fase 0)
+## Spec Kit
+
+Fluxo SDD: specify → plan → tasks → implement · Quality Gate hard-stop. Specs ativas: `026` (Zoho) · `027` (Meta, BLOCKED).
 
 ```powershell
 # Windows
@@ -180,24 +185,22 @@ Guia completo: [DEPLOY-HETZNER.md](DEPLOY-HETZNER.md) · [docs/manual-implantaca
 
 ## Fases do roadmap
 
-| Fase | Nome                                                |
-| ---- | --------------------------------------------------- |
-| 0    | Fundação (Spec Kit, docs, ADRs)                     |
-| 1    | Infraestrutura (Docker, PG, Redis, RabbitMQ, MinIO) |
-| 2    | Chatwoot dedicado                                   |
-| 3    | n8n dedicado                                        |
-| 4    | CRM MVP (tenant-first) ← **frontend scaffold**      |
-| 5    | Financeiro / cobrança                               |
-| 6    | IA ← **ai-services scaffold**                       |
-| 7    | SaaS produção ← **deploy docs**                     |
+| Fase | Nome                           | Status            |
+| ---- | ------------------------------ | ----------------- |
+| 0–7  | Fundação → SaaS produção       | **DONE**          |
+| Pós  | Spec 026 Zoho Blueprint/COQL   | **DONE** (v1.1.0) |
+| Pós  | Spec 027 Meta Cloud API (WABA) | QUEUED · BLOCKED  |
 
-Detalhe: [docs/roadmap.md](docs/roadmap.md)
+Detalhe: [docs/roadmap.md](docs/roadmap.md) · [docs/historico-versoes.md](docs/historico-versoes.md)
 
 ---
 
 ## Documentação
 
-- [Plano Mestre v1.1](./Plano_Mestre_Inova_CRM_AI.md)
+- [Plano Mestre v1.2](./Plano_Mestre_Inova_CRM_AI.md)
+- [Histórico de versões](./docs/historico-versoes.md)
+- [Roadmap](./docs/roadmap.md)
+- [Baseline](./.specify/memory/baseline.md)
 - [Deploy Hetzner](./DEPLOY-HETZNER.md)
 - [Manual implantação produção](docs/manual-implantacao-producao.md)
 - [Runbook SaaS](docs/runbook-saas.md)

@@ -1,8 +1,9 @@
 # Visão Geral da Plataforma — Inova CRM AI
 
 **Volume:** 00  
-**Versão:** 0.1 (Fase 0 — skeleton)  
-**Status:** em construção
+**Versão:** 1.2  
+**Status:** Fases 0–7 DONE · Pós-fase ativa (Spec 026 Zoho → 027 Meta)  
+**Sistema:** v1.0.0 — [historico-versoes.md](./historico-versoes.md)
 
 ---
 
@@ -20,31 +21,30 @@ Documento âncora do pacote corporativo. Apresenta a visão executiva do CRM Saa
 4. [Stack resumida](#stack-resumida)
 5. [Princípios arquiteturais](#princípios-arquiteturais)
 6. [Domínios e hostnames](#domínios-e-hostnames)
-7. [Roadmap de fases](#roadmap-de-fases)
+7. [Roadmap](#roadmap)
 8. [Documentação relacionada](#documentação-relacionada)
 
 ---
 
 ## Objetivo de negócio
 
-<!-- TODO Fase 1+: expandir com KPIs e personas -->
-
-Plataforma CRM integrada aos produtos Inova TI para gestão comercial, atendimento omnichannel e automação inteligente.
+Plataforma CRM integrada aos produtos Inova TI para gestão comercial, atendimento omnichannel e automação inteligente — multi-tenant, LGPD e Quality Gate hard-stop.
 
 ## Escopo da plataforma
 
-- CRM Web completo (20 módulos)
+- CRM Web completo (módulos comerciais + admin SaaS)
 - Atendimento via Chatwoot dedicado
 - Automação via n8n dedicado (orquestração only)
 - IA para qualificação, RAG e agentes especializados
 - Multi-tenant SaaS com LGPD
+- Pós-fase: paridade Zoho seletiva (026) e WhatsApp Oficial Meta (027)
 
 ## Stack resumida
 
 | Camada     | Tecnologia                                  |
 | ---------- | ------------------------------------------- |
-| Frontend   | Next.js, TypeScript, Tailwind, shadcn/ui    |
-| Backend    | NestJS, Prisma, PostgreSQL                  |
+| Frontend   | Next.js, TypeScript, Tailwind, Ember Studio |
+| Backend    | NestJS, Prisma, PostgreSQL + RLS            |
 | IA         | FastAPI, OpenAI/OpenRouter, RAG             |
 | Mensageria | RabbitMQ (eventos), Redis (cache/filas n8n) |
 | Storage    | MinIO dedicado                              |
@@ -69,12 +69,13 @@ Plataforma CRM integrada aos produtos Inova TI para gestão comercial, atendimen
 | AI      | `ai-crm.inovatitech.com.br`   |
 | Ops     | `ops-crm.inovatitech.com.br`  |
 
-## Roadmap de fases
+## Roadmap
 
-Ver [roadmap.md](./roadmap.md) e [Plano Mestre](../Plano_Mestre_Inova_CRM_AI.md).
+Fases 0–7 **concluídas**. Fila pós-fase: [roadmap.md](./roadmap.md) · [Plano Mestre](../Plano_Mestre_Inova_CRM_AI.md) · [historico-versoes.md](./historico-versoes.md).
 
 ## Documentação relacionada
 
 - [Arquitetura corporativa](./arquitetura-corporativa.md)
 - [Constituição](../.specify/memory/constitution.md)
 - [Mapa de portas](./ports.md)
+- [Baseline](../.specify/memory/baseline.md)

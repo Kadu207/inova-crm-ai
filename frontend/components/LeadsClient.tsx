@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { EntityCard } from '@/components/EntityCard';
 import { ErrorState } from '@/components/ErrorState';
 import { LeadCreateModal } from '@/components/LeadCreateModal';
+import { AdvancedSearchPanel } from '@/components/AdvancedSearchPanel';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
 import { leadStatusTone, StatusBadge } from '@/components/StatusBadge';
@@ -198,6 +199,14 @@ export function LeadsClient() {
         busy={creating}
         onClose={() => setCreateOpen(false)}
         onSubmit={(input) => void createLead(input)}
+      />
+      <AdvancedSearchPanel<LeadRow>
+        resource="leads"
+        onResult={(rows) => {
+          setError(null);
+          setItems(rows);
+        }}
+        onError={(message) => setError(message)}
       />
       {error ? (
         <div className="mb-3">

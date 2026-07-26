@@ -1,49 +1,69 @@
 # Plano Mestre — Inova CRM AI
 
-**Versão:** 1.1  
-**Data:** 2026-07-14  
-**Status:** Fase 0 — Fundação em progresso
+**Versão:** 1.2  
+**Data:** 2026-07-26  
+**Status:** Fases 0–7 + Delivery **DONE** · Etapa atual = **pós-fase (produto contínuo)**  
+**Baseline:** [`.specify/memory/baseline.md`](.specify/memory/baseline.md)  
+**Histórico:** [`docs/historico-versoes.md`](docs/historico-versoes.md)
 
 ---
 
 ## Objetivo
 
-Construir uma plataforma **CRM SaaS multi-tenant** da Inova TI, com atendimento omnichannel (Chatwoot dedicado), automação (n8n dedicado), arquitetura event-driven e IA especializada — governada por Spec Kit, TDD e **Quality Gate hard-stop**.
+Construir e operar uma plataforma **CRM SaaS multi-tenant** da Inova TI, com atendimento omnichannel (Chatwoot dedicado), automação (n8n dedicado), arquitetura event-driven e IA especializada — governada por Spec Kit, TDD e **Quality Gate hard-stop**.
 
 ---
 
-## Decisões estruturais (v1.1)
+## Estado atual (2026-07-26)
 
-| Decisão      | Escolha                                                        |
-| ------------ | -------------------------------------------------------------- |
-| Multi-tenant | **Desde o dia 1** — `tenantId` + RLS (não Fase 7)              |
-| Portas VPS   | Bloco reservado **9400–9419**                                  |
-| Quality Gate | Hard-stop — nenhuma task/fase avança com lint/testes vermelhos |
-| Chatwoot     | Instância **dedicada** `chat-crm` — único ponto de canais      |
-| n8n          | Instância **dedicada** `n8n-crm` — **orquestrador only**       |
-| MinIO        | Storage **dedicado** CRM (`s3-crm` / `storage-crm`)            |
-| Redis        | Cache, sessão, rate-limit, filas n8n                           |
-| RabbitMQ     | Eventos de domínio (outbox → workers)                          |
-| Roteamento   | Cloudflare Tunnel (sem nginx/Caddy na 80 do host)              |
-| Deploy       | VPS Hetzner `/opt/inova-crm-ai`                                |
+| Item                        | Status                                                    |
+| --------------------------- | --------------------------------------------------------- |
+| Fases 0–7 (Plano Mestre 1C) | **DONE**                                                  |
+| Delivery / CI images → VPS  | **DONE**                                                  |
+| Produto Specs 004–025       | **DONE**                                                  |
+| Qualidade                   | Gate **PASS**                                             |
+| Etapa ativa                 | **026 — Zoho Blueprint light / filtros avançados / COQL** |
+| Próxima fila                | **027 — Meta Cloud API (WABA)** — aguarda credenciais     |
+| Canal WhatsApp transitório  | Evolution (QR) — ADR 005                                  |
 
-ADRs: `docs/adr/001`–`004`.
+Não existe “Fase 8” numerada: trabalho pós-fase usa Specs Spec Kit (`026+`) com Quality Gate.
+
+---
+
+## Decisões estruturais (v1.2)
+
+| Decisão      | Escolha                                                               |
+| ------------ | --------------------------------------------------------------------- |
+| Multi-tenant | **Desde o dia 1** — `tenantId` + RLS (não adiado)                     |
+| Portas VPS   | Bloco reservado **9400–9419**                                         |
+| Quality Gate | Hard-stop — nenhuma task/fase avança com lint/testes vermelhos        |
+| Chatwoot     | Instância **dedicada** `chat-crm` — único ponto de canais             |
+| n8n          | Instância **dedicada** `n8n-crm` — **orquestrador only**              |
+| MinIO        | Storage **dedicado** CRM (`s3-crm` / `storage-crm`)                   |
+| Redis        | Cache, sessão, rate-limit, filas n8n, locks de cron                   |
+| RabbitMQ     | Eventos de domínio (outbox → workers)                                 |
+| Roteamento   | Cloudflare Tunnel (sem nginx/Caddy na 80 do host)                     |
+| Deploy       | VPS Hetzner `/opt/inova-crm-ai` — images CI (`:ci`), sem build na VPS |
+| Cron crítico | Nest `@nestjs/schedule` (Spec 019); n8n = backup opcional             |
+| WhatsApp     | Alvo = Meta Cloud API; transitório = Evolution até WABA               |
+
+ADRs: `docs/adr/001`–`005`.
 
 ---
 
 ## Stack
 
-| Camada      | Tecnologia                                                        |
-| ----------- | ----------------------------------------------------------------- |
-| Frontend    | Next.js, TypeScript, Tailwind, shadcn/ui                          |
-| Backend     | NestJS, Prisma, PostgreSQL + RLS                                  |
-| Workers     | NestJS consumers RabbitMQ                                         |
-| IA          | FastAPI, OpenAI/OpenRouter, RAG                                   |
-| Mensageria  | RabbitMQ (eventos), Redis (cache/filas n8n)                       |
-| Storage     | MinIO dedicado                                                    |
-| Atendimento | Chatwoot dedicado                                                 |
-| Automação   | n8n dedicado (sem regra de negócio em Function/IF)                |
-| Infra       | Docker Compose, Cloudflare Tunnel, Grafana/Prometheus/Loki/Sentry |
+| Camada      | Tecnologia                                                 |
+| ----------- | ---------------------------------------------------------- |
+| Frontend    | Next.js, TypeScript, Tailwind, Ember Studio (marca Inova)  |
+| Backend     | NestJS, Prisma, PostgreSQL + RLS                           |
+| Workers     | NestJS consumers RabbitMQ                                  |
+| IA          | FastAPI, OpenAI/OpenRouter, RAG                            |
+| Mensageria  | RabbitMQ (eventos), Redis (cache/filas n8n)                |
+| Storage     | MinIO dedicado                                             |
+| Atendimento | Chatwoot dedicado                                          |
+| Automação   | n8n dedicado (sem regra de negócio em Function/IF)         |
+| Infra       | Docker Compose, Cloudflare Tunnel, Grafana/Prometheus/Loki |
 
 ---
 
@@ -64,7 +84,7 @@ Mapa completo: [docs/ports.md](docs/ports.md).
 
 ## Módulos do CRM
 
-Dashboard · Empresas · Contatos · Leads · Funil Kanban · Oportunidades · Agenda · Tarefas · Produtos · Serviços · Propostas · Contratos · Financeiro · Cobrança · Atendimento · Relatórios · Configurações · Usuários · Permissões · Auditoria
+Dashboard · Empresas · Contatos · Leads · Funil Kanban · Oportunidades · Agenda · Tarefas · Produtos · Serviços · Propostas · Contratos · Financeiro · Cobrança · Atendimento · Relatórios · Configurações · Usuários · Permissões · Auditoria · Admin SaaS · Bulk import/export · Custom fields
 
 Regras de negócio: **backend only** — [docs/regras-negocio-crm.md](docs/regras-negocio-crm.md).
 
@@ -77,9 +97,10 @@ Cloudflare Tunnel → Frontend / API / AI / Chatwoot / n8n
 Frontend → API NestJS → PostgreSQL + Redis + RabbitMQ + MinIO
 Chatwoot → webhook → n8n → API
 API → outbox → RabbitMQ → Workers → (AI)
+API → ScheduleModule → SLA + LGPD purge (cron nativo)
 ```
 
-Eventos: [docs/events/catalog-v0.md](docs/events/catalog-v0.md) (`lead.*`, `contact.*`, `opportunity.*`, `conversation.*`, `invoice.*`, `ai.*`).
+Eventos: [docs/events/catalog-v0.md](docs/events/catalog-v0.md).
 
 ---
 
@@ -89,7 +110,7 @@ Eventos: [docs/events/catalog-v0.md](docs/events/catalog-v0.md) (`lead.*`, `cont
 inova-crm-ai/
   .specify/          # Spec Kit (constitution, templates, workflows)
   .cursor/rules/     # Regras Cursor (gate, ports, tenant, n8n, events)
-  docs/              # Pacote corporativo (~20 volumes + ADRs)
+  docs/              # Pacote corporativo + ADRs + histórico
   specs/             # Features SDD (NNN-slug)
   frontend/
   backend/
@@ -109,24 +130,34 @@ inova-crm-ai/
 - **TDD** por bounded context
 - **EDD:** catálogo de eventos antes de publisher
 - **Quality Gate:** `npm run gate` — ver `.cursor/rules/quality-gate.mdc`
-- **Squads:** Governança → Build → QA (gate owner) → Delivery
+- **Baseline:** atualizar só após Gate PASS
 
 ---
 
-## Roadmap (sequencial)
+## Roadmap — Fases 0–7 (concluídas)
 
-| Fase  | Entrega                               | Gate               |
-| ----- | ------------------------------------- | ------------------ |
-| **0** | Spec Kit, docs, ADRs, tokens, portas  | Fundação completa  |
-| **1** | Docker: PG, Redis, RabbitMQ, MinIO    | compose healthy    |
-| **2** | Chatwoot dedicado + webhooks          | smoke ingest       |
-| **3** | n8n dedicado + workflows orquestração | smoke API call     |
-| **4** | CRM MVP (leads, funil, tenant)        | E2E + gate         |
-| **5** | Financeiro / cobrança                 | invoice.* events   |
-| **6** | IA (FastAPI, RAG, agentes)            | qualificação smoke |
-| **7** | Produção SaaS (deploy, backup, obs)   | gate pós-deploy    |
+| Fase  | Entrega                               | Status |
+| ----- | ------------------------------------- | ------ |
+| **0** | Spec Kit, docs, ADRs, tokens, portas  | DONE   |
+| **1** | Docker: PG, Redis, RabbitMQ, MinIO    | DONE   |
+| **2** | Chatwoot dedicado + webhooks          | DONE   |
+| **3** | n8n dedicado + workflows orquestração | DONE   |
+| **4** | CRM MVP (leads, funil, tenant)        | DONE   |
+| **5** | Financeiro / cobrança                 | DONE   |
+| **6** | IA (FastAPI, RAG, agentes)            | DONE   |
+| **7** | Produção SaaS (deploy, backup, obs)   | DONE   |
 
-Detalhe: [docs/roadmap.md](docs/roadmap.md).
+Detalhe e pós-fase: [docs/roadmap.md](docs/roadmap.md) · [docs/historico-versoes.md](docs/historico-versoes.md).
+
+---
+
+## Roadmap — Pós-fase (ativo)
+
+| Spec    | Entrega                                                                             | Status                           |
+| ------- | ----------------------------------------------------------------------------------- | -------------------------------- |
+| 019–025 | Paridade Zoho onda 1 (cron, audit, related, webhooks, filtros, bulk, custom fields) | DONE                             |
+| **026** | **Zoho Blueprint light + filtros avançados + COQL (read-only)**                     | **DONE** (v1.1.0)                |
+| **027** | Meta Cloud API cutover (WABA)                                                       | QUEUED (BLOCKED até credenciais) |
 
 ---
 
@@ -142,13 +173,13 @@ Detalhe: [docs/roadmap.md](docs/roadmap.md).
 
 ---
 
-## Critérios de aceite (por fase)
+## Critérios de aceite (por Spec / entrega)
 
 - Quality Gate 100% PASS
 - Cobertura testes ≥ 70% nos contextos tocados
 - APIs documentadas (OpenAPI)
 - Logs com `tenantId` + `correlationId`
-- Backups validados (Fase 7)
+- Backups validados
 - Baseline atualizada (`.specify/memory/baseline.md`)
 
 ---
@@ -156,12 +187,13 @@ Detalhe: [docs/roadmap.md](docs/roadmap.md).
 ## Prompt para agentes (Cursor / Claude Code)
 
 ```
-Implemente o Inova CRM AI seguindo Plano Mestre v1.1, constitution e docs/.
+Implemente o Inova CRM AI seguindo Plano Mestre v1.2, constitution e docs/.
 Clean Architecture, DDD, SOLID, TDD, Event Driven, tenant-first (tenantId + RLS).
 Stack: PostgreSQL, Redis (cache/filas n8n), RabbitMQ (eventos), MinIO, Next.js, NestJS, FastAPI.
 Chatwoot e n8n dedicados. n8n SOMENTE orquestrador — regras no backend.
 Portas 9400–9419. Quality Gate obrigatório antes de marcar task DONE.
 Design: marca Inova TI (flame #fb640a) — não purple/cream AI.
+Estado: Fases 0–7 DONE. Pós-fase ativa = Spec 026 (Zoho); depois 027 (Meta/WABA).
 ```
 
 Guias: [docs/guia-cursor.md](docs/guia-cursor.md) · [docs/guia-claude-code.md](docs/guia-claude-code.md)

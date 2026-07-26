@@ -3,8 +3,11 @@ import { Opportunity, OpportunityStatus, Prisma, TenantStatus } from '@prisma/cl
 import { actorCreateFields, actorUpdateFields, detailOwnerInclude } from '../common/audit-fields';
 import { listResult, ListQueryInput, ListResult, parseListQuery } from '../common/list-query';
 import { notDeleted } from '../common/soft-delete';
+import { compileFilterToPrisma, parseSearchBody } from '../common/filter-engine/filter-engine';
+import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
+import { BlueprintService } from '../blueprint/blueprint.service';
 import {
   CreateOpportunityDto,
   MoveOpportunityDto,
@@ -19,6 +22,7 @@ export class OpportunitiesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: EventsService,
+    private readonly blueprint: BlueprintService,
   ) {}
 
   async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Opportunity>> {
@@ -38,6 +42,25 @@ export class OpportunitiesService {
           }
         : {}),
     };
+    const [data, total] = await Promise.all([
+      this.prisma.opportunity.findMany({
+        where,
+        orderBy: { [q.sortField]: q.sortDir },
+        skip: q.skip,
+        take: q.pageSize,
+      }),
+      this.prisma.opportunity.count({ where }),
+    ]);
+    return listResult(data, total, q.page, q.pageSize);
+  }
+
+  async search(tenantId: string, body: AdvancedSearchDto): Promise<ListResult<Opportunity>> {
+    const q = parseSearchBody(body);
+    const where = compileFilterToPrisma(
+      'opportunity',
+      tenantId,
+      q.filter,
+    ) as Prisma.OpportunityWhereInput;
     const [data, total] = await Promise.all([
       this.prisma.opportunity.findMany({
         where,
@@ -93,6 +116,13 @@ export class OpportunitiesService {
 
     if (dto.stageId && dto.stageId !== existing.stageId) {
       await this.assertStageInPipeline(tenantId, existing.pipelineId, dto.stageId);
+      await this.blueprint.assertStageTransitionAllowed(
+        tenantId,
+        existing.pipelineId,
+        existing.stageId,
+        dto.stageId,
+        existing,
+      );
     }
 
     const stageChanged = Boolean(dto.stageId && dto.stageId !== existing.stageId);

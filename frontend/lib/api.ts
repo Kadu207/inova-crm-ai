@@ -59,11 +59,15 @@ export async function apiFetch<T>(
     if (!response.ok) {
       let message = response.statusText;
       try {
-        const payload = (await response.json()) as { message?: string | string[] };
+        const payload = (await response.json()) as {
+          message?: string | string[] | { message?: string; code?: string };
+        };
         if (Array.isArray(payload.message)) {
           message = payload.message.join(', ');
-        } else if (payload.message) {
+        } else if (typeof payload.message === 'string') {
           message = payload.message;
+        } else if (payload.message && typeof payload.message === 'object') {
+          message = payload.message.message ?? payload.message.code ?? message;
         }
       } catch {
         message = (await response.text().catch(() => message)) || message;

@@ -7,6 +7,7 @@ import { EntityCard } from '@/components/EntityCard';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { OpportunityCreateModal } from '@/components/OpportunityCreateModal';
+import { AdvancedSearchPanel } from '@/components/AdvancedSearchPanel';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
@@ -119,6 +120,14 @@ export function OpportunitiesClient() {
             Nova oportunidade
           </button>
         }
+      />
+      <AdvancedSearchPanel<OpportunityRow>
+        resource="opportunities"
+        onResult={(next) => {
+          setError(null);
+          setItems(next);
+        }}
+        onError={(message) => setError(message)}
       />
       {error ? (
         <div className="mb-3">

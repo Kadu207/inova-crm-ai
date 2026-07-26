@@ -23,11 +23,12 @@ Catálogo de regras de negócio por módulo. **Toda regra vive no backend** — 
 
 ## Funil e oportunidades
 
-| ID        | Regra                                        | Implementação                                                                   |
-| --------- | -------------------------------------------- | ------------------------------------------------------------------------------- |
-| RN-OPP-01 | Estágio deve pertencer ao pipeline do tenant | `OpportunitiesService.assertStageInPipeline` + `POST /opportunities/:id/move`   |
-| RN-OPP-02 | Ganho/perda emite `opportunity.won` / `lost` | `POST /opportunities/:id/won` \| `lost`                                         |
-| RN-OPP-03 | SLA estágio 24h (MVP) no backend             | `stageEnteredAt` + `POST /opportunities/sla/check` → `opportunity.sla.breached` |
+| ID           | Regra                                                                                                    | Implementação                                                                   |
+| ------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| RN-OPP-01    | Estágio deve pertencer ao pipeline do tenant                                                             | `OpportunitiesService.assertStageInPipeline` + `POST /opportunities/:id/move`   |
+| RN-OPP-02    | Ganho/perda emite `opportunity.won` / `lost`                                                             | `POST /opportunities/:id/won` \| `lost`                                         |
+| RN-OPP-03    | SLA estágio 24h (MVP) no backend                                                                         | `stageEnteredAt` + `POST /opportunities/sla/check` → `opportunity.sla.breached` |
+| RN-OPP-BP-01 | Blueprint opt-in: ≥1 transição no pipeline exige aresta from→to (+ required fields); sem regras = legado | `BlueprintService.assertStageTransitionAllowed`                                 |
 
 ## Atendimento
 

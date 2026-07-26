@@ -131,6 +131,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get customFieldDefinition() {
     return this.client.customFieldDefinition;
   }
+  get blueprintTransition() {
+    return this.client.blueprintTransition;
+  }
 
   $transaction(...args: Parameters<typeof baseClient.$transaction>) {
     return (

@@ -35,6 +35,8 @@ import { PlatformJobsModule } from './platform-jobs/platform-jobs.module';
 import { WebhookSubscriptionsModule } from './webhook-subscriptions/webhook-subscriptions.module';
 import { BulkModule } from './bulk/bulk.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
+import { BlueprintModule } from './blueprint/blueprint.module';
+import { CoqlModule } from './coql/coql.module';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 
 @Module({
@@ -95,6 +97,8 @@ import { RedisThrottlerStorage } from './common/security/redis-throttler.storage
     WebhookSubscriptionsModule,
     BulkModule,
     CustomFieldsModule,
+    BlueprintModule,
+    CoqlModule,
   ],
   providers: [
     {

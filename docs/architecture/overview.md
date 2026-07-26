@@ -1,18 +1,20 @@
 # Arquitetura — Visão geral
 
-## Componentes (roadmap)
+## Componentes (produção)
 
-| Serviço     | Stack            | Porta host  | Fase |
-| ----------- | ---------------- | ----------- | ---- |
-| Frontend    | Next.js          | 9400        | 4    |
-| API         | NestJS + Prisma  | 9401        | 4    |
-| AI          | FastAPI          | 9402        | 6    |
-| Chatwoot    | Ruby             | 9403        | 2    |
-| n8n         | Node             | 9404        | 3    |
-| MinIO       | S3 API / Console | 9405 / 9406 | 1    |
-| RabbitMQ UI | Management       | 9407        | 1    |
-| Grafana     | Observability    | 9408        | 7    |
-| PostgreSQL  | 16-alpine        | 9410 (dev)  | 1    |
+| Serviço     | Stack            | Porta host  | Origem |
+| ----------- | ---------------- | ----------- | ------ |
+| Frontend    | Next.js          | 9400        | Fase 4 |
+| API         | NestJS + Prisma  | 9401        | Fase 4 |
+| AI          | FastAPI          | 9402        | Fase 6 |
+| Chatwoot    | Ruby             | 9403        | Fase 2 |
+| n8n         | Node             | 9404        | Fase 3 |
+| MinIO       | S3 API / Console | 9405 / 9406 | Fase 1 |
+| RabbitMQ UI | Management       | 9407        | Fase 1 |
+| Grafana     | Observability    | 9408        | Fase 7 |
+| PostgreSQL  | 16-alpine        | interno     | Fase 1 |
+
+Fases 0–7 **DONE**. Próximas Specs: `026` Zoho · `027` Meta — ver [roadmap](../roadmap.md) e [histórico](../historico-versoes.md).
 
 ## Rede Docker
 

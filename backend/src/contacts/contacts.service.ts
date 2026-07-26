@@ -3,6 +3,8 @@ import { Contact, Prisma } from '@prisma/client';
 import { actorCreateFields, actorUpdateFields, detailAuditInclude } from '../common/audit-fields';
 import { listResult, ListQueryInput, ListResult, parseListQuery } from '../common/list-query';
 import { notDeleted } from '../common/soft-delete';
+import { compileFilterToPrisma, parseSearchBody } from '../common/filter-engine/filter-engine';
+import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateContactDto, UpdateContactDto } from './dto/contact.dto';
@@ -37,6 +39,21 @@ export class ContactsService {
           }
         : {}),
     };
+    const [data, total] = await Promise.all([
+      this.prisma.contact.findMany({
+        where,
+        orderBy: { [q.sortField]: q.sortDir },
+        skip: q.skip,
+        take: q.pageSize,
+      }),
+      this.prisma.contact.count({ where }),
+    ]);
+    return listResult(data, total, q.page, q.pageSize);
+  }
+
+  async search(tenantId: string, body: AdvancedSearchDto): Promise<ListResult<Contact>> {
+    const q = parseSearchBody(body);
+    const where = compileFilterToPrisma('contact', tenantId, q.filter) as Prisma.ContactWhereInput;
     const [data, total] = await Promise.all([
       this.prisma.contact.findMany({
         where,

@@ -17,6 +17,7 @@ import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
 import { JwtPayload } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { ListQueryInput } from '../common/list-query';
+import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 
 @ApiTags('contacts')
 @ApiBearerAuth()
@@ -27,6 +28,12 @@ export class ContactsController {
   @Get()
   findAll(@TenantId() tenantId: string, @Query() query: ListQueryInput) {
     return this.contactsService.findAll(tenantId, query);
+  }
+
+  @Post('search')
+  @ApiOperation({ summary: 'Advanced filter search (AND/OR + custom fields)' })
+  search(@TenantId() tenantId: string, @Body() body: AdvancedSearchDto) {
+    return this.contactsService.search(tenantId, body);
   }
 
   @Get(':id/leads')
