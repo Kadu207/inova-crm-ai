@@ -154,7 +154,7 @@ Or merge infrastructure/cloudflare-tunnel-ingress.example.yml into cloudflared c
 Login after DNS/Tunnel:
   https://crm.inovatitech.com.br/login
   tenant: demo
-  email:  admin@demo.inovatitech.com.br
-  pass:   InovaDemo@2026   (change after first login)
+  email:  admin@inovatitech.com.br
+  pass:   (SEED_ADMIN_PASSWORD / .credentials-operator.txt) — nunca commit
 
 EOF

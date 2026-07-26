@@ -1,6 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Contact, Lead, LeadSource, LeadStatus, Opportunity, Prisma } from '@prisma/client';
+import { actorCreateFields, actorUpdateFields, detailOwnerInclude } from '../common/audit-fields';
+import { listResult, ListQueryInput, ListResult, parseListQuery } from '../common/list-query';
 import { notDeleted } from '../common/soft-delete';
+import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import {
@@ -22,18 +25,49 @@ export class LeadsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: EventsService,
+    private readonly customFields: CustomFieldsService,
   ) {}
 
-  async findAll(tenantId: string): Promise<Lead[]> {
-    return this.prisma.lead.findMany({
-      where: { tenantId, ...notDeleted },
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Lead>> {
+    const q = parseListQuery(query);
+    const where: Prisma.LeadWhereInput = {
+      tenantId,
+      ...notDeleted,
+      ...(q.status ? { status: q.status as LeadStatus } : {}),
+      ...(q.assignedToId ? { assignedToId: q.assignedToId } : {}),
+      ...(q.q
+        ? {
+            OR: [
+              { title: { contains: q.q, mode: 'insensitive' } },
+              { notes: { contains: q.q, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+      ...(q.createdFrom || q.createdTo
+        ? {
+            createdAt: {
+              ...(q.createdFrom ? { gte: q.createdFrom } : {}),
+              ...(q.createdTo ? { lte: q.createdTo } : {}),
+            },
+          }
+        : {}),
+    };
+    const [data, total] = await Promise.all([
+      this.prisma.lead.findMany({
+        where,
+        orderBy: { [q.sortField]: q.sortDir },
+        skip: q.skip,
+        take: q.pageSize,
+      }),
+      this.prisma.lead.count({ where }),
+    ]);
+    return listResult(data, total, q.page, q.pageSize);
   }
 
-  async findOne(tenantId: string, id: string): Promise<Lead> {
+  async findOne(tenantId: string, id: string) {
     const lead = await this.prisma.lead.findFirst({
       where: { id, tenantId, ...notDeleted },
+      include: detailOwnerInclude,
     });
     if (!lead) {
       throw new NotFoundException(`Lead ${id} not found`);
@@ -41,7 +75,7 @@ export class LeadsService {
     return lead;
   }
 
-  async create(tenantId: string, dto: CreateLeadDto): Promise<Lead> {
+  async create(tenantId: string, dto: CreateLeadDto, actorUserId?: string): Promise<Lead> {
     if (dto.contactId) {
       const dup = await this.findOpenLeadByContact(tenantId, dto.contactId);
       if (dup) {
@@ -50,6 +84,12 @@ export class LeadsService {
         );
       }
     }
+
+    const customFields = await this.customFields.validateCustomFields(
+      tenantId,
+      'LEAD',
+      dto.customFields,
+    );
 
     const lead = await this.prisma.lead.create({
       data: {
@@ -60,6 +100,8 @@ export class LeadsService {
         contactId: dto.contactId,
         companyId: dto.companyId,
         notes: dto.notes,
+        customFields,
+        ...actorCreateFields(actorUserId),
       },
     });
 
@@ -151,11 +193,25 @@ export class LeadsService {
     return lead;
   }
 
-  async update(tenantId: string, id: string, dto: UpdateLeadDto): Promise<Lead> {
+  async update(
+    tenantId: string,
+    id: string,
+    dto: UpdateLeadDto,
+    actorUserId?: string,
+  ): Promise<Lead> {
     await this.findOne(tenantId, id);
+    const customFields =
+      dto.customFields !== undefined
+        ? await this.customFields.validateCustomFields(tenantId, 'LEAD', dto.customFields)
+        : undefined;
+    const { customFields: _cf, ...rest } = dto;
     const lead = await this.prisma.lead.update({
       where: { id },
-      data: dto,
+      data: {
+        ...rest,
+        ...(customFields !== undefined ? { customFields } : {}),
+        ...actorUpdateFields(actorUserId),
+      },
     });
 
     await this.events.publish(tenantId, 'lead.updated', {
@@ -166,12 +222,17 @@ export class LeadsService {
     return lead;
   }
 
-  async qualify(tenantId: string, id: string, dto: QualifyLeadDto = {}): Promise<Lead> {
+  async qualify(
+    tenantId: string,
+    id: string,
+    dto: QualifyLeadDto = {},
+    actorUserId?: string,
+  ): Promise<Lead> {
     await this.findOne(tenantId, id);
     const score = dto.score ?? 80;
     const lead = await this.prisma.lead.update({
       where: { id },
-      data: { status: LeadStatus.QUALIFIED, score },
+      data: { status: LeadStatus.QUALIFIED, score, ...actorUpdateFields(actorUserId) },
     });
 
     await this.events.publish(tenantId, 'lead.qualified', {
@@ -190,6 +251,7 @@ export class LeadsService {
     tenantId: string,
     id: string,
     dto: ConvertLeadDto = {},
+    actorUserId?: string,
   ): Promise<{ lead: Lead; opportunity: Opportunity }> {
     const lead = await this.findOne(tenantId, id);
     if (lead.status === LeadStatus.CONVERTED) {
@@ -231,12 +293,13 @@ export class LeadsService {
         title: dto.title?.trim() || lead.title,
         value: dto.value !== undefined ? new Prisma.Decimal(dto.value) : undefined,
         status: 'OPEN',
+        ...actorCreateFields(actorUserId),
       },
     });
 
     const converted = await this.prisma.lead.update({
       where: { id: lead.id },
-      data: { status: LeadStatus.CONVERTED },
+      data: { status: LeadStatus.CONVERTED, ...actorUpdateFields(actorUserId) },
     });
 
     await this.events.publish(tenantId, 'lead.converted', {
@@ -256,6 +319,22 @@ export class LeadsService {
     await this.prisma.lead.update({ where: { id }, data: { deletedAt: new Date() } });
 
     await this.events.publish(tenantId, 'lead.deleted', { leadId: id });
+  }
+
+  async listOpportunities(tenantId: string, leadId: string) {
+    await this.findOne(tenantId, leadId);
+    return this.prisma.opportunity.findMany({
+      where: { tenantId, leadId, ...notDeleted },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async listConversations(tenantId: string, leadId: string) {
+    await this.findOne(tenantId, leadId);
+    return this.prisma.conversation.findMany({
+      where: { tenantId, leadId },
+      orderBy: { updatedAt: 'desc' },
+    });
   }
 
   private async findOpenLeadByContact(tenantId: string, contactId: string): Promise<Lead | null> {

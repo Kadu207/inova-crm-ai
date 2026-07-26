@@ -8,9 +8,9 @@ import { setSession } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [tenantSlug, setTenantSlug] = useState('demo');
-  const [email, setEmail] = useState('admin@demo.inovatitech.com.br');
-  const [password, setPassword] = useState('InovaDemo@2026');
+  const [tenantSlug, setTenantSlug] = useState('inova');
+  const [email, setEmail] = useState('admin@inovatitech.com.br');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -49,7 +49,7 @@ export default function LoginPage() {
               className="input-field"
               value={tenantSlug}
               onChange={(e) => setTenantSlug(e.target.value)}
-              placeholder="demo"
+              placeholder="inova"
               autoComplete="organization"
               required
             />
@@ -89,9 +89,7 @@ export default function LoginPage() {
           <button type="submit" className="btn-primary w-full" disabled={loading}>
             {loading ? 'Entrando…' : 'Entrar'}
           </button>
-          <p className="text-center text-xs text-faint">
-            API: {getApiBaseUrl()} — seed local: tenant <code>demo</code>
-          </p>
+          <p className="text-center text-xs text-faint">API: {getApiBaseUrl()}</p>
         </form>
       </div>
     </div>

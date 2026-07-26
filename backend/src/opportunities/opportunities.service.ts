@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Opportunity, OpportunityStatus, Prisma, TenantStatus } from '@prisma/client';
+import { actorCreateFields, actorUpdateFields, detailOwnerInclude } from '../common/audit-fields';
+import { listResult, ListQueryInput, ListResult, parseListQuery } from '../common/list-query';
 import { notDeleted } from '../common/soft-delete';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
@@ -19,22 +21,49 @@ export class OpportunitiesService {
     private readonly events: EventsService,
   ) {}
 
-  findAll(tenantId: string): Promise<Opportunity[]> {
-    return this.prisma.opportunity.findMany({
-      where: { tenantId, ...notDeleted },
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Opportunity>> {
+    const q = parseListQuery(query);
+    const where: Prisma.OpportunityWhereInput = {
+      tenantId,
+      ...notDeleted,
+      ...(q.status ? { status: q.status as OpportunityStatus } : {}),
+      ...(q.assignedToId ? { assignedToId: q.assignedToId } : {}),
+      ...(q.q ? { title: { contains: q.q, mode: 'insensitive' } } : {}),
+      ...(q.createdFrom || q.createdTo
+        ? {
+            createdAt: {
+              ...(q.createdFrom ? { gte: q.createdFrom } : {}),
+              ...(q.createdTo ? { lte: q.createdTo } : {}),
+            },
+          }
+        : {}),
+    };
+    const [data, total] = await Promise.all([
+      this.prisma.opportunity.findMany({
+        where,
+        orderBy: { [q.sortField]: q.sortDir },
+        skip: q.skip,
+        take: q.pageSize,
+      }),
+      this.prisma.opportunity.count({ where }),
+    ]);
+    return listResult(data, total, q.page, q.pageSize);
   }
 
-  async findOne(tenantId: string, id: string): Promise<Opportunity> {
+  async findOne(tenantId: string, id: string) {
     const opp = await this.prisma.opportunity.findFirst({
       where: { id, tenantId, ...notDeleted },
+      include: detailOwnerInclude,
     });
     if (!opp) throw new NotFoundException(`Opportunity ${id} not found`);
     return opp;
   }
 
-  async create(tenantId: string, dto: CreateOpportunityDto): Promise<Opportunity> {
+  async create(
+    tenantId: string,
+    dto: CreateOpportunityDto,
+    actorUserId?: string,
+  ): Promise<Opportunity> {
     await this.assertStageInPipeline(tenantId, dto.pipelineId, dto.stageId);
 
     const opp = await this.prisma.opportunity.create({
@@ -47,13 +76,19 @@ export class OpportunitiesService {
         contactId: dto.contactId,
         value: dto.value !== undefined ? new Prisma.Decimal(dto.value) : undefined,
         stageEnteredAt: new Date(),
+        ...actorCreateFields(actorUserId),
       },
     });
     await this.events.publish(tenantId, 'opportunity.created', { opportunityId: opp.id });
     return opp;
   }
 
-  async update(tenantId: string, id: string, dto: UpdateOpportunityDto): Promise<Opportunity> {
+  async update(
+    tenantId: string,
+    id: string,
+    dto: UpdateOpportunityDto,
+    actorUserId?: string,
+  ): Promise<Opportunity> {
     const existing = await this.findOne(tenantId, id);
 
     if (dto.stageId && dto.stageId !== existing.stageId) {
@@ -70,6 +105,7 @@ export class OpportunitiesService {
         status: dto.status,
         value: dto.value !== undefined ? new Prisma.Decimal(dto.value) : undefined,
         ...(stageChanged ? { stageEnteredAt: new Date(), slaBreachedAt: null } : {}),
+        ...actorUpdateFields(actorUserId),
       },
     });
 
@@ -94,22 +130,43 @@ export class OpportunitiesService {
   }
 
   /** Move deal to another stage in the same pipeline (RN-OPP-01). */
-  async moveStage(tenantId: string, id: string, dto: MoveOpportunityDto): Promise<Opportunity> {
-    return this.update(tenantId, id, { stageId: dto.stageId });
+  async moveStage(
+    tenantId: string,
+    id: string,
+    dto: MoveOpportunityDto,
+    actorUserId?: string,
+  ): Promise<Opportunity> {
+    return this.update(tenantId, id, { stageId: dto.stageId }, actorUserId);
   }
 
-  async markWon(tenantId: string, id: string): Promise<Opportunity> {
-    return this.update(tenantId, id, { status: OpportunityStatus.WON });
+  async markWon(tenantId: string, id: string, actorUserId?: string): Promise<Opportunity> {
+    return this.update(tenantId, id, { status: OpportunityStatus.WON }, actorUserId);
   }
 
-  async markLost(tenantId: string, id: string): Promise<Opportunity> {
-    return this.update(tenantId, id, { status: OpportunityStatus.LOST });
+  async markLost(tenantId: string, id: string, actorUserId?: string): Promise<Opportunity> {
+    return this.update(tenantId, id, { status: OpportunityStatus.LOST }, actorUserId);
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
     await this.prisma.opportunity.update({ where: { id }, data: { deletedAt: new Date() } });
     await this.events.publish(tenantId, 'opportunity.deleted', { opportunityId: id });
+  }
+
+  async listTasks(tenantId: string, opportunityId: string) {
+    await this.findOne(tenantId, opportunityId);
+    return this.prisma.task.findMany({
+      where: { tenantId, opportunityId, ...notDeleted },
+      orderBy: { dueDate: 'asc' },
+    });
+  }
+
+  async listProposals(tenantId: string, opportunityId: string) {
+    await this.findOne(tenantId, opportunityId);
+    return this.prisma.proposal.findMany({
+      where: { tenantId, opportunityId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   /**

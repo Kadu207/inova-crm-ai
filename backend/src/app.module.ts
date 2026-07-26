@@ -29,11 +29,19 @@ import { AiToolbeltModule } from './ai-toolbelt/ai-toolbelt.module';
 import { SaasModule } from './saas/saas.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { LgpdModule } from './lgpd/lgpd.module';
+import { RedisModule } from './redis/redis.module';
+import { StorageModule } from './storage/storage.module';
+import { PlatformJobsModule } from './platform-jobs/platform-jobs.module';
+import { WebhookSubscriptionsModule } from './webhook-subscriptions/webhook-subscriptions.module';
+import { BulkModule } from './bulk/bulk.module';
+import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    RedisModule,
+    StorageModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -83,6 +91,10 @@ import { RedisThrottlerStorage } from './common/security/redis-throttler.storage
     SaasModule,
     DashboardModule,
     LgpdModule,
+    PlatformJobsModule,
+    WebhookSubscriptionsModule,
+    BulkModule,
+    CustomFieldsModule,
   ],
   providers: [
     {

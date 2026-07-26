@@ -9,7 +9,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
 import { ServiceCreateModal } from '@/components/ServiceCreateModal';
 import { StatusBadge } from '@/components/StatusBadge';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
 
 export type ServiceRow = {
   id: string;
@@ -39,14 +39,14 @@ export function ServicesClient() {
   const [creating, setCreating] = useState(false);
 
   async function load() {
-    const result = await apiFetch<ServiceRow[]>('/services');
+    const result = await apiFetch<ServiceRow[] | ListEnvelope<ServiceRow>>('/services');
     if (!result.ok) {
       setError(result.error.message);
       setItems([]);
       return;
     }
     setError(null);
-    setItems(result.data);
+    setItems(unwrapList(result.data));
   }
 
   useEffect(() => {

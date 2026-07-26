@@ -6,13 +6,17 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto, UpdateContactDto } from './dto/contact.dto';
-import { TenantId } from '../common/decorators/tenant.decorator';
+import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
+import { JwtPayload } from '../common/constants';
+import { resolveActorId } from '../common/audit-fields';
+import { ListQueryInput } from '../common/list-query';
 
 @ApiTags('contacts')
 @ApiBearerAuth()
@@ -21,8 +25,23 @@ export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
   @Get()
-  findAll(@TenantId() tenantId: string) {
-    return this.contactsService.findAll(tenantId);
+  findAll(@TenantId() tenantId: string, @Query() query: ListQueryInput) {
+    return this.contactsService.findAll(tenantId, query);
+  }
+
+  @Get(':id/leads')
+  listLeads(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.contactsService.listLeads(tenantId, id);
+  }
+
+  @Get(':id/opportunities')
+  listOpportunities(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.contactsService.listOpportunities(tenantId, id);
+  }
+
+  @Get(':id/conversations')
+  listConversations(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.contactsService.listConversations(tenantId, id);
   }
 
   @Get(':id')
@@ -31,13 +50,22 @@ export class ContactsController {
   }
 
   @Post()
-  create(@TenantId() tenantId: string, @Body() dto: CreateContactDto) {
-    return this.contactsService.create(tenantId, dto);
+  create(
+    @TenantId() tenantId: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: CreateContactDto,
+  ) {
+    return this.contactsService.create(tenantId, dto, resolveActorId(user?.sub));
   }
 
   @Patch(':id')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateContactDto) {
-    return this.contactsService.update(tenantId, id, dto);
+  update(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: UpdateContactDto,
+  ) {
+    return this.contactsService.update(tenantId, id, dto, resolveActorId(user?.sub));
   }
 
   @Delete(':id')

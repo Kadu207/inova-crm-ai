@@ -44,6 +44,8 @@ chmod 600 infrastructure/.env
 
 ## Deploy (manual)
 
+> **Obrigatório na VPS:** usar **sempre** `docker-compose.yml` **+** `docker-compose.vps.yml` (e `--profile apps` quando subir API/FE). Sem o overlay VPS, as portas host `9400`/`9401` somem e o Tunnel devolve 502. Em caso de recreate sem overlay: `bash infrastructure/scripts/restore-vps-ports.sh`.
+
 ```bash
 cd /opt/inova-crm-ai
 
@@ -89,6 +91,23 @@ bash infrastructure/scripts/deploy-vps.sh your-vps.hetzner.cloud deploy
 # Windows
 .\infrastructure\scripts\deploy-vps.ps1 -VpsHost "your-vps.hetzner.cloud" -VpsUser "deploy"
 ```
+
+---
+
+## Rebuild na VPS (RAM)
+
+Preferivel: imagens do CI (`docs/operations/ci-docker-images.md`) + `load-ci-images-vps.sh`.
+
+Se precisar compilar na VPS:
+
+```bash
+bash infrastructure/scripts/vps-ram-guard.sh status
+sudo bash infrastructure/scripts/create-swap-inova.sh   # uma vez, root
+bash infrastructure/scripts/rebuild-frontend-vps.sh
+bash infrastructure/scripts/rebuild-api-vps.sh
+```
+
+Detalhe: [docs/operations/vps-ram-hardening.md](docs/operations/vps-ram-hardening.md)
 
 ---
 

@@ -122,8 +122,21 @@ export async function loginRequest(input: {
   });
 }
 
+export type ListEnvelope<T> = {
+  data: T[];
+  meta: { page: number; pageSize: number; total: number };
+};
+
+/** Normalize list API responses: array (legacy) or { data, meta }. */
+export function unwrapList<T>(payload: T[] | ListEnvelope<T> | null | undefined): T[] {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.data)) return payload.data;
+  return [];
+}
+
 export async function fetchListStub<T>(resource: string): Promise<ApiResult<T[]>> {
-  const result = await apiFetch<{ items: T[] } | T[]>(`/${resource}`);
+  const result = await apiFetch<{ items: T[] } | ListEnvelope<T> | T[]>(`/${resource}`);
   if (!result.ok) {
     return result;
   }
@@ -131,5 +144,49 @@ export async function fetchListStub<T>(resource: string): Promise<ApiResult<T[]>
   if (Array.isArray(data)) {
     return { ok: true, data };
   }
-  return { ok: true, data: data.items ?? [] };
+  if ('data' in data && Array.isArray(data.data)) {
+    return { ok: true, data: data.data };
+  }
+  if ('items' in data && Array.isArray(data.items)) {
+    return { ok: true, data: data.items };
+  }
+  return { ok: true, data: [] };
+}
+
+/** Download text/CSV from API (bulk export). */
+export async function apiDownloadText(
+  path: string,
+  options: { token?: string; tenantId?: string } = {},
+): Promise<ApiResult<string>> {
+  try {
+    const headers: Record<string, string> = { Accept: 'text/csv, text/plain, */*' };
+    const bearer = options.token ?? getAccessToken();
+    if (bearer) headers.Authorization = `Bearer ${bearer}`;
+    const tenant = options.tenantId ?? getTenantId();
+    if (tenant) headers['x-tenant-id'] = tenant;
+
+    const response = await fetch(`${API_BASE}${normalizePath(path)}`, {
+      method: 'GET',
+      headers,
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      let message = response.statusText;
+      try {
+        const payload = (await response.json()) as { message?: string | string[] };
+        if (Array.isArray(payload.message)) message = payload.message.join(', ');
+        else if (payload.message) message = payload.message;
+      } catch {
+        /* ignore */
+      }
+      return {
+        ok: false,
+        error: { status: response.status, message: message || 'Download failed' },
+      };
+    }
+    return { ok: true, data: await response.text() };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Network error';
+    return { ok: false, error: { status: 0, message } };
+  }
 }

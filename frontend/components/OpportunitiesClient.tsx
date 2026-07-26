@@ -9,7 +9,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { OpportunityCreateModal } from '@/components/OpportunityCreateModal';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
 
 export type OpportunityRow = {
   id: string;
@@ -22,6 +22,9 @@ export type OpportunityRow = {
   contactId?: string | null;
   createdAt: string;
   updatedAt: string;
+  createdBy?: { id: string; name: string; email: string } | null;
+  updatedBy?: { id: string; name: string; email: string } | null;
+  assignedTo?: { id: string; name: string; email: string } | null;
 };
 
 function formatMoney(value: string | number | null | undefined): string {
@@ -54,14 +57,16 @@ export function OpportunitiesClient() {
   const [creating, setCreating] = useState(false);
 
   async function load() {
-    const result = await apiFetch<OpportunityRow[]>('/opportunities');
+    const result = await apiFetch<OpportunityRow[] | ListEnvelope<OpportunityRow>>(
+      '/opportunities',
+    );
     if (!result.ok) {
       setError(result.error.message);
       setItems([]);
       return;
     }
     setError(null);
-    setItems(result.data);
+    setItems(unwrapList(result.data));
   }
 
   useEffect(() => {

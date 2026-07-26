@@ -35,7 +35,7 @@ Este runbook cobre operação diária do CRM SaaS multi-tenant na VPS Hetzner co
 ```bash
 curl -sf https://api-crm.inovatitech.com.br/health
 curl -sf https://crm.inovatitech.com.br/login | head
-# Login demo → /leads, /atendimento, /funil
+# Login oficial → /leads, /atendimento, /funil (tenant `inova`)
 # WhatsApp inbound → lead + conversa (docs/e2e-atendimento-crm.md)
 # Qualificar + Converter + mover estágio
 ```
@@ -56,7 +56,9 @@ Drill trimestral de restore de produção — ver [manual-implantacao-producao.m
 
 ### SLA funil
 
-Cron n8n: workflow `opportunity-sla-check` → `POST /api/v1/opportunities/sla/check-all` (Bearer `API_TOKEN`, sem `x-tenant-id` — `@PlatformApi`).  
+**Cron crítico:** Nest `PlatformJobsService` (`@nestjs/schedule`) — horário (`CRON_SLA_EXPR`, default `0 * * * *`) chama `checkSlaAll()` no processo da API. Lock Redis `crm:cron:sla`. Desligar: `CRON_ENABLED=false`.
+
+Backup opcional: workflow n8n `opportunity-sla-check` → `POST /api/v1/opportunities/sla/check-all` (Bearer `API_TOKEN`, `@PlatformApi`).  
 Varre tenants `ACTIVE` + `TRIAL`. Single-tenant: `POST .../sla/check` com `x-tenant-id`.  
 Constante MVP: 24h sem mudança de estágio (`OPPORTUNITY_STAGE_SLA_HOURS`).
 
@@ -64,13 +66,24 @@ Constante MVP: 24h sem mudança de estágio (`OPPORTUNITY_STAGE_SLA_HOURS`).
 
 ## Provisionar novo tenant
 
+UI: `https://crm.inovatitech.com.br/admin` (papel `SUPER_ADMIN`).
+
 ```bash
-# Via API (super-admin token)
-curl -X POST https://api-crm.inovatitech.com.br/v1/admin/tenants \
+# Via API
+curl -X POST https://api-crm.inovatitech.com.br/api/v1/saas/tenants \
   -H "Authorization: Bearer $SUPER_ADMIN_JWT" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Cliente X","plan":"trial","admin_email":"admin@cliente.com"}'
+  -d '{
+    "name":"Cliente X",
+    "slug":"cliente-x",
+    "plan":"STARTER",
+    "adminName":"Admin Cliente",
+    "adminEmail":"admin@cliente.com",
+    "adminPassword":"SenhaForte#2026"
+  }'
 ```
+
+Bulk CSV (Spec 024): arquivos em MinIO bucket `MINIO_BUCKET` (default `inova-crm`), chave `{tenantId}/bulk/{jobId}.csv`.
 
 Checklist pós-provisionamento:
 

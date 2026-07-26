@@ -8,6 +8,8 @@ import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
+import { RelatedListSection } from '@/components/RelatedListSection';
+import { SystemAuditFields } from '@/components/SystemAuditFields';
 import { apiFetch } from '@/lib/api';
 
 function formatDate(value: string): string {
@@ -208,6 +210,22 @@ export function CompanyDetailClient() {
           </p>
         </div>
       )}
+      <SystemAuditFields
+        createdBy={company.createdBy}
+        updatedBy={company.updatedBy}
+        createdAt={company.createdAt}
+        updatedAt={company.updatedAt}
+      />
+      <RelatedListSection
+        path={`/companies/${company.id}/contacts`}
+        label="Contatos"
+        hrefPrefix="/contatos"
+      />
+      <RelatedListSection
+        path={`/companies/${company.id}/leads`}
+        label="Leads"
+        hrefPrefix="/leads"
+      />
       <ConfirmDeleteModal
         open={confirmDelete}
         busy={busy}

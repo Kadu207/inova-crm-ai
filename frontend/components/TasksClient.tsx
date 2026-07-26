@@ -9,7 +9,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { TaskCreateModal } from '@/components/TaskCreateModal';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
 
 export type TaskRow = {
   id: string;
@@ -49,14 +49,14 @@ export function TasksClient() {
   const [creating, setCreating] = useState(false);
 
   async function load() {
-    const result = await apiFetch<TaskRow[]>('/tasks');
+    const result = await apiFetch<TaskRow[] | ListEnvelope<TaskRow>>('/tasks');
     if (!result.ok) {
       setError(result.error.message);
       setItems([]);
       return;
     }
     setError(null);
-    setItems(result.data);
+    setItems(unwrapList(result.data));
   }
 
   useEffect(() => {

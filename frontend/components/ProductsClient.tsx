@@ -9,7 +9,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
 import { ProductCreateModal } from '@/components/ProductCreateModal';
 import { StatusBadge } from '@/components/StatusBadge';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
 
 export type ProductRow = {
   id: string;
@@ -39,14 +39,14 @@ export function ProductsClient() {
   const [creating, setCreating] = useState(false);
 
   async function load() {
-    const result = await apiFetch<ProductRow[]>('/products');
+    const result = await apiFetch<ProductRow[] | ListEnvelope<ProductRow>>('/products');
     if (!result.ok) {
       setError(result.error.message);
       setItems([]);
       return;
     }
     setError(null);
-    setItems(result.data);
+    setItems(unwrapList(result.data));
   }
 
   useEffect(() => {

@@ -8,7 +8,7 @@ import { EntityCard } from '@/components/EntityCard';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
 
 export type CompanyRow = {
   id: string;
@@ -18,6 +18,8 @@ export type CompanyRow = {
   industry?: string | null;
   createdAt: string;
   updatedAt: string;
+  createdBy?: { id: string; name: string; email: string } | null;
+  updatedBy?: { id: string; name: string; email: string } | null;
 };
 
 function metaLine(c: CompanyRow): string {
@@ -31,14 +33,14 @@ export function CompaniesClient() {
   const [creating, setCreating] = useState(false);
 
   async function load() {
-    const result = await apiFetch<CompanyRow[]>('/companies');
+    const result = await apiFetch<CompanyRow[] | ListEnvelope<CompanyRow>>('/companies');
     if (!result.ok) {
       setError(result.error.message);
       setItems([]);
       return;
     }
     setError(null);
-    setItems(result.data);
+    setItems(unwrapList(result.data));
   }
 
   useEffect(() => {

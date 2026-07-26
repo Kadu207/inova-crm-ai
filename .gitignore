@@ -57,3 +57,7 @@ blob-report/
 .cache/
 tmp/
 temp/
+
+# Bulk CSV local storage (Spec 024)
+.data/
+

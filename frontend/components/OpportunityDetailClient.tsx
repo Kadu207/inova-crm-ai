@@ -9,7 +9,9 @@ import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
+import { RelatedListSection } from '@/components/RelatedListSection';
 import { StatusBadge } from '@/components/StatusBadge';
+import { SystemAuditFields } from '@/components/SystemAuditFields';
 import { apiFetch } from '@/lib/api';
 
 const STATUSES = ['OPEN', 'WON', 'LOST'] as const;
@@ -308,6 +310,23 @@ export function OpportunityDetailClient() {
           </>
         )}
       </div>
+      <SystemAuditFields
+        createdBy={opp.createdBy}
+        updatedBy={opp.updatedBy}
+        assignedTo={opp.assignedTo}
+        createdAt={opp.createdAt}
+        updatedAt={opp.updatedAt}
+      />
+      <RelatedListSection
+        path={`/opportunities/${opp.id}/tasks`}
+        label="Tarefas"
+        hrefPrefix="/tarefas"
+      />
+      <RelatedListSection
+        path={`/opportunities/${opp.id}/proposals`}
+        label="Propostas"
+        hrefPrefix="/propostas"
+      />
       <ConfirmDeleteModal
         open={confirmDelete}
         busy={busy}

@@ -3,11 +3,12 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const TENANT_SLUG = process.env.SEED_TENANT_SLUG ?? 'demo';
-const TENANT_NAME = process.env.SEED_TENANT_NAME ?? 'Inova Demo';
-const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? 'admin@demo.inovatitech.com.br';
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? 'InovaDemo@2026';
-const ADMIN_NAME = process.env.SEED_ADMIN_NAME ?? 'Admin Demo';
+const TENANT_SLUG = process.env.SEED_TENANT_SLUG ?? 'inova';
+const TENANT_NAME = process.env.SEED_TENANT_NAME ?? 'Inova TI';
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? 'admin@inovatitech.com.br';
+/** Em produção use SEED_ADMIN_PASSWORD (ver .credentials-operator.txt na VPS). */
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? 'ChangeMeLocalOnly@2026!';
+const ADMIN_NAME = process.env.SEED_ADMIN_NAME ?? 'Admin Inova TI';
 
 async function withTenantTx<T>(
   tenantId: string,
@@ -54,7 +55,8 @@ async function main(): Promise<void> {
       update: {
         name: ADMIN_NAME,
         passwordHash,
-        role: UserRole.ADMIN,
+        // Platform operator on primary seed tenant can manage SaaS tenants.
+        role: UserRole.SUPER_ADMIN,
         isActive: true,
       },
       create: {
@@ -62,7 +64,7 @@ async function main(): Promise<void> {
         email: ADMIN_EMAIL,
         name: ADMIN_NAME,
         passwordHash,
-        role: UserRole.ADMIN,
+        role: UserRole.SUPER_ADMIN,
         isActive: true,
       },
     }),

@@ -8,7 +8,9 @@ import { ErrorState } from '@/components/ErrorState';
 import type { LeadRow } from '@/components/LeadsClient';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
+import { RelatedListSection } from '@/components/RelatedListSection';
 import { leadStatusTone, StatusBadge } from '@/components/StatusBadge';
+import { SystemAuditFields } from '@/components/SystemAuditFields';
 import { apiFetch } from '@/lib/api';
 
 function formatDate(value: string): string {
@@ -284,6 +286,23 @@ export function LeadDetailClient() {
           </section>
         </div>
       )}
+      <SystemAuditFields
+        createdBy={lead.createdBy}
+        updatedBy={lead.updatedBy}
+        assignedTo={lead.assignedTo}
+        createdAt={lead.createdAt}
+        updatedAt={lead.updatedAt}
+      />
+      <RelatedListSection
+        path={`/leads/${lead.id}/opportunities`}
+        label="Oportunidades"
+        hrefPrefix="/oportunidades"
+      />
+      <RelatedListSection
+        path={`/leads/${lead.id}/conversations`}
+        label="Conversas"
+        hrefPrefix="/atendimento"
+      />
       <ConfirmDeleteModal
         open={confirmDelete}
         busy={busy}

@@ -56,7 +56,7 @@ curl -sf https://crm.inovatitech.com.br/login | head
 ```
 
 Browser: https://crm.inovatitech.com.br/login  
-Tenant `demo` / `admin@demo.inovatitech.com.br` / `InovaDemo@2026` — **trocar senha** após primeiro acesso.
+Tenant `inova` / `admin@inovatitech.com.br` — senha em `/opt/inova-crm-ai/.credentials-operator.txt` na VPS.
 
 ## 5) Chatwoot (opcional nesta rodada)
 

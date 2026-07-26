@@ -74,9 +74,13 @@ Todo evento **deve** incluir: `eventType`, `tenantId`, `correlationId`, `idempot
 
 ## lgpd.*
 
-| Evento             | Publisher                   | Consumers | Descrição                                    |
-| ------------------ | --------------------------- | --------- | -------------------------------------------- |
-| _(purge via HTTP)_ | `POST /lgpd/purge` Platform | n8n cron  | Hard-delete apos `LGPD_PURGE_RETENTION_DAYS` |
+| Evento             | Publisher                               | Consumers           | Descrição                                    |
+| ------------------ | --------------------------------------- | ------------------- | -------------------------------------------- |
+| _(purge via HTTP)_ | Nest cron + `POST /lgpd/purge` Platform | optional n8n backup | Hard-delete apos `LGPD_PURGE_RETENTION_DAYS` |
+
+## Outbound webhooks (Spec 022)
+
+Assinaturas em `WebhookSubscription`; dispatch no `EventsService.publish` com HMAC `X-Inova-Signature` (docs/webhook-signing.md).
 
 ---
 

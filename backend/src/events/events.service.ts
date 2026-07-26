@@ -1,9 +1,10 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqplib';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { generateCorrelationId, generateIdempotencyKey } from '../common/utils';
+import { WebhookSubscriptionsService } from '../webhook-subscriptions/webhook-subscriptions.service';
 
 interface DomainEventEnvelope {
   eventType: string;
@@ -25,6 +26,7 @@ export class EventsService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    @Optional() private readonly webhooks?: WebhookSubscriptionsService,
   ) {
     this.exchange = this.config.get<string>('RABBITMQ_EXCHANGE', 'crm.events');
   }
@@ -78,6 +80,24 @@ export class EventsService implements OnModuleInit, OnModuleDestroy {
     });
 
     await this.flushOutbox();
+
+    if (this.webhooks) {
+      const envelope: DomainEventEnvelope = {
+        eventType,
+        tenantId,
+        correlationId,
+        idempotencyKey,
+        timestamp: new Date().toISOString(),
+        payload,
+      };
+      void this.webhooks
+        .dispatch(tenantId, eventType, envelope as unknown as Record<string, unknown>)
+        .catch((err) => {
+          this.logger.warn(
+            `Outbound webhook dispatch failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        });
+    }
   }
 
   async flushOutbox(): Promise<void> {

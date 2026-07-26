@@ -1,0 +1,112 @@
+name: Build images (CI)
+
+# Builds api + frontend on GitHub runners (avoids VPS OOM).
+# Artifacts: docker save .tar.gz — load on VPS with load-ci-images-vps.sh
+# Optional: push to GHCR when secrets/permissions allow.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'infrastructure/docker-compose.yml'
+      - '.github/workflows/build-images.yml'
+
+concurrency:
+  group: build-images-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  API_IMAGE: inova-crm-api
+  FE_IMAGE: inova-crm-frontend
+  NEXT_PUBLIC_API_URL: https://api-crm.inovatitech.com.br
+
+jobs:
+  build:
+    name: Build api + frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Image tags
+        id: meta
+        run: |
+          SHA_SHORT="${GITHUB_SHA::12}"
+          echo "sha=${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          echo "api_tag=${API_IMAGE}:ci-${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          echo "fe_tag=${FE_IMAGE}:ci-${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          echo "api_ci=${API_IMAGE}:ci" >> "$GITHUB_OUTPUT"
+          echo "fe_ci=${FE_IMAGE}:ci" >> "$GITHUB_OUTPUT"
+
+      - name: Build API image
+        run: |
+          docker build -t "${{ steps.meta.outputs.api_tag }}" -t "${{ steps.meta.outputs.api_ci }}" \
+            -f backend/Dockerfile backend
+
+      - name: Build Frontend image
+        run: |
+          docker build \
+            --build-arg "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}" \
+            -t "${{ steps.meta.outputs.fe_tag }}" -t "${{ steps.meta.outputs.fe_ci }}" \
+            -f frontend/Dockerfile frontend
+
+      - name: Save images (gzip)
+        run: |
+          mkdir -p dist/images
+          docker save "${{ steps.meta.outputs.api_tag }}" "${{ steps.meta.outputs.api_ci }}" \
+            | gzip -1 > "dist/images/inova-crm-api-ci-${{ steps.meta.outputs.sha }}.tar.gz"
+          docker save "${{ steps.meta.outputs.fe_tag }}" "${{ steps.meta.outputs.fe_ci }}" \
+            | gzip -1 > "dist/images/inova-crm-frontend-ci-${{ steps.meta.outputs.sha }}.tar.gz"
+          ls -lh dist/images/
+          echo "${{ steps.meta.outputs.sha }}" > dist/images/SHA.txt
+          echo "CRM_API_IMAGE=${{ steps.meta.outputs.api_ci }}" > dist/images/images.env
+          echo "CRM_FRONTEND_IMAGE=${{ steps.meta.outputs.fe_ci }}" >> dist/images/images.env
+
+      - name: Upload image tarballs
+        uses: actions/upload-artifact@v4
+        with:
+          name: inova-crm-images-${{ steps.meta.outputs.sha }}
+          path: dist/images/
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to GHCR (best-effort)
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          OWNER_LC="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          API_GHCR="ghcr.io/${OWNER_LC}/${API_IMAGE}"
+          FE_GHCR="ghcr.io/${OWNER_LC}/${FE_IMAGE}"
+          docker tag "${{ steps.meta.outputs.api_ci }}" "${API_GHCR}:ci"
+          docker tag "${{ steps.meta.outputs.api_tag }}" "${API_GHCR}:ci-${{ steps.meta.outputs.sha }}"
+          docker tag "${{ steps.meta.outputs.fe_ci }}" "${FE_GHCR}:ci"
+          docker tag "${{ steps.meta.outputs.fe_tag }}" "${FE_GHCR}:ci-${{ steps.meta.outputs.sha }}"
+          docker push "${API_GHCR}:ci" || true
+          docker push "${API_GHCR}:ci-${{ steps.meta.outputs.sha }}" || true
+          docker push "${FE_GHCR}:ci" || true
+          docker push "${FE_GHCR}:ci-${{ steps.meta.outputs.sha }}" || true
+          {
+            echo "CRM_API_IMAGE=${API_GHCR}:ci"
+            echo "CRM_FRONTEND_IMAGE=${FE_GHCR}:ci"
+          } > dist/images/images.ghcr.env
+          cat dist/images/images.ghcr.env

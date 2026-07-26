@@ -8,7 +8,7 @@ import { EntityCard } from '@/components/EntityCard';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
 
 export type ContactRow = {
   id: string;
@@ -19,6 +19,9 @@ export type ContactRow = {
   companyId?: string | null;
   createdAt: string;
   updatedAt: string;
+  createdBy?: { id: string; name: string; email: string } | null;
+  updatedBy?: { id: string; name: string; email: string } | null;
+  customFields?: Record<string, unknown> | null;
 };
 
 type CompanyOption = { id: string; name: string };
@@ -36,8 +39,8 @@ export function ContactsClient() {
 
   async function load() {
     const [contactsResult, companiesResult] = await Promise.all([
-      apiFetch<ContactRow[]>('/contacts'),
-      apiFetch<CompanyOption[]>('/companies'),
+      apiFetch<ContactRow[] | ListEnvelope<ContactRow>>('/contacts'),
+      apiFetch<CompanyOption[] | ListEnvelope<CompanyOption>>('/companies'),
     ]);
     if (!contactsResult.ok) {
       setError(contactsResult.error.message);
@@ -45,9 +48,9 @@ export function ContactsClient() {
       return;
     }
     setError(null);
-    setItems(contactsResult.data);
+    setItems(unwrapList(contactsResult.data));
     if (companiesResult.ok) {
-      setCompanies(companiesResult.data.map((c) => ({ id: c.id, name: c.name })));
+      setCompanies(unwrapList(companiesResult.data).map((c) => ({ id: c.id, name: c.name })));
     }
   }
 

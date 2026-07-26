@@ -1,7 +1,7 @@
 import { PageHeader } from '@/components/PageHeader';
 
 const SETTINGS = [
-  { key: 'tenant', label: 'Dados do tenant', value: 'tenant-demo' },
+  { key: 'tenant', label: 'Dados do tenant', value: 'inova' },
   { key: 'timezone', label: 'Fuso horario', value: 'America/Sao_Paulo' },
   { key: 'chatwoot', label: 'Chatwoot account_id', value: '\u2014' },
   { key: 'webhooks', label: 'Webhooks ativos', value: '0' },

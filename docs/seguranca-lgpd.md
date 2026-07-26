@@ -72,7 +72,9 @@ Log estruturado: `who`, `what`, `when`, `tenantId`, `correlationId`. Worker `wor
 | Portabilidade | Export JSON/CSV                                                                  |
 | Oposição      | Flag de consentimento                                                            |
 
-Retenção padrão: `LGPD_PURGE_RETENTION_DAYS=30` (env). Cron n8n chama o purge diário — ver `n8n/workflows/lgpd-purge.json`.
+Retenção padrão: `LGPD_PURGE_RETENTION_DAYS=30` (env).  
+**Cron crítico:** Nest `PlatformJobsService` diário (`CRON_LGPD_EXPR`, default `0 3 * * *`) chama `purgeExpired()`; lock Redis `crm:cron:lgpd`.  
+Backup opcional: `n8n/workflows/lgpd-purge.json` → `POST /api/v1/lgpd/purge`.
 
 Retenção documentada por tipo de dado. DPO e política de privacidade — links externos.
 

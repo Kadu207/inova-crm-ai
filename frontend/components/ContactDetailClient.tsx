@@ -8,6 +8,8 @@ import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
+import { RelatedListSection } from '@/components/RelatedListSection';
+import { SystemAuditFields } from '@/components/SystemAuditFields';
 import { apiFetch } from '@/lib/api';
 
 function formatDate(value: string): string {
@@ -219,6 +221,27 @@ export function ContactDetailClient() {
           </p>
         </div>
       )}
+      <SystemAuditFields
+        createdBy={contact.createdBy}
+        updatedBy={contact.updatedBy}
+        createdAt={contact.createdAt}
+        updatedAt={contact.updatedAt}
+      />
+      <RelatedListSection
+        path={`/contacts/${contact.id}/leads`}
+        label="Leads"
+        hrefPrefix="/leads"
+      />
+      <RelatedListSection
+        path={`/contacts/${contact.id}/opportunities`}
+        label="Oportunidades"
+        hrefPrefix="/oportunidades"
+      />
+      <RelatedListSection
+        path={`/contacts/${contact.id}/conversations`}
+        label="Conversas"
+        hrefPrefix="/atendimento"
+      />
       <ConfirmDeleteModal
         open={confirmDelete}
         busy={busy}

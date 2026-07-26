@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -16,8 +17,10 @@ import {
   MoveOpportunityDto,
   UpdateOpportunityDto,
 } from './dto/opportunity.dto';
-import { TenantId } from '../common/decorators/tenant.decorator';
-import { PlatformApi } from '../common/constants';
+import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
+import { JwtPayload, PlatformApi } from '../common/constants';
+import { resolveActorId } from '../common/audit-fields';
+import { ListQueryInput } from '../common/list-query';
 
 @ApiTags('opportunities')
 @ApiBearerAuth()
@@ -26,8 +29,8 @@ export class OpportunitiesController {
   constructor(private readonly opportunitiesService: OpportunitiesService) {}
 
   @Get()
-  findAll(@TenantId() tenantId: string) {
-    return this.opportunitiesService.findAll(tenantId);
+  findAll(@TenantId() tenantId: string, @Query() query: ListQueryInput) {
+    return this.opportunitiesService.findAll(tenantId, query);
   }
 
   @Post('sla/check')
@@ -42,10 +45,20 @@ export class OpportunitiesController {
   @PlatformApi()
   @ApiOperation({
     summary:
-      'Platform SLA check for all ACTIVE/TRIAL tenants (API_TOKEN, no x-tenant-id; n8n cron)',
+      'Platform SLA check for all ACTIVE/TRIAL tenants (API_TOKEN; Nest cron + optional n8n backup)',
   })
   checkSlaAll() {
     return this.opportunitiesService.checkSlaAll();
+  }
+
+  @Get(':id/tasks')
+  listTasks(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.opportunitiesService.listTasks(tenantId, id);
+  }
+
+  @Get(':id/proposals')
+  listProposals(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.opportunitiesService.listProposals(tenantId, id);
   }
 
   @Get(':id')
@@ -54,31 +67,53 @@ export class OpportunitiesController {
   }
 
   @Post()
-  create(@TenantId() tenantId: string, @Body() dto: CreateOpportunityDto) {
-    return this.opportunitiesService.create(tenantId, dto);
+  create(
+    @TenantId() tenantId: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: CreateOpportunityDto,
+  ) {
+    return this.opportunitiesService.create(tenantId, dto, resolveActorId(user?.sub));
   }
 
   @Patch(':id')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateOpportunityDto) {
-    return this.opportunitiesService.update(tenantId, id, dto);
+  update(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: UpdateOpportunityDto,
+  ) {
+    return this.opportunitiesService.update(tenantId, id, dto, resolveActorId(user?.sub));
   }
 
   @Post(':id/move')
   @ApiOperation({ summary: 'Move opportunity to another pipeline stage' })
-  move(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: MoveOpportunityDto) {
-    return this.opportunitiesService.moveStage(tenantId, id, dto);
+  move(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: MoveOpportunityDto,
+  ) {
+    return this.opportunitiesService.moveStage(tenantId, id, dto, resolveActorId(user?.sub));
   }
 
   @Post(':id/won')
   @ApiOperation({ summary: 'Mark opportunity as won (RN-OPP-02)' })
-  won(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.opportunitiesService.markWon(tenantId, id);
+  won(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+  ) {
+    return this.opportunitiesService.markWon(tenantId, id, resolveActorId(user?.sub));
   }
 
   @Post(':id/lost')
   @ApiOperation({ summary: 'Mark opportunity as lost (RN-OPP-02)' })
-  lost(@TenantId() tenantId: string, @Param('id') id: string) {
-    return this.opportunitiesService.markLost(tenantId, id);
+  lost(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+  ) {
+    return this.opportunitiesService.markLost(tenantId, id, resolveActorId(user?.sub));
   }
 
   @Delete(':id')

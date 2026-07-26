@@ -1,5 +1,5 @@
 {
-  "name": "CRM — LGPD Soft-delete Purge (cron)",
+  "name": "CRM — LGPD Soft-delete Purge (backup cron; Nest is primary)",
   "nodes": [
     {
       "parameters": {

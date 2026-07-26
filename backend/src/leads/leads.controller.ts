@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -18,7 +19,10 @@ import {
   QualifyLeadDto,
   UpdateLeadDto,
 } from './dto/lead.dto';
-import { TenantId } from '../common/decorators/tenant.decorator';
+import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
+import { JwtPayload } from '../common/constants';
+import { resolveActorId } from '../common/audit-fields';
+import { ListQueryInput } from '../common/list-query';
 
 @ApiTags('leads')
 @ApiBearerAuth()
@@ -28,14 +32,24 @@ export class LeadsController {
 
   @Get()
   @ApiOperation({ summary: 'List leads for tenant' })
-  findAll(@TenantId() tenantId: string) {
-    return this.leadsService.findAll(tenantId);
+  findAll(@TenantId() tenantId: string, @Query() query: ListQueryInput) {
+    return this.leadsService.findAll(tenantId, query);
   }
 
   @Post('inbound')
   @ApiOperation({ summary: 'Inbound lead from n8n/Chatwoot' })
   inbound(@TenantId() tenantId: string, @Body() dto: InboundLeadDto) {
     return this.leadsService.inboundFromChatwoot(tenantId, dto);
+  }
+
+  @Get(':id/opportunities')
+  listOpportunities(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.leadsService.listOpportunities(tenantId, id);
+  }
+
+  @Get(':id/conversations')
+  listConversations(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.leadsService.listConversations(tenantId, id);
   }
 
   @Get(':id')
@@ -46,26 +60,45 @@ export class LeadsController {
 
   @Post()
   @ApiOperation({ summary: 'Create lead' })
-  create(@TenantId() tenantId: string, @Body() dto: CreateLeadDto) {
-    return this.leadsService.create(tenantId, dto);
+  create(
+    @TenantId() tenantId: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: CreateLeadDto,
+  ) {
+    return this.leadsService.create(tenantId, dto, resolveActorId(user?.sub));
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update lead' })
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateLeadDto) {
-    return this.leadsService.update(tenantId, id, dto);
+  update(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: UpdateLeadDto,
+  ) {
+    return this.leadsService.update(tenantId, id, dto, resolveActorId(user?.sub));
   }
 
   @Post(':id/qualify')
   @ApiOperation({ summary: 'Qualify lead (RN-LEAD-02)' })
-  qualify(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: QualifyLeadDto) {
-    return this.leadsService.qualify(tenantId, id, dto);
+  qualify(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: QualifyLeadDto,
+  ) {
+    return this.leadsService.qualify(tenantId, id, dto, resolveActorId(user?.sub));
   }
 
   @Post(':id/convert')
   @ApiOperation({ summary: 'Convert lead to opportunity' })
-  convert(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: ConvertLeadDto) {
-    return this.leadsService.convert(tenantId, id, dto);
+  convert(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: ConvertLeadDto,
+  ) {
+    return this.leadsService.convert(tenantId, id, dto, resolveActorId(user?.sub));
   }
 
   @Delete(':id')

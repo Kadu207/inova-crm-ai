@@ -175,6 +175,7 @@ services:
 
   api:
     profiles: ['apps']
+    image: ${CRM_API_IMAGE:-inova-crm-api:local}
     build:
       context: ../backend
       dockerfile: Dockerfile
@@ -206,6 +207,8 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-inova-crm}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
     networks:
       - inova-crm
     healthcheck:
@@ -241,6 +244,7 @@ services:
 
   frontend:
     profiles: ['apps']
+    image: ${CRM_FRONTEND_IMAGE:-inova-crm-frontend:local}
     build:
       context: ../frontend
       dockerfile: Dockerfile

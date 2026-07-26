@@ -125,6 +125,31 @@ enum AuditAction {
   WEBHOOK
 }
 
+enum BulkJobType {
+  EXPORT
+  IMPORT
+}
+
+enum BulkJobStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+}
+
+enum CustomFieldModule {
+  LEAD
+  CONTACT
+}
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  DATE
+  PICKLIST
+}
+
 // ─── Tenant & Identity ───────────────────────────────────────────────────────
 
 model Tenant {
@@ -145,23 +170,26 @@ model Tenant {
   maxStorageMb     Int? @map("max_storage_mb")
   maxAiRequestsDay Int? @map("max_ai_requests_day")
 
-  users         User[]
-  companies     Company[]
-  contacts      Contact[]
-  leads         Lead[]
-  pipelines     Pipeline[]
-  opportunities Opportunity[]
-  tasks         Task[]
-  products      Product[]
-  services      Service[]
-  conversations Conversation[]
-  auditLogs     AuditLog[]
-  proposals     Proposal[]
-  contracts     Contract[]
-  invoices      Invoice[]
-  payments      Payment[]
-  outboxEvents  OutboxEvent[]
-  tenantConfigs TenantConfig[]
+  users                   User[]
+  companies               Company[]
+  contacts                Contact[]
+  leads                   Lead[]
+  pipelines               Pipeline[]
+  opportunities           Opportunity[]
+  tasks                   Task[]
+  products                Product[]
+  services                Service[]
+  conversations           Conversation[]
+  auditLogs               AuditLog[]
+  proposals               Proposal[]
+  contracts               Contract[]
+  invoices                Invoice[]
+  payments                Payment[]
+  outboxEvents            OutboxEvent[]
+  tenantConfigs           TenantConfig[]
+  webhookSubscriptions    WebhookSubscription[]
+  bulkJobs                BulkJob[]
+  customFieldDefinitions  CustomFieldDefinition[]
 
   @@map("tenants")
 }
@@ -183,6 +211,22 @@ model User {
   assignedOpportunities Opportunity[]  @relation("OpportunityAssignee")
   assignedTasks         Task[]         @relation("TaskAssignee")
   auditLogs             AuditLog[]
+
+  createdCompanies      Company[]      @relation("CompanyCreatedBy")
+  updatedCompanies      Company[]      @relation("CompanyUpdatedBy")
+  createdContacts       Contact[]      @relation("ContactCreatedBy")
+  updatedContacts       Contact[]      @relation("ContactUpdatedBy")
+  createdLeads          Lead[]         @relation("LeadCreatedBy")
+  updatedLeads          Lead[]         @relation("LeadUpdatedBy")
+  createdOpportunities  Opportunity[]  @relation("OpportunityCreatedBy")
+  updatedOpportunities  Opportunity[]  @relation("OpportunityUpdatedBy")
+  createdTasks          Task[]         @relation("TaskCreatedBy")
+  updatedTasks          Task[]         @relation("TaskUpdatedBy")
+  createdProducts       Product[]      @relation("ProductCreatedBy")
+  updatedProducts       Product[]      @relation("ProductUpdatedBy")
+  createdServices       Service[]      @relation("ServiceCreatedBy")
+  updatedServices       Service[]      @relation("ServiceUpdatedBy")
+  createdBulkJobs       BulkJob[]      @relation("BulkJobCreatedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -207,17 +251,21 @@ model TenantConfig {
 // ─── CRM Core ────────────────────────────────────────────────────────────────
 
 model Company {
-  id        String    @id @default(cuid())
-  tenantId  String    @map("tenant_id")
-  name      String
-  document  String?
-  website   String?
-  industry  String?
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+  id          String    @id @default(cuid())
+  tenantId    String    @map("tenant_id")
+  name        String
+  document    String?
+  website     String?
+  industry    String?
+  createdById String?   @map("created_by_id")
+  updatedById String?   @map("updated_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy User?      @relation("CompanyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User?      @relation("CompanyUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   contacts  Contact[]
   leads     Lead[]
   proposals Proposal[]
@@ -230,21 +278,26 @@ model Company {
 }
 
 model Contact {
-  id                  String   @id @default(cuid())
-  tenantId            String   @map("tenant_id")
-  companyId           String?  @map("company_id")
-  name                String
-  email               String?
-  phone               String?
+  id                 String    @id @default(cuid())
+  tenantId           String    @map("tenant_id")
+  companyId          String?   @map("company_id")
+  name               String
+  email              String?
+  phone              String?
   /// WhatsApp identity: Evolution jid/wa_id or future Meta BSUID
-  whatsappExternalId  String?  @map("whatsapp_external_id")
-  title               String?
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
-  deletedAt           DateTime? @map("deleted_at")
+  whatsappExternalId String?   @map("whatsapp_external_id")
+  title              String?
+  customFields       Json?     @map("custom_fields")
+  createdById        String?   @map("created_by_id")
+  updatedById        String?   @map("updated_by_id")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  deletedAt          DateTime? @map("deleted_at")
 
   tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdBy     User?          @relation("ContactCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     User?          @relation("ContactUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   leads         Lead[]
   opportunities Opportunity[]
   conversations Conversation[]
@@ -267,6 +320,9 @@ model Lead {
   source       LeadSource @default(MANUAL)
   score        Int        @default(0)
   notes        String?
+  customFields Json?      @map("custom_fields")
+  createdById  String?    @map("created_by_id")
+  updatedById  String?    @map("updated_by_id")
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")
@@ -275,6 +331,8 @@ model Lead {
   contact       Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
   company       Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
   assignedTo    User?          @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy     User?          @relation("LeadCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     User?          @relation("LeadUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   opportunities Opportunity[]
   conversations Conversation[]
 
@@ -320,22 +378,24 @@ model PipelineStage {
 }
 
 model Opportunity {
-  id           String            @id @default(cuid())
-  tenantId     String            @map("tenant_id")
-  pipelineId   String            @map("pipeline_id")
-  stageId      String            @map("stage_id")
-  leadId       String?           @map("lead_id")
-  contactId    String?           @map("contact_id")
-  assignedToId String?           @map("assigned_to_id")
-  title        String
-  value        Decimal           @default(0) @db.Decimal(15, 2)
-  status       OpportunityStatus @default(OPEN)
-  expectedCloseDate DateTime?    @map("expected_close_date")
-  stageEnteredAt DateTime        @default(now()) @map("stage_entered_at")
-  slaBreachedAt  DateTime?       @map("sla_breached_at")
-  createdAt    DateTime          @default(now()) @map("created_at")
-  updatedAt    DateTime          @updatedAt @map("updated_at")
-  deletedAt    DateTime?         @map("deleted_at")
+  id                String            @id @default(cuid())
+  tenantId          String            @map("tenant_id")
+  pipelineId        String            @map("pipeline_id")
+  stageId           String            @map("stage_id")
+  leadId            String?           @map("lead_id")
+  contactId         String?           @map("contact_id")
+  assignedToId      String?           @map("assigned_to_id")
+  title             String
+  value             Decimal           @default(0) @db.Decimal(15, 2)
+  status            OpportunityStatus @default(OPEN)
+  expectedCloseDate DateTime?         @map("expected_close_date")
+  stageEnteredAt    DateTime          @default(now()) @map("stage_entered_at")
+  slaBreachedAt     DateTime?         @map("sla_breached_at")
+  createdById       String?           @map("created_by_id")
+  updatedById       String?           @map("updated_by_id")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  deletedAt         DateTime?         @map("deleted_at")
 
   tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   pipeline   Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
@@ -343,6 +403,8 @@ model Opportunity {
   lead       Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
   contact    Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
   assignedTo User?         @relation("OpportunityAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?         @relation("OpportunityCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy  User?         @relation("OpportunityUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   tasks      Task[]
   proposals  Proposal[]
 
@@ -363,6 +425,8 @@ model Task {
   status        TaskStatus   @default(PENDING)
   priority      TaskPriority @default(MEDIUM)
   dueDate       DateTime?    @map("due_date")
+  createdById   String?      @map("created_by_id")
+  updatedById   String?      @map("updated_by_id")
   createdAt     DateTime     @default(now()) @map("created_at")
   updatedAt     DateTime     @updatedAt @map("updated_at")
   deletedAt     DateTime?    @map("deleted_at")
@@ -370,6 +434,8 @@ model Task {
   tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
   assignedTo  User?        @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy   User?        @relation("TaskCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?        @relation("TaskUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -385,11 +451,15 @@ model Product {
   price       Decimal   @default(0) @db.Decimal(15, 2)
   description String?
   isActive    Boolean   @default(true) @map("is_active")
+  createdById String?   @map("created_by_id")
+  updatedById String?   @map("updated_by_id")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy User?  @relation("ProductCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User?  @relation("ProductUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
   @@index([tenantId, deletedAt])
@@ -404,11 +474,15 @@ model Service {
   price       Decimal   @default(0) @db.Decimal(15, 2)
   description String?
   isActive    Boolean   @default(true) @map("is_active")
+  createdById String?   @map("created_by_id")
+  updatedById String?   @map("updated_by_id")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy User?  @relation("ServiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User?  @relation("ServiceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
   @@index([tenantId, deletedAt])
@@ -563,4 +637,63 @@ model OutboxEvent {
   @@index([tenantId])
   @@index([publishedAt])
   @@map("outbox_events")
+}
+
+// ─── Spec 022/024/025 — Webhooks, Bulk, Custom fields ────────────────────────
+
+model WebhookSubscription {
+  id         String   @id @default(cuid())
+  tenantId   String   @map("tenant_id")
+  url        String
+  secret     String
+  eventTypes String[] @map("event_types")
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, active])
+  @@map("webhook_subscriptions")
+}
+
+model BulkJob {
+  id          String        @id @default(cuid())
+  tenantId    String        @map("tenant_id")
+  type        BulkJobType
+  module      String
+  status      BulkJobStatus @default(PENDING)
+  fileKey     String?       @map("file_key")
+  error       String?
+  rowCount    Int?          @map("row_count")
+  createdById String?       @map("created_by_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy User?  @relation("BulkJobCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("bulk_jobs")
+}
+
+model CustomFieldDefinition {
+  id        String            @id @default(cuid())
+  tenantId  String            @map("tenant_id")
+  module    CustomFieldModule
+  apiName   String            @map("api_name")
+  label     String
+  type      CustomFieldType
+  required  Boolean           @default(false)
+  options   Json?
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, module, apiName])
+  @@index([tenantId])
+  @@map("custom_field_definitions")
 }

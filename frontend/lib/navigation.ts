@@ -51,6 +51,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/usuarios', label: 'Usuários', group: 'Sistema', icon: 'user' },
   { href: '/permissoes', label: 'Permissões', group: 'Sistema', icon: 'shield' },
   { href: '/auditoria', label: 'Auditoria', group: 'Sistema', icon: 'audit' },
+  { href: '/bulk', label: 'Import/Export', group: 'Sistema', icon: 'file' },
   { href: '/admin', label: 'Admin SaaS', group: 'SaaS', icon: 'admin' },
 ];
 

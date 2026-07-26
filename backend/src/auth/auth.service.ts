@@ -55,8 +55,16 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
+    // Compat: tenant legado `demo` foi renomeado para `inova`.
+    const tenantSlug =
+      dto.tenantSlug.trim().toLowerCase() === 'demo' ? 'inova' : dto.tenantSlug.trim();
+    const email =
+      dto.email.trim().toLowerCase() === 'admin@demo.inovatitech.com.br'
+        ? 'admin@inovatitech.com.br'
+        : dto.email.trim();
+
     const tenant = await this.prisma.tenant.findUnique({
-      where: { slug: dto.tenantSlug },
+      where: { slug: tenantSlug },
     });
     if (!tenant) {
       throw new UnauthorizedException('Invalid credentials');
@@ -65,7 +73,7 @@ export class AuthService {
     const user = await this.prisma.withTenant(tenant.id, (tx) =>
       tx.user.findUnique({
         where: {
-          tenantId_email: { tenantId: tenant.id, email: dto.email },
+          tenantId_email: { tenantId: tenant.id, email },
         },
       }),
     );

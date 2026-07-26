@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateContactDto {
@@ -26,6 +26,11 @@ export class CreateContactDto {
   @IsOptional()
   @IsString()
   title?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsObject()
+  customFields?: Record<string, unknown>;
 }
 
 export class UpdateContactDto {
@@ -48,4 +53,9 @@ export class UpdateContactDto {
   @IsOptional()
   @IsString()
   title?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsObject()
+  customFields?: Record<string, unknown>;
 }

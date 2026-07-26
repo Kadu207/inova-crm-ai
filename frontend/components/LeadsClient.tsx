@@ -9,7 +9,7 @@ import { LeadCreateModal } from '@/components/LeadCreateModal';
 import { LoadingState } from '@/components/LoadingState';
 import { PageHeader } from '@/components/PageHeader';
 import { leadStatusTone, StatusBadge } from '@/components/StatusBadge';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, unwrapList, type ListEnvelope } from '@/lib/api';
 
 export type LeadRow = {
   id: string;
@@ -19,6 +19,10 @@ export type LeadRow = {
   score: number;
   notes?: string | null;
   createdAt: string;
+  createdBy?: { id: string; name: string; email: string } | null;
+  updatedBy?: { id: string; name: string; email: string } | null;
+  assignedTo?: { id: string; name: string; email: string } | null;
+  updatedAt?: string;
 };
 
 function formatDate(value: string): string {
@@ -78,20 +82,20 @@ export function LeadsClient() {
   const [creating, setCreating] = useState(false);
 
   async function load() {
-    const result = await apiFetch<LeadRow[]>('/leads');
+    const result = await apiFetch<LeadRow[] | ListEnvelope<LeadRow>>('/leads');
     if (!result.ok) {
       setError(result.error.message);
       setItems([]);
       return;
     }
     setError(null);
-    setItems(result.data);
+    setItems(unwrapList(result.data));
   }
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const result = await apiFetch<LeadRow[]>('/leads');
+      const result = await apiFetch<LeadRow[] | ListEnvelope<LeadRow>>('/leads');
       if (cancelled) return;
       if (!result.ok) {
         setError(result.error.message);
@@ -99,7 +103,7 @@ export function LeadsClient() {
         return;
       }
       setError(null);
-      setItems(result.data);
+      setItems(unwrapList(result.data));
     })();
     return () => {
       cancelled = true;

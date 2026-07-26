@@ -6,13 +6,17 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
-import { TenantId } from '../common/decorators/tenant.decorator';
+import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
+import { JwtPayload } from '../common/constants';
+import { resolveActorId } from '../common/audit-fields';
+import { ListQueryInput } from '../common/list-query';
 
 @ApiTags('tasks')
 @ApiBearerAuth()
@@ -21,8 +25,8 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  findAll(@TenantId() tenantId: string) {
-    return this.tasksService.findAll(tenantId);
+  findAll(@TenantId() tenantId: string, @Query() query: ListQueryInput) {
+    return this.tasksService.findAll(tenantId, query);
   }
 
   @Get(':id')
@@ -31,13 +35,22 @@ export class TasksController {
   }
 
   @Post()
-  create(@TenantId() tenantId: string, @Body() dto: CreateTaskDto) {
-    return this.tasksService.create(tenantId, dto);
+  create(
+    @TenantId() tenantId: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: CreateTaskDto,
+  ) {
+    return this.tasksService.create(tenantId, dto, resolveActorId(user?.sub));
   }
 
   @Patch(':id')
-  update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateTaskDto) {
-    return this.tasksService.update(tenantId, id, dto);
+  update(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload | undefined,
+    @Body() dto: UpdateTaskDto,
+  ) {
+    return this.tasksService.update(tenantId, id, dto, resolveActorId(user?.sub));
   }
 
   @Delete(':id')

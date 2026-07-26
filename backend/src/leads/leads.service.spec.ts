@@ -4,6 +4,7 @@ import { LeadStatus, LeadSource } from '@prisma/client';
 import { LeadsService } from './leads.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
+import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 
 const tenantId = 'tenant-1';
 
@@ -31,6 +32,7 @@ describe('LeadsService', () => {
       create: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
+      count: jest.Mock;
     };
     contact: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock };
     conversation: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock };
@@ -47,6 +49,7 @@ describe('LeadsService', () => {
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+        count: jest.fn().mockResolvedValue(0),
       },
       contact: { findFirst: jest.fn(), create: jest.fn(), update: jest.fn() },
       conversation: { findFirst: jest.fn(), create: jest.fn(), update: jest.fn() },
@@ -60,6 +63,10 @@ describe('LeadsService', () => {
         LeadsService,
         { provide: PrismaService, useValue: prisma },
         { provide: EventsService, useValue: events },
+        {
+          provide: CustomFieldsService,
+          useValue: { validateCustomFields: jest.fn().mockResolvedValue(undefined) },
+        },
       ],
     }).compile();
 
@@ -68,12 +75,15 @@ describe('LeadsService', () => {
 
   it('findAll returns tenant-scoped leads', async () => {
     prisma.lead.findMany.mockResolvedValue([mockLead]);
+    prisma.lead.count.mockResolvedValue(1);
     const result = await service.findAll(tenantId);
-    expect(result).toHaveLength(1);
-    expect(prisma.lead.findMany).toHaveBeenCalledWith({
-      where: { tenantId, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
-    });
+    expect(result.data).toHaveLength(1);
+    expect(result.meta.total).toBe(1);
+    expect(prisma.lead.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ tenantId, deletedAt: null }),
+      }),
+    );
   });
 
   it('findOne throws when lead not in tenant', async () => {

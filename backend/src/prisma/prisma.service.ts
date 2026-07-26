@@ -122,6 +122,15 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get outboxEvent() {
     return this.client.outboxEvent;
   }
+  get webhookSubscription() {
+    return this.client.webhookSubscription;
+  }
+  get bulkJob() {
+    return this.client.bulkJob;
+  }
+  get customFieldDefinition() {
+    return this.client.customFieldDefinition;
+  }
 
   $transaction(...args: Parameters<typeof baseClient.$transaction>) {
     return (
