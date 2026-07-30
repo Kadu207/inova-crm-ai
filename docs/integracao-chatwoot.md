@@ -30,24 +30,29 @@ Documenta a instância Chatwoot dedicada ao CRM, mapeamento tenant, webhooks ass
 
 - Host: `chat-crm.inovatitech.com.br`
 - Porta host VPS: `127.0.0.1:9403` → container `3000`
-- **Único ponto de canais** — WhatsApp, email, Instagram, Facebook
-- **Separada** de Inova-TI e outros produtos Inova
+- **Único ponto de canais do CRM** — WhatsApp, email, Instagram, Facebook
+- **Uma instância = um projeto** — não compartilha Postgres/Redis com Casa da Paz, Swarm Inova-TI ou outros produtos
+- Inventário VPS: [`docs/operations/vps-chatwoot-instances.md`](operations/vps-chatwoot-instances.md)
 
 ## Stack Docker
 
 Compose em `chatwoot/` (projeto `crm-chatwoot`):
 
-| Serviço  | Imagem                     | Isolamento        |
-| -------- | -------------------------- | ----------------- |
-| rails    | `chatwoot/chatwoot:latest` | UI + API interna  |
-| sidekiq  | `chatwoot/chatwoot:latest` | jobs assíncronos  |
-| postgres | `pgvector/pgvector:pg16`   | DB `chatwoot_crm` |
-| redis    | `redis:7-alpine`           | fila Sidekiq      |
+| Serviço  | Imagem (default)           | Isolamento                        |
+| -------- | -------------------------- | --------------------------------- |
+| rails    | `chatwoot/chatwoot:v4.8.0` | UI + API; `pids_limit=512`, 768M  |
+| sidekiq  | `chatwoot/chatwoot:v4.8.0` | jobs; `pids_limit=512`, 512M      |
+| postgres | `pgvector/pgvector:pg16`   | DB `chatwoot_crm` (só este stack) |
+| redis    | `redis:7-alpine`           | fila Sidekiq (só este stack)      |
+
+Override de imagem: `CHATWOOT_IMAGE` em `chatwoot/.env`.
 
 Redes:
 
 - `cw` — rede interna do stack Chatwoot
 - `inova-crm` — **external**, criada por `infrastructure/`; permite API/workers alcançarem `crm_chatwoot_rails`
+
+Audit: `bash chatwoot/scripts/audit-crm-chatwoot.sh` (PIDs, health, bind `9403`).
 
 Subir:
 

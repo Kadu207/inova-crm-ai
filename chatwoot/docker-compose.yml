@@ -44,9 +44,13 @@ services:
       start_period: 10s
 
   rails:
-    image: chatwoot/chatwoot:latest
+    # Pin estável — override com CHATWOOT_IMAGE no .env se precisar de digest/tag específica
+    image: ${CHATWOOT_IMAGE:-chatwoot/chatwoot:v4.8.0}
     container_name: crm_chatwoot_rails
     restart: unless-stopped
+    # VPS compartilhada (~8GiB): evita fork bomb / ThreadError (pids.max ~9227 no host default)
+    pids_limit: 512
+    mem_limit: 768m
     env_file:
       - .env
     environment:
@@ -74,9 +78,11 @@ services:
       start_period: 90s
 
   sidekiq:
-    image: chatwoot/chatwoot:latest
+    image: ${CHATWOOT_IMAGE:-chatwoot/chatwoot:v4.8.0}
     container_name: crm_chatwoot_sidekiq
     restart: unless-stopped
+    pids_limit: 512
+    mem_limit: 512m
     env_file:
       - .env
     environment:

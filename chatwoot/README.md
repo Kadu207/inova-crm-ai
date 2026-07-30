@@ -1,17 +1,32 @@
 # Chatwoot — Inova CRM AI
 
-Instância **dedicada** ao CRM (`chat-crm.inovatitech.com.br`). Não reutiliza stacks Inova-TI ou outros produtos.
+Instância **dedicada** ao CRM (`chat-crm.inovatitech.com.br`).  
+Regra: **uma instância Chatwoot por projeto** — Postgres/Redis/domínio próprios; não reutiliza Casa da Paz, Swarm Inova-TI nem outros produtos.
+
+Inventário VPS: [docs/operations/vps-chatwoot-instances.md](../docs/operations/vps-chatwoot-instances.md).
 
 ## Arquitetura
 
-| Serviço  | Container                    | Rede              |
-| -------- | ---------------------------- | ----------------- |
-| Rails UI | `crm_chatwoot_rails`         | `cw`, `inova-crm` |
-| Sidekiq  | `crm_chatwoot_sidekiq`       | `cw`              |
-| Postgres | `crm_cw_postgres` (pgvector) | `cw`              |
-| Redis    | `crm_cw_redis`               | `cw`              |
+| Serviço  | Container                    | Rede              | Limites (VPS)          |
+| -------- | ---------------------------- | ----------------- | ---------------------- |
+| Rails UI | `crm_chatwoot_rails`         | `cw`, `inova-crm` | `pids_limit=512`, 768M |
+| Sidekiq  | `crm_chatwoot_sidekiq`       | `cw`              | `pids_limit=512`, 512M |
+| Postgres | `crm_cw_postgres` (pgvector) | `cw`              | —                      |
+| Redis    | `crm_cw_redis`               | `cw`              | —                      |
+
+Imagem pinada: `${CHATWOOT_IMAGE:-chatwoot/chatwoot:v4.8.0}` (ver `.env.example`).
 
 A rede Docker `inova-crm` é criada pelo stack `infrastructure/` e anexada aqui como **external**, permitindo que API/workers alcancem o Chatwoot por hostname `crm_chatwoot_rails` (ou `rails` dentro do projeto `crm-chatwoot`).
+
+## Audit / saúde
+
+```bash
+# Só CRM (PIDs, health, bind 9403, FRONTEND_URL)
+bash scripts/audit-crm-chatwoot.sh
+
+# Todas as instâncias na VPS (desvios de bind/naming)
+bash ../infrastructure/scripts/audit-chatwoot-instances.sh
+```
 
 ## Pré-requisitos
 

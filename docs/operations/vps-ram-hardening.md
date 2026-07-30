@@ -25,10 +25,14 @@ bash infrastructure/scripts/load-ci-images-vps.sh dist/images
 
 Por padrao pausa: `inova-crm-n8n`, `inova-crm-n8n-worker`, `inova-crm-workers`, `crm_chatwoot_sidekiq`.
 
+Chatwoot é **por projeto** (CRM ≠ Casa da Paz ≠ Swarm). Ao pausar sidekiq de outros produtos, use nomes explícitos — ver [vps-chatwoot-instances.md](./vps-chatwoot-instances.md).
+
 ```bash
 export VPS_RAM_PAUSE_EXTRA="infra-n8n-1 excellence-n8n infra-chatwoot-sidekiq-1"
 bash infrastructure/scripts/vps-ram-guard.sh pause
 ```
+
+Se `crm_chatwoot_rails` apresentar 500 / `can't fork`, auditar PIDs (`chatwoot/scripts/audit-crm-chatwoot.sh`) e recreate rails/sidekiq — o compose CRM limita `pids_limit=512`.
 
 ### Swap (uma vez, root)
 
