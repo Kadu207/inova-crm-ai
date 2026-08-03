@@ -1,7 +1,7 @@
 # Histórico de versões — Inova CRM AI
 
 **Produto:** Inova CRM AI  
-**Versão atual do sistema:** **1.1.0** (2026-07-26)  
+**Versão atual do sistema:** **1.1.1** (2026-08-03)  
 **Plano Mestre:** 1.2  
 **Fonte de verdade operacional:** [`.specify/memory/baseline.md`](../.specify/memory/baseline.md)
 
@@ -30,13 +30,22 @@ Convenção SemVer do produto:
      │
 2026-07-26  v1.0.0  CI images + swap + Gate PASS · baseline alinhada
      │
-2026-07-26  v1.1.0  Spec 026 Zoho Blueprint/COQL   ← ATUAL
-depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA
+2026-07-26  v1.1.0  Spec 026 Zoho Blueprint/COQL
+2026-08-03  v1.1.1  Spec 028 Relatórios comerciais   ← ATUAL
+depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 ```
 
 ---
 
 ## Changelog
+
+### [1.1.1] — 2026-08-03 — Spec 028 Relatórios comerciais / funil
+
+- API `GET /api/v1/reports/{pipeline,lead-conversion,revenue,sla}` + export CSV
+- UI `/relatorios` com período, 4 cards e download CSV
+- Docs: `docs/architecture/spec-028-commercial-reports.md`, OpenAPI módulos
+- Gate PASS: `reports/quality-gate/2026-08-03T01-57-06-714Z.md`
+- Nota: 1.1.1 (patch) enquanto Spec 027 Meta reserva **1.2.0**
 
 ### [1.1.0] — 2026-07-26 — Spec 026 Zoho Blueprint / filtros / COQL
 

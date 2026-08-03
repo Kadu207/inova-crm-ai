@@ -1,9 +1,9 @@
 # Baseline — Inova CRM AI
 
-**Última atualização:** 2026-07-26  
-**Versão do sistema:** **1.1.0** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
+**Última atualização:** 2026-08-03  
+**Versão do sistema:** **1.1.1** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
 **Plano Mestre:** 1.2  
-**Quality Gate:** PASS — `reports/quality-gate/2026-07-26T19-49-07-164Z.md`
+**Quality Gate:** PASS — `reports/quality-gate/2026-08-03T01-57-06-714Z.md`
 
 ## Estado
 
@@ -14,14 +14,13 @@
 | Deploy API/FE via CI → docker load | DONE (validado: run `30184019868`, images `:ci`) |
 | Swap `/swapfile-inova`             | DONE (4G ativo)                                  |
 | **026 Zoho Blueprint/COQL**        | **DONE** (v1.1.0)                                |
+| **028 Relatórios / funil**         | **DONE** (v1.1.1) — API + UI `/relatorios`       |
 | **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                |
 
 ## Sequência oficial
 
-1. **Deploy API/FE:** GitHub Actions `Build images (CI)` → download artifact → scp → `bash infrastructure/scripts/load-ci-images-vps.sh dist/images` (sem build na VPS)
-2. **Migrate:** `bash infrastructure/scripts/migrate-api-vps.sh` (obrigatório após Spec 026 — `20260726160000_blueprint_transitions`)
-3. **Swap:** `/swapfile-inova` ativo
-4. **026 Zoho** — DONE
-5. **027 Meta:** checklist [`docs/operations/meta-waba-cutover.md`](../../docs/operations/meta-waba-cutover.md) — aguardando credenciais
+1. **027 Meta:** checklist [`docs/operations/waba-credentials-checklist.md`](../../docs/operations/waba-credentials-checklist.md) → cutover [`meta-waba-cutover.md`](../../docs/operations/meta-waba-cutover.md) (gatilho: “WABA pronto — executar Spec 027”)
+2. **Deploy API/FE (028):** GitHub Actions `Build images (CI)` → `load-ci-images-vps.sh` para publicar reports em produção
+3. **Migrate:** `migrate-api-vps.sh` quando schema mudar (028 sem migration)
 
-Docs: `docs/architecture/spec-026-query-blueprint.md`, `docs/operations/ci-docker-images.md`, `docs/operations/meta-waba-cutover.md`
+Docs: `docs/architecture/spec-028-commercial-reports.md`, `docs/architecture/spec-026-query-blueprint.md`, `docs/operations/ci-docker-images.md`, `docs/operations/waba-credentials-checklist.md`

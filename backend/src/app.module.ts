@@ -37,6 +37,7 @@ import { BulkModule } from './bulk/bulk.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { BlueprintModule } from './blueprint/blueprint.module';
 import { CoqlModule } from './coql/coql.module';
+import { ReportsModule } from './reports/reports.module';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 
 @Module({
@@ -99,6 +100,7 @@ import { RedisThrottlerStorage } from './common/security/redis-throttler.storage
     CustomFieldsModule,
     BlueprintModule,
     CoqlModule,
+    ReportsModule,
   ],
   providers: [
     {

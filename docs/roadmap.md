@@ -2,7 +2,7 @@
 
 **Volume:** 16  
 **Versão:** 1.2  
-**Status:** Fases 0–7 **DONE** · Pós-fase ativa = Spec **026** (Zoho) → **027** (Meta/WABA)  
+**Status:** Fases 0–7 **DONE** · Pós-fase ativa = Spec **027** (Meta/WABA BLOCKED) · **028** DONE (v1.1.1)  
 **Baseline:** [`.specify/memory/baseline.md`](../.specify/memory/baseline.md)  
 **Histórico:** [historico-versoes.md](./historico-versoes.md)
 
@@ -92,10 +92,11 @@ Deploy Hetzner, backups, observabilidade, hardening LGPD, Admin SaaS, CI docker 
 
 ### Fila ativa
 
-| Ordem | Spec    | Entrega                                                                    | Status                                                      |
-| ----- | ------- | -------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| 1     | **026** | Zoho Blueprint light + filtros avançados + COQL (read-only, tenant-scoped) | **DONE** (v1.1.0)                                           |
-| 2     | **027** | Meta Cloud API — cutover WhatsApp oficial (WABA)                           | QUEUED · **BLOCKED** até App Meta / Phone Number ID / token |
+| Ordem | Spec    | Entrega                                                                    | Status                                                                                                                             |
+| ----- | ------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| —     | **026** | Zoho Blueprint light + filtros avançados + COQL (read-only, tenant-scoped) | **DONE** (v1.1.0)                                                                                                                  |
+| —     | **028** | Relatórios comerciais + métricas de funil (API + UI `/relatorios`)         | **DONE** (v1.1.1) · [`architecture/spec-028-commercial-reports.md`](./architecture/spec-028-commercial-reports.md)                 |
+| 1     | **027** | Meta Cloud API — cutover WhatsApp oficial (WABA)                           | QUEUED · **BLOCKED** até WABA · checklist [`operations/waba-credentials-checklist.md`](./operations/waba-credentials-checklist.md) |
 
 Premissa Zoho: **não** clonar Zoho (Deluge completo, Multi-DC, OAuth apps marketplace). Usar referência pública como checklist e entregar valor comercial no Inova.
 

@@ -2,7 +2,7 @@
 
 **Versão:** 1.2  
 **Data:** 2026-07-26  
-**Status:** Fases 0–7 + Delivery **DONE** · Etapa atual = **pós-fase (produto contínuo)**  
+**Status:** Fases 0–7 + Delivery **DONE** · Etapa atual = **pós-fase** · Spec **027** (Meta BLOCKED) · **028** DONE (v1.1.1)  
 **Baseline:** [`.specify/memory/baseline.md`](.specify/memory/baseline.md)  
 **Histórico:** [`docs/historico-versoes.md`](docs/historico-versoes.md)
 
@@ -157,6 +157,7 @@ Detalhe e pós-fase: [docs/roadmap.md](docs/roadmap.md) · [docs/historico-verso
 | ------- | ----------------------------------------------------------------------------------- | -------------------------------- |
 | 019–025 | Paridade Zoho onda 1 (cron, audit, related, webhooks, filtros, bulk, custom fields) | DONE                             |
 | **026** | **Zoho Blueprint light + filtros avançados + COQL (read-only)**                     | **DONE** (v1.1.0)                |
+| **028** | Relatórios comerciais + métricas de funil (API + UI)                                | **DONE** (v1.1.1)                |
 | **027** | Meta Cloud API cutover (WABA)                                                       | QUEUED (BLOCKED até credenciais) |
 
 ---
@@ -193,7 +194,7 @@ Stack: PostgreSQL, Redis (cache/filas n8n), RabbitMQ (eventos), MinIO, Next.js, 
 Chatwoot e n8n dedicados. n8n SOMENTE orquestrador — regras no backend.
 Portas 9400–9419. Quality Gate obrigatório antes de marcar task DONE.
 Design: marca Inova TI (flame #fb640a) — não purple/cream AI.
-Estado: Fases 0–7 DONE. Pós-fase ativa = Spec 026 (Zoho); depois 027 (Meta/WABA).
+Estado: Fases 0–7 DONE. Pós-fase ativa = Spec 027 Meta/WABA (BLOCKED até credenciais); Spec 028 relatórios DONE (v1.1.1).
 ```
 
 Guias: [docs/guia-cursor.md](docs/guia-cursor.md) · [docs/guia-claude-code.md](docs/guia-claude-code.md)

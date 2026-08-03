@@ -62,11 +62,13 @@ X-Tenant-Id: <uuid>               # somente service accounts multi-tenant audita
 | `/v1/opportunities`                       | Oportunidades (+ `POST /search`) |
 | `/v1/pipelines/:id/blueprint/transitions` | Blueprint light (admin)          |
 | `/v1/coql/query`                          | COQL read-only (admin)           |
+| `/v1/reports/*`                           | Relatórios comerciais (funil)    |
 | `/v1/conversations`                       | Atendimento                      |
 | `/v1/invoices`                            | Financeiro                       |
 | `/v1/platform`                            | Tenants, users                   |
 
-Detalhe Spec 026: [`docs/architecture/spec-026-query-blueprint.md`](./architecture/spec-026-query-blueprint.md).
+Detalhe Spec 026: [`docs/architecture/spec-026-query-blueprint.md`](./architecture/spec-026-query-blueprint.md).  
+Detalhe Spec 028: [`docs/architecture/spec-028-commercial-reports.md`](./architecture/spec-028-commercial-reports.md).
 
 ## Erros
 
