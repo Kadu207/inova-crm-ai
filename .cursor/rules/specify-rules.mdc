@@ -9,7 +9,7 @@ Este projeto segue **Spec-Driven Development (SDD)** via Spec Kit.
 
 ## Referências obrigatórias
 
-- **Harness:** `memory.md` → `agentes.md` → `AGENTS.md` → rule `inova-crm-harness.mdc`
+- **Harness:** `memory.md` → `docs/agents.md` → `AGENTS.md` → rule `inova-crm-harness.mdc`
 - **Constituição:** `.specify/memory/constitution.md` — leia antes de qualquer implementação.
 - **Plano Mestre:** `Plano_Mestre_Inova_CRM_AI.md`
 - **Baseline:** `.specify/memory/baseline.md` — atualizar somente após Quality Gate PASS.

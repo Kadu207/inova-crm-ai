@@ -4,7 +4,7 @@
 **Versão do sistema:** **1.1.1** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
 **Plano Mestre:** 1.2  
 **Quality Gate:** PASS — `reports/quality-gate/2026-08-03T01-57-06-714Z.md`  
-**Harness:** ativo — [`memory.md`](../../memory.md) · [`agentes.md`](../../agentes.md) · [`AGENTS.md`](../../AGENTS.md)
+**Harness:** ativo — [`memory.md`](../../memory.md) · [`docs/agents.md`](../../docs/agents.md) · [`AGENTS.md`](../../AGENTS.md)
 
 ## Estado
 

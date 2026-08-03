@@ -1,4 +1,4 @@
----
+﻿---
 name: spec-squad
 description: Squad 0 Spec — Spec Kit specify/plan/tasks. Use when opening a new feature, clarifying requirements, or writing specs/plan/tasks before code.
 ---
@@ -11,7 +11,7 @@ Produzir artefatos SDD alinhados à constitution **antes** de qualquer implement
 
 ## Ordem
 
-1. Ler `memory.md` → `agentes.md` → constitution → baseline
+1. Ler `memory.md` → `docs/agents.md` → constitution → baseline
 2. SK-02 specify → `specs/NNN-slug/spec.md`
 3. SK-03 clarify se ambíguo
 4. SK-04 plan → `plan.md`

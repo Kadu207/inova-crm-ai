@@ -1,4 +1,4 @@
----
+﻿---
 name: speckit-tasks
 description: Break a Spec Kit plan into prioritized tasks.md (P0–P2) with DONE only after Quality Gate.
 ---
@@ -10,4 +10,4 @@ description: Break a Spec Kit plan into prioritized tasks.md (P0–P2) with DONE
 3. Saída: `specs/NNN-slug/tasks.md`
 4. Nunca marcar `[x]` sem gate PASS no fechamento
 
-Catálogo: `agentes.md` (SK-05).
+Catálogo: `docs/agents.md` (SK-05).

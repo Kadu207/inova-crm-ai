@@ -1,4 +1,4 @@
----
+﻿---
 name: speckit-checklist
 description: Run Spec Kit Definition of Done checklist before marking a feature complete.
 ---
@@ -9,4 +9,4 @@ description: Run Spec Kit Definition of Done checklist before marking a feature 
 2. Verificar RF/RNF, tenant tests, docs, gate report
 3. Squad QA (`qa-squad`) é dona do R-90
 
-Catálogo: `agentes.md` (SK-07).
+Catálogo: `docs/agents.md` (SK-07).

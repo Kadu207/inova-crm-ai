@@ -1,4 +1,4 @@
----
+﻿---
 name: speckit-clarify
 description: Resolve ambiguities in a Spec Kit feature before planning. Use when the spec has open questions.
 ---
@@ -9,4 +9,4 @@ description: Resolve ambiguities in a Spec Kit feature before planning. Use when
 2. Perguntar ao usuário ou registrar decisões na spec
 3. Não avançar para plan com TBD de aceite P0
 
-Catálogo: `agentes.md` (SK-03).
+Catálogo: `docs/agents.md` (SK-03).

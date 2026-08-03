@@ -10,7 +10,7 @@ alwaysApply: true
 Ler nesta ordem:
 
 1. `memory.md`
-2. `agentes.md`
+2. `docs/agents.md`
 3. `AGENTS.md`
 4. `.specify/memory/constitution.md`
 5. `.specify/memory/baseline.md`
@@ -28,7 +28,7 @@ Squads: `.cursor/agents/{spec,build,qa,delivery}-squad.md`. Ciclo completo em `d
 
 ## Ops Chatwoot (prioridade)
 
-Se `bash chatwoot/scripts/audit-crm-chatwoot.sh` indicar rails PID ≥ 80% do limite (512) ou health unhealthy / `can't fork` → recreate rails/sidekiq **antes** de feature work (EMB-04 em `agentes.md`).
+Se `bash chatwoot/scripts/audit-crm-chatwoot.sh` indicar rails PID ≥ 80% do limite (512) ou health unhealthy / `can't fork` → recreate rails/sidekiq **antes** de feature work (EMB-04 em `docs/agents.md`).
 
 ## Spec Kit
 

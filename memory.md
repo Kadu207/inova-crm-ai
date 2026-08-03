@@ -2,11 +2,11 @@
 
 **Índice vivo do projeto** (ler no início de toda sessão de agente).  
 Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.  
-Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`agentes.md`](agentes.md)
+Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
 **Última atualização:** 2026-08-03  
 **Versão produto:** **1.1.1**  
-**Harness:** ativo (`agentes.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
+**Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
 ---
 
@@ -98,6 +98,6 @@ bash infrastructure/scripts/load-ci-images-vps.sh dist/images   # na VPS
 2. Após load CI → SHA / run id / smoke
 3. Após ops Chatwoot/Swarm → snapshot PIDs / decisão dono
 4. Espelhar estado canônico em `.specify/memory/baseline.md`
-5. Manter `agentes.md` mapa Spec × papéis alinhado
+5. Manter `docs/agents.md` mapa Spec × papéis alinhado
 
 _Não commit secrets. Não inventar endpoints. Não scale Swarm sem dono._

@@ -1,6 +1,6 @@
 # AGENTS.md — Inova CRM AI
 
-Front door para agentes Cursor. Detalhe: [`memory.md`](memory.md) · [`agentes.md`](agentes.md).
+Front door para agentes Cursor. Detalhe: [`memory.md`](memory.md) · [`docs/agents.md`](docs/agents.md).
 
 ## O que é
 
@@ -11,7 +11,7 @@ Fases 0–7 **DONE**. Pós-fase: Spec Kit `026+`. Versão atual **1.1.1** (Spec 
 ## Antes de qualquer tarefa
 
 1. Ler [`memory.md`](memory.md) (snapshot)
-2. Ler [`agentes.md`](agentes.md) (squads SK/C/R/EMB)
+2. Ler [`docs/agents.md`](docs/agents.md) (squads SK/C/R/EMB)
 3. Ler [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
 4. Ler [`.specify/memory/baseline.md`](.specify/memory/baseline.md)
 5. Se ops Chatwoot: PID rails ≥ 80% → recreate **antes** de feature (EMB-04)

@@ -1,4 +1,4 @@
----
+﻿---
 name: speckit-taskstoissues
 description: Convert Spec Kit tasks into tracker issues. Use when the user asks to sync tasks to GitHub/GitLab issues.
 ---
@@ -9,4 +9,4 @@ description: Convert Spec Kit tasks into tracker issues. Use when the user asks 
 2. Criar issues com IDs da Spec e labels
 3. Não fechar issues sem gate
 
-Catálogo: `agentes.md` (SK-09).
+Catálogo: `docs/agents.md` (SK-09).

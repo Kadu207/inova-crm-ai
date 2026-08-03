@@ -11,7 +11,7 @@
 Dois planos distintos:
 
 1. **Harness Cursor** (build do produto) — squads Spec/Build/QA/Delivery, memória e Spec Kit.  
-   → [`../agentes.md`](../agentes.md) · [`../memory.md`](../memory.md) · [`harness.md`](./harness.md)
+   → [`agents.md`](./agents.md) · [`../memory.md`](../memory.md) · [`harness.md`](./harness.md)
 2. **Agentes IA de produto** (runtime) — FastAPI + worker-crm-ai, toolbelt NestJS, RAG por tenant.
 
 Este documento cobre o **runtime** (2). O harness (1) é a fonte de verdade para orquestração de agentes de engenharia.
@@ -71,7 +71,7 @@ Agentes **nunca** acessam PostgreSQL, MinIO ou RabbitMQ diretamente. Todas as a�
 | Artefato                              | Uso                                |
 | ------------------------------------- | ---------------------------------- |
 | `AGENTS.md`                           | Front door                         |
-| `agentes.md`                          | Catálogo SK / C / R / EMB + squads |
+| `docs/agents.md`                      | Catálogo SK / C / R / EMB + squads |
 | `memory.md`                           | Snapshot vivo                      |
 | `.cursor/agents/*`                    | Subagentes Spec/Build/QA/Delivery  |
 | `.cursor/skills/speckit-*`            | Stubs Spec Kit                     |

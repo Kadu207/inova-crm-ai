@@ -8,7 +8,7 @@
 | Camada            | Path                                                                                    |
 | ----------------- | --------------------------------------------------------------------------------------- |
 | Memória viva      | [`memory.md`](../memory.md)                                                             |
-| Catálogo agentes  | [`agentes.md`](../agentes.md)                                                           |
+| Catálogo agentes  | [`agents.md`](./agents.md)                                                              |
 | Front door Cursor | [`AGENTS.md`](../AGENTS.md)                                                             |
 | Constitution      | [`.specify/memory/constitution.md`](../.specify/memory/constitution.md)                 |
 | Baseline          | [`.specify/memory/baseline.md`](../.specify/memory/baseline.md)                         |
@@ -20,12 +20,12 @@
 ## Ciclo (resumo)
 
 ```text
-memory → agentes → AGENTS → constitution → baseline
+memory → docs/agents.md → AGENTS → constitution → baseline
   → Spec Kit (SK-*) → Build (C-*) → QA (R-90 gate) → Delivery (EMB-*)
   → atualizar memory + baseline
 ```
 
-Detalhe copiável: seção 2 de [`agentes.md`](../agentes.md).
+Detalhe copiável: seção 2 de [`agents.md`](./agents.md).
 
 ## Ops ligados ao harness
 
