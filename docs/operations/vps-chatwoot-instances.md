@@ -59,16 +59,14 @@ Swarm `chat.inovatitech.com.br` permanece documentado como **legado** até o don
 - UI Chatwoot no host: **sempre** `127.0.0.1:<porta>` + **Cloudflare Tunnel**.
 - **Nunca** publicar `0.0.0.0:<porta>` para a UI.
 
-### Desvio conhecido — Casa da Paz
+### Casa da Paz — bind
 
-Estado observado: `infra-chatwoot-1` em `0.0.0.0:3001`.
+Estado **2026-08-03:** `infra-chatwoot-1` em `127.0.0.1:3001` (OK). Se voltar `0.0.0.0`, runbook (path `casadapaz`, fora deste repo):
 
-Runbook (operador, **fora** deste repo — path `casadapaz`):
-
-1. No compose de messaging (`docker-compose.prod.messaging.yml` ou equivalente), alterar publish para `127.0.0.1:3001:3000`.
-2. Confirmar que o Tunnel aponta `casadapaz-chat.inovatitech.com.br` → `http://127.0.0.1:3001`.
-3. `docker compose … up -d --force-recreate chatwoot` (nome do serviço conforme o compose).
-4. Reexecutar `bash /opt/inova-crm-ai/infrastructure/scripts/audit-chatwoot-instances.sh` e validar ausência de `0.0.0.0`.
+1. Publish → `127.0.0.1:3001:3000` no compose messaging.
+2. Tunnel `casadapaz-chat.inovatitech.com.br` → `http://127.0.0.1:3001`.
+3. `docker compose … up -d --force-recreate` do serviço chatwoot.
+4. `bash /opt/inova-crm-ai/infrastructure/scripts/audit-chatwoot-instances.sh` → `deviations=0`.
 
 ---
 
@@ -78,7 +76,68 @@ Runbook (operador, **fora** deste repo — path `casadapaz`):
 - Imagem pinada: `CHATWOOT_IMAGE` (default `chatwoot/chatwoot:v4.8.0`).
 - Limites: `pids_limit: 512`, `mem_limit` 768M (rails) / 512M (sidekiq) — evita 500 por `can't fork`.
 - Audit dedicado: `bash chatwoot/scripts/audit-crm-chatwoot.sh`
+- Se rails PID ≥ **80%** do limite → recreate imediato (ver § CRM PID).
 - Docs: [integracao-chatwoot.md](../integracao-chatwoot.md), [chatwoot/README.md](../../chatwoot/README.md)
+
+### CRM PID — snapshot e recreate
+
+| Data (UTC)     | rails PIDs         | sidekiq | Health rails | Ação                    |
+| -------------- | ------------------ | ------- | ------------ | ----------------------- |
+| 2026-08-03 pré | **512/512** (100%) | ~22/512 | unhealthy    | recreate                |
+| 2026-08-03 pós | **17/512** (~3%)   | ~21/512 | healthy      | `AUDIT_CRM_CHATWOOT_OK` |
+
+```bash
+cd /opt/inova-crm-ai/chatwoot
+docker compose -f docker-compose.yml -f docker-compose.vps.yml \
+  up -d --force-recreate --no-deps rails sidekiq
+bash /opt/inova-crm-ai/chatwoot/scripts/audit-crm-chatwoot.sh
+curl -sS -o /dev/null -w 'chatwoot %{http_code}\n' http://127.0.0.1:9403/
+```
+
+---
+
+## Pacote de decisão — Swarm Inova-TI (`chat.inovatitech.com.br`)
+
+**Proibido:** `docker service scale …=0` sem autorização **explícita** do dono Inova-TI.
+
+### Snapshot 2026-08-03
+
+| Service                             | Replicas | Image                      | Estado task                       |
+| ----------------------------------- | -------- | -------------------------- | --------------------------------- |
+| `chatwoot-admin_chatwoot-admin`     | **1/1**  | `chatwoot/chatwoot:v4.8.0` | Running ~8d (PIDs baixos no task) |
+| `chatwoot-sidekiq_chatwoot-sidekiq` | **1/1**  | `chatwoot/chatwoot:v4.8.0` | Running ~8d                       |
+
+Histórico: tasks anteriores com **Exit 137** (OOM/kill) — stack instável sob pressão de RAM da VPS compartilhada.
+
+### Pré-requisitos antes de qualquer mudança
+
+1. Quem ainda usa `https://chat.inovatitech.com.br`? (lista de produtos/clientes)
+2. Cloudflare Tunnel / DNS: hostname legado aponta para Swarm — migrar ou desligar?
+3. Backup / export se houver dados vivos no Postgres Swarm
+4. Rotação de secrets (ver § Segurança) **antes** de expor de novo
+
+### Checklist dono Inova-TI
+
+| Decisão         | Marcar | Efeito                                              |
+| --------------- | ------ | --------------------------------------------------- |
+| Manter ativo    | [ ]    | Continua 1/1; CRM não toca                          |
+| Scale 0 (pause) | [ ]    | Libera RAM; Tunnel pode 502 até DNS/Tunnel ajustado |
+| Remover stack   | [ ]    | Só após backup + confirmação escrita                |
+
+### Comandos (comentados — só após confirmação)
+
+```bash
+# Inventário
+# docker service ls | grep -i chatwoot
+# docker service ps chatwoot-admin_chatwoot-admin --no-trunc | head
+# docker service ps chatwoot-sidekiq_chatwoot-sidekiq --no-trunc | head
+
+# Scale 0 (NÃO executar sem dono Inova-TI)
+# docker service scale chatwoot-admin_chatwoot-admin=0 chatwoot-sidekiq_chatwoot-sidekiq=0
+
+# Voltar 1/1
+# docker service scale chatwoot-admin_chatwoot-admin=1 chatwoot-sidekiq_chatwoot-sidekiq=1
+```
 
 ---
 
@@ -88,15 +147,14 @@ Antes de pausar ou remover uma instância, o **dono do produto** confirma:
 
 | Instância                       | Manter ativo | Scale 0 / pause | Remover |
 | ------------------------------- | ------------ | --------------- | ------- |
-| CRM `chat-crm`                  | [ ]          | [ ]             | [ ]     |
+| CRM `chat-crm`                  | [x]          | [ ]             | [ ]     |
 | Casa da Paz `casadapaz-chat`    | [ ]          | [ ]             | [ ]     |
 | Swarm `chat.inovatitech.com.br` | [ ]          | [ ]             | [ ]     |
 
 ### Comandos de referência (só após confirmação explícita)
 
 ```bash
-# Swarm — scale 0 (NÃO executar sem dono Inova-TI)
-# docker service scale chatwoot-admin_chatwoot-admin=0 chatwoot-sidekiq_chatwoot-sidekiq=0
+# Swarm — ver § Pacote de decisão (scale comentado)
 
 # Casa da Paz — pause containers (path do compose casadapaz)
 # cd /home/gestaoti/casadapaz/infra && docker compose -f docker-compose.prod.yml -f docker-compose.prod.messaging.yml stop chatwoot chatwoot-sidekiq

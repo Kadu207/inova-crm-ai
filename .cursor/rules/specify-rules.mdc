@@ -9,6 +9,7 @@ Este projeto segue **Spec-Driven Development (SDD)** via Spec Kit.
 
 ## Referências obrigatórias
 
+- **Harness:** `memory.md` → `agentes.md` → `AGENTS.md` → rule `inova-crm-harness.mdc`
 - **Constituição:** `.specify/memory/constitution.md` — leia antes de qualquer implementação.
 - **Plano Mestre:** `Plano_Mestre_Inova_CRM_AI.md`
 - **Baseline:** `.specify/memory/baseline.md` — atualizar somente após Quality Gate PASS.
@@ -21,7 +22,7 @@ Este projeto segue **Spec-Driven Development (SDD)** via Spec Kit.
 3. **Tasks** — `tasks.md` com prioridades P0–P2 e blocos por camada
 4. **Implement** — código + TDD + **Quality Gate PASS** antes de marcar DONE
 
-Skills Spec Kit (quando disponíveis em `.cursor/skills/`): `speckit-specify`, `speckit-plan`, `speckit-tasks`, `speckit-implement`, `speckit-checklist`.
+Skills Spec Kit (projeto): `.cursor/skills/speckit-*`. Squads: `.cursor/agents/*-squad.md`.
 
 ## Princípios inegociáveis (resumo)
 

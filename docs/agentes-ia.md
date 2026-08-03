@@ -1,14 +1,20 @@
 # Agentes de IA — Inova CRM AI
 
 **Volume:** 08  
-**Versão:** 0.1 (Fase 0 — skeleton)  
-**Status:** em construção
+**Versão:** 1.1  
+**Status:** harness Cursor ativo · runtime FastAPI Fase 6 DONE (base)
 
 ---
 
 ## Propósito
 
-Define arquitetura de agentes IA, squads, toolbelt API, RAG, guardrails e human-in-the-loop.
+Dois planos distintos:
+
+1. **Harness Cursor** (build do produto) — squads Spec/Build/QA/Delivery, memória e Spec Kit.  
+   → [`../agentes.md`](../agentes.md) · [`../memory.md`](../memory.md) · [`harness.md`](./harness.md)
+2. **Agentes IA de produto** (runtime) — FastAPI + worker-crm-ai, toolbelt NestJS, RAG por tenant.
+
+Este documento cobre o **runtime** (2). O harness (1) é a fonte de verdade para orquestração de agentes de engenharia.
 
 ---
 
@@ -17,11 +23,11 @@ Define arquitetura de agentes IA, squads, toolbelt API, RAG, guardrails e human-
 1. [Propósito](#propósito)
 2. [Princípio API/toolbelt](#princípio-apitoolbelt)
 3. [Serviço AI (FastAPI)](#serviço-ai-fastapi)
-4. [Squads previstos](#squads-previstos)
+4. [Squads runtime previstos](#squads-runtime-previstos)
 5. [RAG e conhecimento](#rag-e-conhecimento)
 6. [Guardrails](#guardrails)
 7. [Eventos ai.*](#eventos-ai)
-8. [Fase de entrega](#fase-de-entrega)
+8. [Harness Cursor](#harness-cursor)
 
 ---
 
@@ -35,7 +41,7 @@ Agentes **nunca** acessam PostgreSQL, MinIO ou RabbitMQ diretamente. Todas as a�
 - OpenAI / OpenRouter
 - Worker `worker-crm-ai` para jobs assíncronos
 
-## Squads previstos
+## Squads runtime previstos
 
 | Squad            | Domínio       | Ferramentas                   |
 | ---------------- | ------------- | ----------------------------- |
@@ -48,7 +54,7 @@ Agentes **nunca** acessam PostgreSQL, MinIO ou RabbitMQ diretamente. Todas as a�
 
 - Embeddings por tenant (isolamento obrigatório)
 - Fontes: propostas, FAQs, histórico autorizado
-- Storage vetorial — definir na Fase 6
+- Storage vetorial — evoluir sob Spec futura; isolamento tenant inegociável
 
 ## Guardrails
 
@@ -56,10 +62,19 @@ Agentes **nunca** acessam PostgreSQL, MinIO ou RabbitMQ diretamente. Todas as a�
 - Menor privilégio por squad
 - Auditoria de toda ação de agente
 
-## Eventos ai.*
+## Eventos ai.\*
 
 `ai.qualification.completed`, `ai.suggestion.created`, `ai.rag.indexed` — ver [catalog-v0](./events/catalog-v0.md).
 
-## Fase de entrega
+## Harness Cursor
 
-IA especializada: **Fase 6** do roadmap (após CRM MVP estável).
+| Artefato                              | Uso                                |
+| ------------------------------------- | ---------------------------------- |
+| `AGENTS.md`                           | Front door                         |
+| `agentes.md`                          | Catálogo SK / C / R / EMB + squads |
+| `memory.md`                           | Snapshot vivo                      |
+| `.cursor/agents/*`                    | Subagentes Spec/Build/QA/Delivery  |
+| `.cursor/skills/speckit-*`            | Stubs Spec Kit                     |
+| `.cursor/rules/inova-crm-harness.mdc` | Always-on                          |
+
+Engenharia: Fases 0–7 DONE; pós-fase via Spec Kit (`026+`). Ver [`roadmap.md`](./roadmap.md).

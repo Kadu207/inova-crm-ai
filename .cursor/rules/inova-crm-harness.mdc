@@ -1,0 +1,35 @@
+---
+description: Harness Inova CRM AI — session start, squads, hard-stops
+alwaysApply: true
+---
+
+# Harness — Inova CRM AI
+
+## Início de sessão / Spec
+
+Ler nesta ordem:
+
+1. `memory.md`
+2. `agentes.md`
+3. `AGENTS.md`
+4. `.specify/memory/constitution.md`
+5. `.specify/memory/baseline.md`
+
+Squads: `.cursor/agents/{spec,build,qa,delivery}-squad.md`. Ciclo completo em `docs/harness.md`.
+
+## Hard-stops
+
+- **Quality Gate:** `npm run gate` → `GATE_PASS` antes de DONE / baseline / Delivery
+- **Tenant-first:** toda query de domínio com `tenantId`; teste de isolamento
+- **API/toolbelt:** agentes IA e n8n não acessam Postgres/MinIO/Rabbit direto
+- **n8n:** só orquestra HTTP — sem regra CRM em Function/Code
+- **Canais:** só via Chatwoot CRM (`chat-crm`)
+- **Swarm Chatwoot** (`chat.inovatitech.com.br`): sem scale 0 sem dono Inova-TI
+
+## Ops Chatwoot (prioridade)
+
+Se `bash chatwoot/scripts/audit-crm-chatwoot.sh` indicar rails PID ≥ 80% do limite (512) ou health unhealthy / `can't fork` → recreate rails/sidekiq **antes** de feature work (EMB-04 em `agentes.md`).
+
+## Spec Kit
+
+Ordem: specify → plan → tasks → implement. Skills stub: `.cursor/skills/speckit-*/SKILL.md`. Não pular SDD em feature nova.
