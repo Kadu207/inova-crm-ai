@@ -2,7 +2,7 @@
 
 **Spec:** `029-security-hardening-p0`  
 **Plano:** [plan.md](./plan.md)  
-**Status geral:** P0 concluído (GATE_PASS) · P1 aberto
+**Status geral:** concluído (P0+P1 · GATE_PASS · Delivery)
 
 ---
 

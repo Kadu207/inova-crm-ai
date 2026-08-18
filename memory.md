@@ -18,7 +18,7 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | VPS          | `gestaoti@128.140.77.31` · path `/opt/inova-crm-ai`                                  |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                     |
 | Gate         | PASS — `reports/quality-gate/2026-08-18T05-07-57-461Z.md` (Spec 029 P0+P1)           |
-| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `fef2725e2a7b`, run `30779411458`) |
+| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `878a92fd5969`, run `32101917702`) |
 | Plano Mestre | 1.2                                                                                  |
 
 ### Stack
@@ -44,9 +44,10 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                        |
 | **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                          |
 | **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                               |
+| **030** | RBAC navegação / páginas por papel                | **READY** (spec/plan/tasks) — próxima implementação                                                                      |
 | **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md) |
 
-**Próximo produto:** Spec 027 quando credenciais WABA (gatilho: “WABA pronto — executar Spec 027”).
+**Próximo produto:** Spec **030** (RBAC UI) enquanto 027 aguarda WABA. Gatilho Meta: “WABA pronto — executar Spec 027”.
 
 ---
 

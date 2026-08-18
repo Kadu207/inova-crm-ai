@@ -3,17 +3,33 @@
 #
 # Usage on VPS:
 #   mkdir -p /opt/inova-crm-ai/dist/images
-#   # copy *.tar.gz (+ images.env) into that dir, then:
+#   # copy *.tar.gz (+ images.env + SHA.txt) into that dir, then:
 #   bash infrastructure/scripts/load-ci-images-vps.sh
 #   bash infrastructure/scripts/load-ci-images-vps.sh /path/to/tarballs
 #
+# Loads ONLY the SHA listed in SHA.txt (or CRM_IMAGE_SHA / --sha=).
+# Avoids old *.tar.gz in the same folder overwriting the :ci tag.
+#
 # REQUIRES infrastructure/.env (POSTGRES_*, JWT_SECRET, REDIS_*, etc.).
-# Without --env-file, compose interpolates blank secrets and api goes unhealthy.
 set -euo pipefail
 cd /opt/inova-crm-ai
 
 IMG_DIR="${1:-dist/images}"
 ENV_FILE="${ENV_FILE:-infrastructure/.env}"
+SHA_OVERRIDE="${CRM_IMAGE_SHA:-}"
+
+for arg in "$@"; do
+  case "$arg" in
+    --sha=*) SHA_OVERRIDE="${arg#--sha=}" ;;
+  esac
+done
+# If first arg looks like a path, keep IMG_DIR; optional second --sha=
+if [[ "${1:-}" == --sha=* ]]; then
+  IMG_DIR=dist/images
+  SHA_OVERRIDE="${1#--sha=}"
+elif [[ -n "${2:-}" && "${2}" == --sha=* ]]; then
+  SHA_OVERRIDE="${2#--sha=}"
+fi
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Missing ${ENV_FILE} — aborting (api would start with blank secrets)." >&2
@@ -33,23 +49,33 @@ if [[ ! -d "$IMG_DIR" ]]; then
   exit 1
 fi
 
-shopt -s nullglob
-maps=("${IMG_DIR}"/*.tar.gz)
-if [[ ${#maps[@]} -eq 0 ]]; then
-  echo "No *.tar.gz in ${IMG_DIR}" >&2
+SHA="${SHA_OVERRIDE}"
+if [[ -z "$SHA" && -f "${IMG_DIR}/SHA.txt" ]]; then
+  SHA=$(tr -d '[:space:]\r' < "${IMG_DIR}/SHA.txt")
+fi
+if [[ -z "$SHA" ]]; then
+  echo "Missing SHA — provide ${IMG_DIR}/SHA.txt or CRM_IMAGE_SHA / --sha=<12hex>" >&2
   exit 1
 fi
 
-echo "==> docker load"
-for f in "${maps[@]}"; do
-  echo "    loading ${f}"
-  gzip -dc "$f" | docker load
-done
+API_TAR="${IMG_DIR}/inova-crm-api-ci-${SHA}.tar.gz"
+FE_TAR="${IMG_DIR}/inova-crm-frontend-ci-${SHA}.tar.gz"
+if [[ ! -f "$API_TAR" || ! -f "$FE_TAR" ]]; then
+  echo "Missing tarballs for SHA=${SHA}:" >&2
+  echo "  ${API_TAR}" >&2
+  echo "  ${FE_TAR}" >&2
+  exit 1
+fi
+
+echo "==> docker load (SHA=${SHA} only)"
+echo "    loading ${API_TAR}"
+gzip -dc "$API_TAR" | docker load
+echo "    loading ${FE_TAR}"
+gzip -dc "$FE_TAR" | docker load
 
 if [[ -f "${IMG_DIR}/images.env" ]]; then
   # shellcheck disable=SC1090
   set -a
-  # strip CR if copied from Windows
   source <(sed 's/\r$//' "${IMG_DIR}/images.env")
   set +a
 fi
@@ -86,3 +112,4 @@ fi
 echo "LOAD_CI_IMAGES_OK"
 echo "api 200"
 echo "fe 200"
+echo "sha ${SHA}"

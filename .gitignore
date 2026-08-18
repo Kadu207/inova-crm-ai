@@ -32,10 +32,16 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Logs / reports (local gate artifacts may be committed selectively)
+# Logs / reports (local gate artifacts — keep .gitkeep only)
 *.log
 npm-debug.log*
 logs/
+reports/quality-gate/*.md
+reports/ui-smoke/
+
+# Local / sensitive media
+evolution-qr.png
+*.code-workspace
 
 # Docker volumes / local data
 data/

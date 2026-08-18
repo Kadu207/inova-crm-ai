@@ -178,6 +178,8 @@ cd /opt/inova-crm-ai
 # bash infrastructure/scripts/vps-ram-guard.sh pause
 
 bash infrastructure/scripts/load-ci-images-vps.sh dist/images
+# Opcional: CRM_IMAGE_SHA=878a92fd5969 bash …  ou  --sha=878a92fd5969
+# Carrega SOMENTE api+frontend do SHA em SHA.txt (não reprocessa tarballs antigos na pasta).
 
 # Se pausou:
 # bash infrastructure/scripts/vps-ram-guard.sh resume
