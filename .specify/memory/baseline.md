@@ -12,7 +12,7 @@
 | ---------------------------------- | ------------------------------------------------------------------------------------ |
 | Fases 0–7 + Delivery               | DONE                                                                                 |
 | Produto 019–025 + Admin/Bulk/RAM   | DONE                                                                                 |
-| Deploy API/FE via CI → docker load | DONE (028: run `30779411458`, SHA `fef2725e2a7b`)                                    |
+| Deploy API/FE via CI → docker load | DONE (030: run `32104291388`, SHA `26cc829d0e05`)                                    |
 | Swap `/swapfile-inova`             | DONE (4G ativo)                                                                      |
 | **Harness Cursor**                 | **DONE** — agents/skills/rule + memory/agentes                                       |
 | **026 Zoho Blueprint/COQL**        | **DONE** (v1.1.0)                                                                    |

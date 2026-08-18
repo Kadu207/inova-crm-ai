@@ -18,7 +18,7 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | VPS          | `gestaoti@128.140.77.31` · path `/opt/inova-crm-ai`                                  |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                     |
 | Gate         | PASS — `reports/quality-gate/2026-08-18T05-40-35-457Z.md` (Spec 030)                 |
-| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `878a92fd5969`, run `32101917702`) |
+| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `26cc829d0e05`, run `32104291388`) |
 | Plano Mestre | 1.2                                                                                  |
 
 ### Stack
