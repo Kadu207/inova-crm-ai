@@ -66,15 +66,20 @@ export class CompaniesService {
     actorUserId?: string,
   ): Promise<Company> {
     await this.findOne(tenantId, id);
-    return this.prisma.company.update({
-      where: { id },
+    const result = await this.prisma.company.updateMany({
+      where: { id, tenantId },
       data: { ...dto, ...actorUpdateFields(actorUserId) },
     });
+    if (result.count === 0) throw new NotFoundException(`Company ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.company.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.company.updateMany({
+      where: { id, tenantId },
+      data: { deletedAt: new Date() },
+    });
   }
 
   async listContacts(tenantId: string, companyId: string) {

@@ -75,7 +75,7 @@ docker compose --env-file infrastructure/.env \
 sleep 8
 curl -sf http://127.0.0.1:9404/healthz >/dev/null && echo n8n_ok
 
-PASS='E6qfmZ2ZPA7PhzwwuJi7xW58JcWcAa1!'
+PASS="${SEED_ADMIN_PASSWORD:-${DEMO_ADMIN_PASSWORD:?SEED_ADMIN_PASSWORD or DEMO_ADMIN_PASSWORD is required}}"
 LOGIN=$(curl -sS -X POST http://127.0.0.1:9401/api/v1/auth/login \
   -H 'Content-Type: application/json' \
   -d "{\"email\":\"admin@demo.inovatitech.com.br\",\"password\":\"${PASS}\",\"tenantSlug\":\"demo\"}")

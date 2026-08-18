@@ -127,8 +127,8 @@ export class OpportunitiesService {
 
     const stageChanged = Boolean(dto.stageId && dto.stageId !== existing.stageId);
 
-    const opp = await this.prisma.opportunity.update({
-      where: { id },
+    const result = await this.prisma.opportunity.updateMany({
+      where: { id, tenantId },
       data: {
         title: dto.title,
         stageId: dto.stageId,
@@ -138,6 +138,8 @@ export class OpportunitiesService {
         ...actorUpdateFields(actorUserId),
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Opportunity ${id} not found`);
+    const opp = await this.findOne(tenantId, id);
 
     if (stageChanged) {
       await this.events.publish(tenantId, 'opportunity.stage.changed', {
@@ -179,7 +181,10 @@ export class OpportunitiesService {
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.opportunity.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.opportunity.updateMany({
+      where: { id, tenantId },
+      data: { deletedAt: new Date() },
+    });
     await this.events.publish(tenantId, 'opportunity.deleted', { opportunityId: id });
   }
 
@@ -218,10 +223,11 @@ export class OpportunitiesService {
 
     const breached: string[] = [];
     for (const opp of overdue) {
-      const updated = await this.prisma.opportunity.update({
-        where: { id: opp.id },
+      await this.prisma.opportunity.updateMany({
+        where: { id: opp.id, tenantId },
         data: { slaBreachedAt: new Date() },
       });
+      const updated = await this.findOne(tenantId, opp.id);
       await this.events.publish(tenantId, 'opportunity.sla.breached', {
         opportunityId: updated.id,
         stageId: updated.stageId,

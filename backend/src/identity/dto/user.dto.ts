@@ -1,6 +1,14 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UserRole } from '@prisma/client';
+
+/** Roles assignable via identity API — excludes SUPER_ADMIN. */
+export enum AssignableUserRole {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  SALES = 'SALES',
+  SUPPORT = 'SUPPORT',
+  VIEWER = 'VIEWER',
+}
 
 export class CreateUserDto {
   @ApiProperty()
@@ -17,10 +25,10 @@ export class CreateUserDto {
   @IsNotEmpty()
   password!: string;
 
-  @ApiPropertyOptional({ enum: UserRole })
+  @ApiPropertyOptional({ enum: AssignableUserRole })
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsEnum(AssignableUserRole)
+  role?: AssignableUserRole;
 }
 
 export class UpdateUserDto {
@@ -29,8 +37,8 @@ export class UpdateUserDto {
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ enum: UserRole })
+  @ApiPropertyOptional({ enum: AssignableUserRole })
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsEnum(AssignableUserRole)
+  role?: AssignableUserRole;
 }

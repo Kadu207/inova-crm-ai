@@ -11,10 +11,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto, UpdateContactDto } from './dto/contact.dto';
 import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
-import { JwtPayload } from '../common/constants';
+import { JwtPayload, Roles } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { ListQueryInput } from '../common/list-query';
 import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
@@ -57,6 +58,7 @@ export class ContactsController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   create(
     @TenantId() tenantId: string,
     @CurrentUser() user: JwtPayload | undefined,
@@ -66,6 +68,7 @@ export class ContactsController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -76,6 +79,7 @@ export class ContactsController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete contact' })
   remove(@TenantId() tenantId: string, @Param('id') id: string) {

@@ -10,7 +10,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { TenantId } from '../common/decorators/tenant.decorator';
+import { Roles } from '../common/constants';
 import {
   CreateWebhookSubscriptionDto,
   UpdateWebhookSubscriptionDto,
@@ -34,11 +36,13 @@ export class WebhookSubscriptionsController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   create(@TenantId() tenantId: string, @Body() dto: CreateWebhookSubscriptionDto) {
     return this.service.create(tenantId, dto);
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -48,6 +52,7 @@ export class WebhookSubscriptionsController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete webhook subscription' })
   remove(@TenantId() tenantId: string, @Param('id') id: string) {

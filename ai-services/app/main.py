@@ -2,13 +2,14 @@
 
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel, Field
 
 from app.agents.followup import suggest_next_step
 from app.agents.qualifier import qualify_lead
 from app.agents.sla_alerts import check_sla_alerts
 from app.agents.summarizer import summarize_conversation
+from app.auth import require_ai_token
 from app.guardrails import guard_output, require_tenant_id, validate_payload_no_secrets
 from app.rag.in_memory import rag_store
 
@@ -17,6 +18,8 @@ app = FastAPI(
     version="0.1.0",
     description="AI endpoints — qualify, suggest, summarize, RAG (Phase 6 stub)",
 )
+
+_protected = [Depends(require_ai_token)]
 
 
 class TenantRequest(BaseModel):
@@ -49,21 +52,21 @@ def health() -> dict[str, str]:
     return {"status": "ok", "service": "ai-crm"}
 
 
-@app.post("/v1/qualify-lead")
+@app.post("/v1/qualify-lead", dependencies=_protected)
 def qualify_lead_endpoint(body: QualifyLeadRequest) -> dict[str, Any]:
     tenant_id = require_tenant_id(body.tenant_id)
     validate_payload_no_secrets(body.lead)
     return qualify_lead(tenant_id, body.lead)
 
 
-@app.post("/v1/suggest-next-step")
+@app.post("/v1/suggest-next-step", dependencies=_protected)
 def suggest_next_step_endpoint(body: SuggestNextStepRequest) -> dict[str, Any]:
     tenant_id = require_tenant_id(body.tenant_id)
     validate_payload_no_secrets(body.context)
     return suggest_next_step(tenant_id, body.context)
 
 
-@app.post("/v1/summarize-conversation")
+@app.post("/v1/summarize-conversation", dependencies=_protected)
 def summarize_conversation_endpoint(body: SummarizeRequest) -> dict[str, Any]:
     tenant_id = require_tenant_id(body.tenant_id)
     for msg in body.messages:
@@ -71,7 +74,7 @@ def summarize_conversation_endpoint(body: SummarizeRequest) -> dict[str, Any]:
     return summarize_conversation(tenant_id, body.messages)
 
 
-@app.post("/v1/rag/query")
+@app.post("/v1/rag/query", dependencies=_protected)
 def rag_query_endpoint(body: RagQueryRequest) -> dict[str, Any]:
     tenant_id = require_tenant_id(body.tenant_id)
     docs = rag_store.query(tenant_id, body.question, limit=body.limit)
@@ -90,7 +93,7 @@ def rag_query_endpoint(body: RagQueryRequest) -> dict[str, Any]:
     }
 
 
-@app.post("/v1/sla/check")
+@app.post("/v1/sla/check", dependencies=_protected)
 def sla_check_endpoint(body: SlaCheckRequest) -> dict[str, Any]:
     tenant_id = require_tenant_id(body.tenant_id)
     return check_sla_alerts(tenant_id, body.conversations)

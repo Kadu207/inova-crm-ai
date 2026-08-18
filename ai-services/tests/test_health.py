@@ -12,3 +12,8 @@ def test_health():
     data = response.json()
     assert data["status"] == "ok"
     assert data["service"] == "ai-crm"
+
+
+def test_health_does_not_require_auth():
+    response = client.get("/health")
+    assert response.status_code == 200

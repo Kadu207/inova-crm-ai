@@ -11,6 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { OpportunitiesService } from './opportunities.service';
 import {
   CreateOpportunityDto,
@@ -18,7 +19,7 @@ import {
   UpdateOpportunityDto,
 } from './dto/opportunity.dto';
 import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
-import { JwtPayload, PlatformApi } from '../common/constants';
+import { JwtPayload, PlatformApi, Roles } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { ListQueryInput } from '../common/list-query';
 import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
@@ -41,6 +42,7 @@ export class OpportunitiesController {
   }
 
   @Post('sla/check')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({
     summary: 'Check opportunity stage SLA for current tenant (RN-OPP-03)',
   })
@@ -74,6 +76,7 @@ export class OpportunitiesController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   create(
     @TenantId() tenantId: string,
     @CurrentUser() user: JwtPayload | undefined,
@@ -83,6 +86,7 @@ export class OpportunitiesController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -93,6 +97,7 @@ export class OpportunitiesController {
   }
 
   @Post(':id/move')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Move opportunity to another pipeline stage' })
   move(
     @TenantId() tenantId: string,
@@ -104,6 +109,7 @@ export class OpportunitiesController {
   }
 
   @Post(':id/won')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Mark opportunity as won (RN-OPP-02)' })
   won(
     @TenantId() tenantId: string,
@@ -114,6 +120,7 @@ export class OpportunitiesController {
   }
 
   @Post(':id/lost')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Mark opportunity as lost (RN-OPP-02)' })
   lost(
     @TenantId() tenantId: string,
@@ -124,6 +131,7 @@ export class OpportunitiesController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete opportunity' })
   remove(@TenantId() tenantId: string, @Param('id') id: string) {

@@ -4,7 +4,7 @@
 Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.  
 Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
-**Última atualização:** 2026-08-03  
+**Última atualização:** 2026-08-18  
 **Versão produto:** **1.1.1**  
 **Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
@@ -17,7 +17,7 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Repo         | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                            |
 | VPS          | `gestaoti@128.140.77.31` · path `/opt/inova-crm-ai`                                  |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                     |
-| Gate         | PASS — `reports/quality-gate/2026-08-03T01-57-06-714Z.md` (Spec 028)                 |
+| Gate         | PASS — `reports/quality-gate/2026-08-18T05-07-57-461Z.md` (Spec 029 P0+P1)           |
 | Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `fef2725e2a7b`, run `30779411458`) |
 | Plano Mestre | 1.2                                                                                  |
 
@@ -38,12 +38,13 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Specs (pós-fase)
 
-| Spec    | Entrega                               | Status                                                                                                                   |
-| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 019–025 | Paridade Zoho onda 1                  | DONE                                                                                                                     |
-| **026** | Blueprint / FilterEngine / COQL       | **DONE** (v1.1.0)                                                                                                        |
-| **028** | Relatórios comerciais + `/relatorios` | **DONE** (v1.1.1) · prod loaded                                                                                          |
-| **027** | Meta Cloud API / WABA                 | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md) |
+| Spec    | Entrega                                           | Status                                                                                                                   |
+| ------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 019–025 | Paridade Zoho onda 1                              | DONE                                                                                                                     |
+| **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                        |
+| **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                          |
+| **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                               |
+| **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md) |
 
 **Próximo produto:** Spec 027 quando credenciais WABA (gatilho: “WABA pronto — executar Spec 027”).
 

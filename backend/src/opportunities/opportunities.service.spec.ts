@@ -12,6 +12,7 @@ describe('OpportunitiesService SLA', () => {
       findMany: jest.Mock;
       findFirst: jest.Mock;
       update: jest.Mock;
+      updateMany: jest.Mock;
       create: jest.Mock;
     };
     pipelineStage: { findFirst: jest.Mock };
@@ -25,6 +26,7 @@ describe('OpportunitiesService SLA', () => {
         findMany: jest.fn(),
         findFirst: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
         create: jest.fn(),
       },
       pipelineStage: { findFirst: jest.fn() },
@@ -59,7 +61,8 @@ describe('OpportunitiesService SLA', () => {
         slaBreachedAt: null,
       },
     ]);
-    prisma.opportunity.update.mockResolvedValue({
+    prisma.opportunity.updateMany.mockResolvedValue({ count: 1 });
+    prisma.opportunity.findFirst.mockResolvedValue({
       id: 'opp-1',
       stageId: 's1',
       stageEnteredAt: old,
@@ -98,7 +101,8 @@ describe('OpportunitiesService SLA', () => {
         },
       ])
       .mockResolvedValueOnce([]);
-    prisma.opportunity.update.mockResolvedValue({
+    prisma.opportunity.updateMany.mockResolvedValue({ count: 1 });
+    prisma.opportunity.findFirst.mockResolvedValue({
       id: 'opp-1',
       stageId: 's1',
       stageEnteredAt: old,
@@ -116,25 +120,31 @@ describe('OpportunitiesService SLA', () => {
   });
 
   it('moveStage resets slaBreachedAt via update', async () => {
-    prisma.opportunity.findFirst.mockResolvedValue({
+    const afterMove = {
       id: 'opp-1',
       tenantId: 't1',
       pipelineId: 'p1',
-      stageId: 's1',
-      status: OpportunityStatus.OPEN,
-      slaBreachedAt: new Date(),
-    });
-    prisma.pipelineStage.findFirst.mockResolvedValue({ id: 's2', pipelineId: 'p1' });
-    prisma.opportunity.update.mockResolvedValue({
-      id: 'opp-1',
       stageId: 's2',
       status: OpportunityStatus.OPEN,
       slaBreachedAt: null,
-    });
+    };
+    prisma.opportunity.findFirst
+      .mockResolvedValueOnce({
+        id: 'opp-1',
+        tenantId: 't1',
+        pipelineId: 'p1',
+        stageId: 's1',
+        status: OpportunityStatus.OPEN,
+        slaBreachedAt: new Date(),
+      })
+      .mockResolvedValueOnce(afterMove);
+    prisma.pipelineStage.findFirst.mockResolvedValue({ id: 's2', pipelineId: 'p1' });
+    prisma.opportunity.updateMany.mockResolvedValue({ count: 1 });
 
     await service.moveStage('t1', 'opp-1', { stageId: 's2' });
-    expect(prisma.opportunity.update).toHaveBeenCalledWith(
+    expect(prisma.opportunity.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        where: { id: 'opp-1', tenantId: 't1' },
         data: expect.objectContaining({
           stageId: 's2',
           slaBreachedAt: null,

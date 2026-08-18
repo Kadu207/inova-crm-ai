@@ -107,6 +107,25 @@ describe('RLS migration SQL', () => {
   });
 });
 
+describe('RLS migration SQL (Spec 029 webhook/bulk/custom)', () => {
+  const sql = readFileSync(
+    join(__dirname, '../../prisma/migrations/20260818013000_rls_webhook_bulk_custom/migration.sql'),
+    'utf8',
+  );
+
+  const tables = ['webhook_subscriptions', 'bulk_jobs', 'custom_field_definitions'];
+
+  it('enables and forces RLS on Spec 022/024/025 tables', () => {
+    for (const table of tables) {
+      expect(sql).toContain(`'${table}'`);
+    }
+    expect(sql).toContain('ENABLE ROW LEVEL SECURITY');
+    expect(sql).toContain('FORCE ROW LEVEL SECURITY');
+    expect(sql).toContain('app.tenant_id');
+    expect(sql).toContain('tenant_isolation');
+  });
+});
+
 const isolationDescribe = process.env.RUN_RLS_INTEGRATION === '1' ? describe : describe.skip;
 
 isolationDescribe('RLS isolation (integration)', () => {

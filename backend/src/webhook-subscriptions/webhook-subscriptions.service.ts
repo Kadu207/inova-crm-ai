@@ -44,8 +44,8 @@ export class WebhookSubscriptionsService {
     dto: UpdateWebhookSubscriptionDto,
   ): Promise<WebhookSubscription> {
     await this.findOne(tenantId, id);
-    return this.prisma.webhookSubscription.update({
-      where: { id },
+    const result = await this.prisma.webhookSubscription.updateMany({
+      where: { id, tenantId },
       data: {
         url: dto.url,
         secret: dto.secret,
@@ -53,11 +53,13 @@ export class WebhookSubscriptionsService {
         active: dto.active,
       },
     });
+    if (result.count === 0) throw new NotFoundException(`WebhookSubscription ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.webhookSubscription.delete({ where: { id } });
+    await this.prisma.webhookSubscription.deleteMany({ where: { id, tenantId } });
   }
 
   /**

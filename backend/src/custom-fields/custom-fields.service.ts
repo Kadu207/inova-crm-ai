@@ -40,19 +40,21 @@ export class CustomFieldsService {
     dto: UpdateCustomFieldDto,
   ): Promise<CustomFieldDefinition> {
     await this.findOne(tenantId, id);
-    return this.prisma.customFieldDefinition.update({
-      where: { id },
+    const result = await this.prisma.customFieldDefinition.updateMany({
+      where: { id, tenantId },
       data: {
         label: dto.label,
         required: dto.required,
         options: dto.options === undefined ? undefined : (dto.options as Prisma.InputJsonValue),
       },
     });
+    if (result.count === 0) throw new NotFoundException(`CustomFieldDefinition ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.customFieldDefinition.delete({ where: { id } });
+    await this.prisma.customFieldDefinition.deleteMany({ where: { id, tenantId } });
   }
 
   /**

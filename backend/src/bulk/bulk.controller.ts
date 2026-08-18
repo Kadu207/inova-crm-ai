@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Header, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
-import { JwtPayload } from '../common/constants';
+import { JwtPayload, Roles } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { BulkService } from './bulk.service';
 import { CreateBulkExportDto, CreateBulkImportDto } from './dto/bulk.dto';
@@ -30,6 +31,7 @@ export class BulkController {
   }
 
   @Post('export')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   export(
     @TenantId() tenantId: string,
     @CurrentUser() user: JwtPayload | undefined,
@@ -39,6 +41,7 @@ export class BulkController {
   }
 
   @Post('import')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   import(
     @TenantId() tenantId: string,
     @CurrentUser() user: JwtPayload | undefined,

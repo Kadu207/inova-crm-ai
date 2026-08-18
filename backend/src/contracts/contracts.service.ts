@@ -33,13 +33,15 @@ export class ContractsService {
 
   async update(tenantId: string, id: string, dto: UpdateContractDto): Promise<Contract> {
     await this.findOne(tenantId, id);
-    return this.prisma.contract.update({
-      where: { id },
+    const result = await this.prisma.contract.updateMany({
+      where: { id, tenantId },
       data: {
         title: dto.title,
         status: dto.status,
         value: dto.value !== undefined ? new Prisma.Decimal(dto.value) : undefined,
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Contract ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 }

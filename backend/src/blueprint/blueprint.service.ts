@@ -70,10 +70,14 @@ export class BlueprintService {
       dto.requiredFieldKeys !== undefined
         ? this.normalizeRequiredKeys(dto.requiredFieldKeys)
         : undefined;
-    return this.prisma.blueprintTransition.update({
-      where: { id: transitionId },
+    const result = await this.prisma.blueprintTransition.updateMany({
+      where: { id: transitionId, tenantId, pipelineId },
       data: keys !== undefined ? { requiredFieldKeys: keys } : {},
     });
+    if (result.count === 0) {
+      throw new NotFoundException(`Blueprint transition ${transitionId} not found`);
+    }
+    return this.findTransition(tenantId, pipelineId, transitionId);
   }
 
   async deleteTransition(
@@ -82,7 +86,9 @@ export class BlueprintService {
     transitionId: string,
   ): Promise<void> {
     await this.findTransition(tenantId, pipelineId, transitionId);
-    await this.prisma.blueprintTransition.delete({ where: { id: transitionId } });
+    await this.prisma.blueprintTransition.deleteMany({
+      where: { id: transitionId, tenantId, pipelineId },
+    });
   }
 
   /**

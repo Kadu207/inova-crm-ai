@@ -31,12 +31,14 @@ export class BillingService {
 
   async update(tenantId: string, id: string, dto: UpdatePaymentDto): Promise<Payment> {
     await this.findOne(tenantId, id);
-    return this.prisma.payment.update({
-      where: { id },
+    const result = await this.prisma.payment.updateMany({
+      where: { id, tenantId },
       data: {
         status: dto.status,
         paidAt: dto.status === PaymentStatus.COMPLETED ? new Date() : undefined,
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Payment ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 }

@@ -16,10 +16,12 @@ curl -sS -o /dev/null -w 'host-fe %{http_code}\n' http://127.0.0.1:9400/login ||
 curl -sS -o /dev/null -w 'public-api %{http_code}\n' https://api-crm.inovatitech.com.br/health || true
 curl -sS -o /dev/null -w 'public-fe %{http_code}\n' https://crm.inovatitech.com.br/login || true
 
+EMAIL="${SEED_ADMIN_EMAIL:-admin@inovatitech.com.br}"
+PASS="${SEED_ADMIN_PASSWORD:?SEED_ADMIN_PASSWORD is required for login smoke}"
 echo '==> Login smoke public'
 curl -sS -o /tmp/l.json -w 'login %{http_code}\n' -X POST https://api-crm.inovatitech.com.br/api/v1/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"admin@inovatitech.com.br","password":"InovaCrm#Oficial2026xK9!","tenantSlug":"inova"}'
+  -d "{\"email\":\"${EMAIL}\",\"password\":\"${PASS}\",\"tenantSlug\":\"inova\"}"
 head -c 200 /tmp/l.json; echo
 
 echo '==> FE defaults'

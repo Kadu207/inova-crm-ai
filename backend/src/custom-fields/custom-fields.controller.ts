@@ -11,8 +11,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CustomFieldModule } from '@prisma/client';
+import { CustomFieldModule, UserRole } from '@prisma/client';
 import { TenantId } from '../common/decorators/tenant.decorator';
+import { Roles } from '../common/constants';
 import { CreateCustomFieldDto, UpdateCustomFieldDto } from './dto/custom-field.dto';
 import { CustomFieldsService } from './custom-fields.service';
 
@@ -33,16 +34,19 @@ export class CustomFieldsController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   create(@TenantId() tenantId: string, @Body() dto: CreateCustomFieldDto) {
     return this.service.create(tenantId, dto);
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   update(@TenantId() tenantId: string, @Param('id') id: string, @Body() dto: UpdateCustomFieldDto) {
     return this.service.update(tenantId, id, dto);
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.service.remove(tenantId, id);

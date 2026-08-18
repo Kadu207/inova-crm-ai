@@ -280,6 +280,7 @@ services:
     restart: unless-stopped
     environment:
       AI_API_TOKEN: ${AI_API_TOKEN:-}
+      NODE_ENV: ${NODE_ENV:-production}
     networks:
       - inova-crm
     healthcheck:

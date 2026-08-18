@@ -65,8 +65,8 @@ export class ProductsService {
     actorUserId?: string,
   ): Promise<Product> {
     await this.findOne(tenantId, id);
-    return this.prisma.product.update({
-      where: { id },
+    const result = await this.prisma.product.updateMany({
+      where: { id, tenantId },
       data: {
         name: dto.name,
         isActive: dto.isActive,
@@ -74,10 +74,15 @@ export class ProductsService {
         ...actorUpdateFields(actorUserId),
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Product ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.product.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.product.updateMany({
+      where: { id, tenantId },
+      data: { deletedAt: new Date() },
+    });
   }
 }

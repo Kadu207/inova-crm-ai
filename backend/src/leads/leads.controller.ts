@@ -11,6 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { LeadsService } from './leads.service';
 import {
   ConvertLeadDto,
@@ -20,7 +21,7 @@ import {
   UpdateLeadDto,
 } from './dto/lead.dto';
 import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
-import { JwtPayload } from '../common/constants';
+import { JwtPayload, Roles } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { ListQueryInput } from '../common/list-query';
 import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
@@ -44,6 +45,7 @@ export class LeadsController {
   }
 
   @Post('inbound')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Inbound lead from n8n/Chatwoot' })
   inbound(@TenantId() tenantId: string, @Body() dto: InboundLeadDto) {
     return this.leadsService.inboundFromChatwoot(tenantId, dto);
@@ -66,6 +68,7 @@ export class LeadsController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Create lead' })
   create(
     @TenantId() tenantId: string,
@@ -76,6 +79,7 @@ export class LeadsController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Update lead' })
   update(
     @TenantId() tenantId: string,
@@ -87,6 +91,7 @@ export class LeadsController {
   }
 
   @Post(':id/qualify')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Qualify lead (RN-LEAD-02)' })
   qualify(
     @TenantId() tenantId: string,
@@ -98,6 +103,7 @@ export class LeadsController {
   }
 
   @Post(':id/convert')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @ApiOperation({ summary: 'Convert lead to opportunity' })
   convert(
     @TenantId() tenantId: string,
@@ -109,6 +115,7 @@ export class LeadsController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete lead' })
   remove(@TenantId() tenantId: string, @Param('id') id: string) {

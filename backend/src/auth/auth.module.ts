@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
+import { resolveJwtSecret } from './jwt-secret';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { RolesGuard } from './roles.guard';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET', 'dev-secret'),
+        secret: resolveJwtSecret(config),
         signOptions: {
           expiresIn: config.get<string>('JWT_EXPIRES_IN', '7d'),
         },

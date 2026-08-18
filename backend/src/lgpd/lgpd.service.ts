@@ -32,40 +32,66 @@ export class LgpdService {
 
   /**
    * Hard-delete soft-deleted CRM rows older than retention (platform cron / API_TOKEN).
-   * Result returned to caller/n8n (no outbox — no platform tenant FK).
+   * Iterates tenants with withTenant so RLS + tenantId filter apply.
    */
   async purgeExpired(): Promise<LgpdPurgeResult> {
     const days = this.retentionDays();
     const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    const where = { deletedAt: { lte: cutoff } };
 
-    const [companies, contacts, leads, opportunities, tasks, products, services] =
-      await Promise.all([
-        this.prisma.company.deleteMany({ where }),
-        this.prisma.contact.deleteMany({ where }),
-        this.prisma.lead.deleteMany({ where }),
-        this.prisma.opportunity.deleteMany({ where }),
-        this.prisma.task.deleteMany({ where }),
-        this.prisma.product.deleteMany({ where }),
-        this.prisma.service.deleteMany({ where }),
-      ]);
+    const tenants = await this.prisma.tenant.findMany({ select: { id: true } });
+    const totals = {
+      companies: 0,
+      contacts: 0,
+      leads: 0,
+      opportunities: 0,
+      tasks: 0,
+      products: 0,
+      services: 0,
+    };
+
+    for (const tenant of tenants) {
+      const tenantWhere = { tenantId: tenant.id, deletedAt: { lte: cutoff } };
+      const counts = await this.prisma.withTenant(tenant.id, async (tx) => {
+        const [companies, contacts, leads, opportunities, tasks, products, services] =
+          await Promise.all([
+            tx.company.deleteMany({ where: tenantWhere }),
+            tx.contact.deleteMany({ where: tenantWhere }),
+            tx.lead.deleteMany({ where: tenantWhere }),
+            tx.opportunity.deleteMany({ where: tenantWhere }),
+            tx.task.deleteMany({ where: tenantWhere }),
+            tx.product.deleteMany({ where: tenantWhere }),
+            tx.service.deleteMany({ where: tenantWhere }),
+          ]);
+        return {
+          companies: companies.count,
+          contacts: contacts.count,
+          leads: leads.count,
+          opportunities: opportunities.count,
+          tasks: tasks.count,
+          products: products.count,
+          services: services.count,
+        };
+      });
+
+      totals.companies += counts.companies;
+      totals.contacts += counts.contacts;
+      totals.leads += counts.leads;
+      totals.opportunities += counts.opportunities;
+      totals.tasks += counts.tasks;
+      totals.products += counts.products;
+      totals.services += counts.services;
+    }
 
     const result: LgpdPurgeResult = {
       retentionDays: days,
       cutoff: cutoff.toISOString(),
-      purged: {
-        companies: companies.count,
-        contacts: contacts.count,
-        leads: leads.count,
-        opportunities: opportunities.count,
-        tasks: tasks.count,
-        products: products.count,
-        services: services.count,
-      },
+      purged: totals,
     };
 
     const total = Object.values(result.purged).reduce((a, b) => a + b, 0);
-    this.logger.log(`LGPD purge: ${total} rows before ${result.cutoff}`);
+    this.logger.log(
+      `LGPD purge: ${total} rows before ${result.cutoff} across ${tenants.length} tenants`,
+    );
 
     return result;
   }

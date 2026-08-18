@@ -29,6 +29,7 @@ describe('FinanceService', () => {
       findFirst: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
+      updateMany: jest.Mock;
     };
   };
   let events: { publish: jest.Mock };
@@ -40,6 +41,7 @@ describe('FinanceService', () => {
         findFirst: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
       },
     };
     events = { publish: jest.fn().mockResolvedValue(undefined) };
@@ -70,12 +72,15 @@ describe('FinanceService', () => {
   });
 
   it('approve transitions DRAFT to APPROVED', async () => {
-    prisma.invoice.findFirst.mockResolvedValue(mockInvoice);
     const approved = { ...mockInvoice, status: InvoiceStatus.APPROVED };
-    prisma.invoice.update.mockResolvedValue(approved);
+    prisma.invoice.findFirst.mockResolvedValueOnce(mockInvoice).mockResolvedValueOnce(approved);
+    prisma.invoice.updateMany.mockResolvedValue({ count: 1 });
 
     const result = await service.approve(tenantId, 'inv-1');
     expect(result.status).toBe(InvoiceStatus.APPROVED);
+    expect(prisma.invoice.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'inv-1', tenantId } }),
+    );
     expect(events.publish).toHaveBeenCalledWith(
       tenantId,
       'invoice.approved',

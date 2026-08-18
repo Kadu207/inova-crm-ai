@@ -31,6 +31,7 @@ describe('LeadsService', () => {
       findFirst: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
+      updateMany: jest.Mock;
       delete: jest.Mock;
       count: jest.Mock;
     };
@@ -48,6 +49,7 @@ describe('LeadsService', () => {
         findFirst: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        updateMany: jest.fn(),
         delete: jest.fn(),
         count: jest.fn().mockResolvedValue(0),
       },
@@ -103,12 +105,15 @@ describe('LeadsService', () => {
   });
 
   it('qualify updates status and publishes lead.qualified', async () => {
-    prisma.lead.findFirst.mockResolvedValue(mockLead);
     const qualified = { ...mockLead, status: LeadStatus.QUALIFIED, score: 80 };
-    prisma.lead.update.mockResolvedValue(qualified);
+    prisma.lead.findFirst.mockResolvedValueOnce(mockLead).mockResolvedValueOnce(qualified);
+    prisma.lead.updateMany.mockResolvedValue({ count: 1 });
 
     const result = await service.qualify(tenantId, 'lead-1', { score: 80 });
     expect(result.status).toBe(LeadStatus.QUALIFIED);
+    expect(prisma.lead.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'lead-1', tenantId } }),
+    );
     expect(events.publish).toHaveBeenCalledWith(
       tenantId,
       'lead.qualified',
@@ -129,8 +134,10 @@ describe('LeadsService', () => {
       phone: '+5511999',
       email: null,
     });
-    prisma.lead.findFirst.mockResolvedValue(mockLead);
-    prisma.lead.update.mockResolvedValue({ ...mockLead, notes: 'message=oi' });
+    prisma.lead.findFirst
+      .mockResolvedValueOnce(mockLead) // findOpenLeadByContact / findOne path
+      .mockResolvedValueOnce({ ...mockLead, notes: 'message=oi' });
+    prisma.lead.updateMany.mockResolvedValue({ count: 1 });
     prisma.conversation.findFirst.mockResolvedValue(null);
     prisma.conversation.create.mockResolvedValue({ id: 'conv-1' });
 
@@ -144,6 +151,7 @@ describe('LeadsService', () => {
 
     expect(result.id).toBe('lead-1');
     expect(prisma.lead.create).not.toHaveBeenCalled();
+    expect(prisma.lead.updateMany).toHaveBeenCalled();
     expect(events.publish).toHaveBeenCalledWith(
       tenantId,
       'lead.updated',
@@ -187,7 +195,8 @@ describe('LeadsService', () => {
   });
 
   it('convert creates opportunity and marks CONVERTED', async () => {
-    prisma.lead.findFirst.mockResolvedValue(mockLead);
+    const converted = { ...mockLead, status: LeadStatus.CONVERTED };
+    prisma.lead.findFirst.mockResolvedValueOnce(mockLead).mockResolvedValueOnce(converted);
     prisma.pipeline.findFirst.mockResolvedValue({
       id: 'pipe-1',
       stages: [{ id: 'stage-1', pipelineId: 'pipe-1', order: 1 }],
@@ -197,11 +206,14 @@ describe('LeadsService', () => {
       leadId: 'lead-1',
       stageId: 'stage-1',
     });
-    prisma.lead.update.mockResolvedValue({ ...mockLead, status: LeadStatus.CONVERTED });
+    prisma.lead.updateMany.mockResolvedValue({ count: 1 });
 
     const result = await service.convert(tenantId, 'lead-1', {});
     expect(result.lead.status).toBe(LeadStatus.CONVERTED);
     expect(result.opportunity.id).toBe('opp-1');
+    expect(prisma.lead.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'lead-1', tenantId } }),
+    );
     expect(events.publish).toHaveBeenCalledWith(
       tenantId,
       'lead.converted',

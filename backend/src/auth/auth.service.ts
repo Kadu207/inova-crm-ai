@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
@@ -14,6 +19,10 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PUBLIC_REGISTER !== 'true') {
+      throw new ForbiddenException('Public registration is disabled');
+    }
+
     const existing = await this.prisma.tenant.findUnique({
       where: { slug: dto.tenantSlug },
     });

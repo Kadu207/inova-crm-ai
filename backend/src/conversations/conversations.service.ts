@@ -86,8 +86,8 @@ export class ConversationsService {
         where: { tenantId, chatwootId },
       });
       if (existing) {
-        const conv = await this.prisma.conversation.update({
-          where: { id: existing.id },
+        await this.prisma.conversation.updateMany({
+          where: { id: existing.id, tenantId },
           data: {
             ...(status ? { status } : {}),
             ...(contactId ? { contactId } : {}),
@@ -96,6 +96,7 @@ export class ConversationsService {
             ...(dto.accountId != null ? { chatwootAccountId: dto.accountId } : {}),
           },
         });
+        const conv = await this.findOne(tenantId, existing.id);
         if (status === ConversationStatus.RESOLVED) {
           await this.events.publish(tenantId, 'conversation.resolved', {
             conversationId: conv.id,
@@ -113,15 +114,21 @@ export class ConversationsService {
       leadId,
       ...(dto.accountId != null ? { chatwootAccountId: dto.accountId } : {}),
     });
-    return this.prisma.conversation.update({
-      where: { id: conv.id },
+    await this.prisma.conversation.updateMany({
+      where: { id: conv.id, tenantId },
       data: { lastMessageAt: new Date() },
     });
+    return this.findOne(tenantId, conv.id);
   }
 
   async update(tenantId: string, id: string, dto: UpdateConversationDto): Promise<Conversation> {
     await this.findOne(tenantId, id);
-    const conv = await this.prisma.conversation.update({ where: { id }, data: dto });
+    const result = await this.prisma.conversation.updateMany({
+      where: { id, tenantId },
+      data: dto,
+    });
+    if (result.count === 0) throw new NotFoundException(`Conversation ${id} not found`);
+    const conv = await this.findOne(tenantId, id);
     if (dto.status === 'RESOLVED') {
       await this.events.publish(tenantId, 'conversation.resolved', {
         conversationId: conv.id,

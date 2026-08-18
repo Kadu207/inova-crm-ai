@@ -99,19 +99,24 @@ export class ContactsService {
         ? await this.customFields.validateCustomFields(tenantId, 'CONTACT', dto.customFields)
         : undefined;
     const { customFields: _cf, ...rest } = dto;
-    return this.prisma.contact.update({
-      where: { id },
+    const result = await this.prisma.contact.updateMany({
+      where: { id, tenantId },
       data: {
         ...rest,
         ...(customFields !== undefined ? { customFields } : {}),
         ...actorUpdateFields(actorUserId),
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Contact ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.contact.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.contact.updateMany({
+      where: { id, tenantId },
+      data: { deletedAt: new Date() },
+    });
   }
 
   async listLeads(tenantId: string, contactId: string) {

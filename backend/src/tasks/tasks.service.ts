@@ -61,14 +61,19 @@ export class TasksService {
     actorUserId?: string,
   ): Promise<Task> {
     await this.findOne(tenantId, id);
-    return this.prisma.task.update({
-      where: { id },
+    const result = await this.prisma.task.updateMany({
+      where: { id, tenantId },
       data: { ...dto, ...actorUpdateFields(actorUserId) },
     });
+    if (result.count === 0) throw new NotFoundException(`Task ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.task.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.task.updateMany({
+      where: { id, tenantId },
+      data: { deletedAt: new Date() },
+    });
   }
 }

@@ -72,7 +72,7 @@ print(m.group(1) if m else '')
 PY
 )
 if [ -z "$DEMO_PASS" ]; then
-  DEMO_PASS='E6qfmZ2ZPA7PhzwwuJi7xW58JcWcAa1!'
+  DEMO_PASS="${SEED_ADMIN_PASSWORD:-${DEMO_ADMIN_PASSWORD:?DEMO password not found in credentials file; set SEED_ADMIN_PASSWORD or DEMO_ADMIN_PASSWORD}}"
 fi
 
 LOGIN=$(curl -sS -X POST http://127.0.0.1:9401/api/v1/auth/login \

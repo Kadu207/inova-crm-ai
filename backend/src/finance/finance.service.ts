@@ -53,14 +53,16 @@ export class FinanceService {
 
   async update(tenantId: string, id: string, dto: UpdateInvoiceDto): Promise<Invoice> {
     await this.findOne(tenantId, id);
-    return this.prisma.invoice.update({
-      where: { id },
+    const result = await this.prisma.invoice.updateMany({
+      where: { id, tenantId },
       data: {
         status: dto.status,
         amount: dto.amount !== undefined ? new Prisma.Decimal(dto.amount) : undefined,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Invoice ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 
   async approve(tenantId: string, id: string): Promise<Invoice> {
@@ -72,10 +74,12 @@ export class FinanceService {
       throw new BadRequestException('Invoice cannot be approved in current status');
     }
 
-    const updated = await this.prisma.invoice.update({
-      where: { id },
+    const result = await this.prisma.invoice.updateMany({
+      where: { id, tenantId },
       data: { status: InvoiceStatus.APPROVED },
     });
+    if (result.count === 0) throw new NotFoundException(`Invoice ${id} not found`);
+    const updated = await this.findOne(tenantId, id);
 
     await this.events.publish(tenantId, 'invoice.approved', {
       invoiceId: updated.id,
@@ -88,10 +92,12 @@ export class FinanceService {
     const invoice = await this.findOne(tenantId, id);
     this.assertPayableStatus(invoice.status);
 
-    const updated = await this.prisma.invoice.update({
-      where: { id },
+    const result = await this.prisma.invoice.updateMany({
+      where: { id, tenantId },
       data: { status: InvoiceStatus.PAID, paidAt: new Date() },
     });
+    if (result.count === 0) throw new NotFoundException(`Invoice ${id} not found`);
+    const updated = await this.findOne(tenantId, id);
 
     await this.events.publish(tenantId, 'invoice.paid', {
       invoiceId: updated.id,

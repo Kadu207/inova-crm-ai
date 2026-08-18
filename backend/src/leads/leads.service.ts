@@ -168,13 +168,14 @@ export class LeadsService {
 
     if (existing) {
       const notes = [existing.notes, noteLine].filter(Boolean).join('\n---\n');
-      lead = await this.prisma.lead.update({
-        where: { id: existing.id },
+      await this.prisma.lead.updateMany({
+        where: { id: existing.id, tenantId },
         data: {
           notes: notes || existing.notes,
           title: existing.title.startsWith('Lead Chatwoot:') ? title : existing.title,
         },
       });
+      lead = await this.findOne(tenantId, existing.id);
       await this.events.publish(tenantId, 'lead.updated', {
         leadId: lead.id,
         status: lead.status,
@@ -222,14 +223,16 @@ export class LeadsService {
         ? await this.customFields.validateCustomFields(tenantId, 'LEAD', dto.customFields)
         : undefined;
     const { customFields: _cf, ...rest } = dto;
-    const lead = await this.prisma.lead.update({
-      where: { id },
+    const result = await this.prisma.lead.updateMany({
+      where: { id, tenantId },
       data: {
         ...rest,
         ...(customFields !== undefined ? { customFields } : {}),
         ...actorUpdateFields(actorUserId),
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Lead ${id} not found`);
+    const lead = await this.findOne(tenantId, id);
 
     await this.events.publish(tenantId, 'lead.updated', {
       leadId: lead.id,
@@ -247,10 +250,12 @@ export class LeadsService {
   ): Promise<Lead> {
     await this.findOne(tenantId, id);
     const score = dto.score ?? 80;
-    const lead = await this.prisma.lead.update({
-      where: { id },
+    const result = await this.prisma.lead.updateMany({
+      where: { id, tenantId },
       data: { status: LeadStatus.QUALIFIED, score, ...actorUpdateFields(actorUserId) },
     });
+    if (result.count === 0) throw new NotFoundException(`Lead ${id} not found`);
+    const lead = await this.findOne(tenantId, id);
 
     await this.events.publish(tenantId, 'lead.qualified', {
       leadId: lead.id,
@@ -314,10 +319,12 @@ export class LeadsService {
       },
     });
 
-    const converted = await this.prisma.lead.update({
-      where: { id: lead.id },
+    const convertedResult = await this.prisma.lead.updateMany({
+      where: { id: lead.id, tenantId },
       data: { status: LeadStatus.CONVERTED, ...actorUpdateFields(actorUserId) },
     });
+    if (convertedResult.count === 0) throw new NotFoundException(`Lead ${id} not found`);
+    const converted = await this.findOne(tenantId, id);
 
     await this.events.publish(tenantId, 'lead.converted', {
       leadId: converted.id,
@@ -333,7 +340,10 @@ export class LeadsService {
 
   async remove(tenantId: string, id: string): Promise<void> {
     await this.findOne(tenantId, id);
-    await this.prisma.lead.update({ where: { id }, data: { deletedAt: new Date() } });
+    await this.prisma.lead.updateMany({
+      where: { id, tenantId },
+      data: { deletedAt: new Date() },
+    });
 
     await this.events.publish(tenantId, 'lead.deleted', { leadId: id });
   }

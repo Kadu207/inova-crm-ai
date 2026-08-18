@@ -31,13 +31,15 @@ export class ProposalsService {
 
   async update(tenantId: string, id: string, dto: UpdateProposalDto): Promise<Proposal> {
     await this.findOne(tenantId, id);
-    return this.prisma.proposal.update({
-      where: { id },
+    const result = await this.prisma.proposal.updateMany({
+      where: { id, tenantId },
       data: {
         title: dto.title,
         status: dto.status,
         totalValue: dto.totalValue !== undefined ? new Prisma.Decimal(dto.totalValue) : undefined,
       },
     });
+    if (result.count === 0) throw new NotFoundException(`Proposal ${id} not found`);
+    return this.findOne(tenantId, id);
   }
 }

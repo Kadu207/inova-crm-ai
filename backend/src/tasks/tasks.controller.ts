@@ -11,10 +11,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
 import { CurrentUser, TenantId } from '../common/decorators/tenant.decorator';
-import { JwtPayload } from '../common/constants';
+import { JwtPayload, Roles } from '../common/constants';
 import { resolveActorId } from '../common/audit-fields';
 import { ListQueryInput } from '../common/list-query';
 
@@ -35,6 +36,7 @@ export class TasksController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPPORT)
   create(
     @TenantId() tenantId: string,
     @CurrentUser() user: JwtPayload | undefined,
@@ -44,6 +46,7 @@ export class TasksController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPPORT)
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -54,6 +57,7 @@ export class TasksController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPPORT)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete task' })
   remove(@TenantId() tenantId: string, @Param('id') id: string) {

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -13,8 +13,10 @@ describe('AuthService', () => {
     user: { findUnique: jest.Mock };
     withTenant: jest.Mock;
   };
+  const originalEnv = { ...process.env };
 
   beforeEach(async () => {
+    process.env = { ...originalEnv };
     prisma = {
       tenant: { findUnique: jest.fn(), create: jest.fn() },
       user: { findUnique: jest.fn() },
@@ -41,6 +43,10 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get(AuthService);
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
   });
 
   it('login rejects invalid tenant', async () => {
@@ -76,5 +82,53 @@ describe('AuthService', () => {
     expect(result.tenantId).toBe('t1');
     expect(result.tenantSlug).toBe('acme');
     expect(result.userName).toBe('Admin');
+  });
+
+  it('register is forbidden in production unless ALLOW_PUBLIC_REGISTER=true', async () => {
+    process.env.NODE_ENV = 'production';
+    delete process.env.ALLOW_PUBLIC_REGISTER;
+
+    await expect(
+      service.register({
+        email: 'a@b.com',
+        password: 'password1',
+        name: 'Admin',
+        tenantSlug: 'acme',
+        tenantName: 'Acme',
+      }),
+    ).rejects.toThrow(ForbiddenException);
+
+    expect(prisma.tenant.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('register is allowed in production when ALLOW_PUBLIC_REGISTER=true', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.ALLOW_PUBLIC_REGISTER = 'true';
+    prisma.tenant.findUnique.mockResolvedValue(null);
+    prisma.tenant.create.mockResolvedValue({ id: 't1', slug: 'acme', name: 'Acme' });
+    prisma.withTenant.mockImplementation(
+      (_tenantId: string, fn: (tx: { user: { create: jest.Mock } }) => Promise<unknown>) =>
+        fn({
+          user: {
+            create: jest.fn().mockResolvedValue({
+              id: 'u1',
+              email: 'a@b.com',
+              name: 'Admin',
+              role: UserRole.ADMIN,
+            }),
+          },
+        }),
+    );
+
+    const result = await service.register({
+      email: 'a@b.com',
+      password: 'password1',
+      name: 'Admin',
+      tenantSlug: 'acme',
+      tenantName: 'Acme',
+    });
+
+    expect(result.accessToken).toBe('token-abc');
+    expect(result.tenantId).toBe('t1');
   });
 });

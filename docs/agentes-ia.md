@@ -38,6 +38,7 @@ Agentes **nunca** acessam PostgreSQL, MinIO ou RabbitMQ diretamente. Todas as a�
 ## Serviço AI (FastAPI)
 
 - Host: `ai-crm.inovatitech.com.br` (porta `9402`)
+- Auth (Spec 029): rotas `/v1/*` exigem `Authorization: Bearer <AI_API_TOKEN>`; `/health` permanece público. Em produção, `AI_API_TOKEN` ausente → 503.
 - OpenAI / OpenRouter
 - Worker `worker-crm-ai` para jobs assíncronos
 
