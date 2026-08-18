@@ -4,13 +4,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BrandLogo } from '@/components/BrandLogo';
 import { NavIcon } from '@/components/NavIcon';
-import { isNavActive, NAV_GROUPS, NAV_ITEMS } from '@/lib/navigation';
+import { filterNavItems, isNavActive, navGroupsForRole } from '@/lib/navigation';
 
 type SidebarProps = {
   open?: boolean;
   expanded?: boolean;
   onNavigate?: () => void;
   onToggleExpand?: () => void;
+  /** Spec 030 — filtra itens pelo papel da sessão */
+  role?: string | null;
 };
 
 export function Sidebar({
@@ -18,8 +20,11 @@ export function Sidebar({
   expanded = true,
   onNavigate,
   onToggleExpand,
+  role = null,
 }: SidebarProps) {
   const pathname = usePathname();
+  const items = filterNavItems(role);
+  const groups = navGroupsForRole(role);
 
   return (
     <aside
@@ -72,7 +77,7 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto overscroll-contain px-2 py-4" aria-label="Principal">
-        {NAV_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group} className="mb-5">
             <p
               className={`mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-faint ${
@@ -82,32 +87,34 @@ export function Sidebar({
               {group}
             </p>
             <ul className="space-y-0.5">
-              {NAV_ITEMS.filter((item) => item.group === group).map((item) => {
-                const active = isNavActive(pathname, item.href);
+              {items
+                .filter((item) => item.group === group)
+                .map((item) => {
+                  const active = isNavActive(pathname, item.href);
 
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      onClick={onNavigate}
-                      title={item.label}
-                      aria-current={active ? 'page' : undefined}
-                      className={[
-                        'flex items-center gap-3 rounded-md px-2.5 py-2.5 text-sm transition-colors sm:py-2',
-                        expanded ? '' : 'lg:justify-center lg:px-2',
-                        active
-                          ? 'bg-mist font-medium text-flame'
-                          : 'text-smoke hover:bg-mist hover:text-bone',
-                      ].join(' ')}
-                    >
-                      <NavIcon name={item.icon} className="h-5 w-5 shrink-0" />
-                      <span className={expanded ? 'truncate' : 'truncate lg:hidden'}>
-                        {item.label}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={onNavigate}
+                        title={item.label}
+                        aria-current={active ? 'page' : undefined}
+                        className={[
+                          'flex items-center gap-3 rounded-md px-2.5 py-2.5 text-sm transition-colors sm:py-2',
+                          expanded ? '' : 'lg:justify-center lg:px-2',
+                          active
+                            ? 'bg-mist font-medium text-flame'
+                            : 'text-smoke hover:bg-mist hover:text-bone',
+                        ].join(' ')}
+                      >
+                        <NavIcon name={item.icon} className="h-5 w-5 shrink-0" />
+                        <span className={expanded ? 'truncate' : 'truncate lg:hidden'}>
+                          {item.label}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         ))}

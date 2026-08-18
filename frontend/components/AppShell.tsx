@@ -6,6 +6,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Sidebar } from '@/components/Sidebar';
 import { AuthSession, clearSession, getSession } from '@/lib/auth';
+import { canAccessPath } from '@/lib/navigation';
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ export function AppShell({ children }: AppShellProps) {
   const [ready, setReady] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [railExpanded, setRailExpanded] = useState(true);
+  const [forbiddenRedirect, setForbiddenRedirect] = useState(false);
 
   useEffect(() => {
     const current = getSession();
@@ -32,6 +34,16 @@ export function AppShell({ children }: AppShellProps) {
   useEffect(() => {
     setNavOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!ready || !session) return;
+    if (canAccessPath(pathname, session.role)) {
+      setForbiddenRedirect(false);
+      return;
+    }
+    setForbiddenRedirect(true);
+    router.replace('/?denied=1');
+  }, [ready, session, pathname, router]);
 
   useEffect(() => {
     if (!navOpen) return;
@@ -59,6 +71,14 @@ export function AppShell({ children }: AppShellProps) {
     );
   }
 
+  if (forbiddenRedirect || (session && !canAccessPath(pathname, session.role))) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-void px-4 text-smoke">
+        Sem permissão para esta página. Redirecionando…
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-dvh bg-void">
       {navOpen ? (
@@ -73,6 +93,7 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar
         open={navOpen}
         expanded={railExpanded}
+        role={session?.role}
         onNavigate={() => setNavOpen(false)}
         onToggleExpand={() => setRailExpanded((v) => !v)}
       />
@@ -118,7 +139,7 @@ export function AppShell({ children }: AppShellProps) {
 
         <main className="page-main page-main-with-bottom-nav">{children}</main>
 
-        <BottomNav onMore={() => setNavOpen(true)} />
+        <BottomNav role={session?.role} onMore={() => setNavOpen(true)} />
       </div>
     </div>
   );

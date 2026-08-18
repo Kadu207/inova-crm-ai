@@ -1,7 +1,7 @@
 # Especificação: RBAC na navegação e páginas por papel
 
 **ID:** `030-rbac-navigation-roles`  
-**Status:** aprovado  
+**Status:** DONE  
 **Autor:** Squad Spec  
 **Data:** 2026-08-18  
 **Fase do roadmap:** pós-fase (produto contínuo) · Spec 027 Meta permanece BLOCKED

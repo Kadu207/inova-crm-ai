@@ -6,7 +6,7 @@ Front door para agentes Cursor. Detalhe: [`memory.md`](memory.md) · [`docs/agen
 
 CRM omnichannel multi-tenant (Inova TI): Next.js + NestJS/Prisma + FastAPI + workers, Chatwoot e n8n **dedicados**, RabbitMQ (eventos) + Redis (cache/filas n8n), MinIO, deploy VPS Hetzner via Cloudflare Tunnel (portas **9400–9419**).
 
-Fases 0–7 **DONE**. Pós-fase: Spec Kit `026+`. Versão atual **1.1.1** (Spec 028 relatórios DONE; Spec 027 Meta **BLOCKED**).
+Fases 0–7 **DONE**. Pós-fase: Spec Kit `026+`. Versão atual **1.1.1** (Spec 028–030 DONE; Spec 027 Meta **BLOCKED**).
 
 ## Antes de qualquer tarefa
 

@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavIcon } from '@/components/NavIcon';
-import { BOTTOM_NAV_ITEMS, isNavActive } from '@/lib/navigation';
+import { BOTTOM_NAV_ITEMS, canAccessNavItem, isNavActive } from '@/lib/navigation';
 
 type BottomNavProps = {
   onMore: () => void;
+  role?: string | null;
 };
 
-export function BottomNav({ onMore }: BottomNavProps) {
+export function BottomNav({ onMore, role = null }: BottomNavProps) {
   const pathname = usePathname();
+  const items = BOTTOM_NAV_ITEMS.filter((item) => canAccessNavItem(item, role));
 
   return (
     <nav
@@ -18,7 +20,7 @@ export function BottomNav({ onMore }: BottomNavProps) {
       aria-label="Navegação rápida"
     >
       <ul className="grid h-16 grid-cols-5">
-        {BOTTOM_NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const active = isNavActive(pathname, item.href);
           return (
             <li key={item.href}>
