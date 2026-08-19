@@ -31,21 +31,21 @@ npm run format:check
 ```
 
 Deploy imagens: [`docs/operations/ci-docker-images.md`](docs/operations/ci-docker-images.md)  
-VPS: `gestaoti@128.140.77.31` · `/opt/inova-crm-ai`
+VPS: `gestaoti@128.140.77.31` · SSH **`:65022`** · `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)
 
 ## Hard rules
 
-| Regra          | Detalhe                                                |
-| -------------- | ------------------------------------------------------ |
-| Tenant-first   | `tenantId` + RLS; zero query cross-tenant              |
-| API/toolbelt   | Agentes e AI **não** acessam DB/MinIO/Rabbit direto    |
-| n8n            | Só orquestra HTTP — sem regra CRM em Function/Code     |
-| Canais         | Só via Chatwoot `chat-crm`                             |
-| Mensageria     | RabbitMQ = domínio; Redis ≠ barramento                 |
-| Gate           | Sem `GATE_PASS` não há DONE / baseline / merge de fase |
-| Design         | Marca Inova (flame) — não purple/cream AI defaults     |
-| Secrets        | Nunca commit `.env`                                    |
-| Swarm Chatwoot | Sem scale 0 sem dono Inova-TI                          |
+| Regra          | Detalhe                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Tenant-first   | `tenantId` + RLS; zero query cross-tenant                                                                                           |
+| API/toolbelt   | Agentes e AI **não** acessam DB/MinIO/Rabbit direto                                                                                 |
+| n8n            | Só orquestra HTTP — sem regra CRM em Function/Code                                                                                  |
+| Canais         | Só via Chatwoot `chat-crm`                                                                                                          |
+| Mensageria     | RabbitMQ = domínio; Redis ≠ barramento                                                                                              |
+| Gate           | Sem `GATE_PASS` não há DONE / baseline / merge de fase                                                                              |
+| Design         | Marca Inova (flame) — não purple/cream AI defaults                                                                                  |
+| Secrets        | Nunca commit `.env`                                                                                                                 |
+| Swarm Chatwoot | Scale só com dono Inova-TI · estado **0/0** · recovery [`swarm-vxlan-chatwoot-fix.md`](docs/operations/swarm-vxlan-chatwoot-fix.md) |
 
 ## Layout útil
 

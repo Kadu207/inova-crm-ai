@@ -24,11 +24,13 @@ Squads: `.cursor/agents/{spec,build,qa,delivery}-squad.md`. Ciclo completo em `d
 - **API/toolbelt:** agentes IA e n8n não acessam Postgres/MinIO/Rabbit direto
 - **n8n:** só orquestra HTTP — sem regra CRM em Function/Code
 - **Canais:** só via Chatwoot CRM (`chat-crm`)
-- **Swarm Chatwoot** (`chat.inovatitech.com.br`): sem scale 0 sem dono Inova-TI
+- **Swarm Chatwoot** (`chat.inovatitech.com.br`): scale/recovery só com dono Inova-TI · runbook `docs/operations/swarm-vxlan-chatwoot-fix.md`
 
 ## Ops Chatwoot (prioridade)
 
 Se `bash chatwoot/scripts/audit-crm-chatwoot.sh` indicar rails PID ≥ 80% do limite (512) ou health unhealthy / `can't fork` → recreate rails/sidekiq **antes** de feature work (EMB-04 em `docs/agents.md`).
+
+SSH VPS: porta **`65022`** (`docs/operations/vps-ssh.md`). Swarm legado em **0/0** até recovery vxlan pelo dono.
 
 ## Spec Kit
 

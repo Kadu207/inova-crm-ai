@@ -98,9 +98,19 @@ curl -sS -o /dev/null -w 'chatwoot %{http_code}\n' http://127.0.0.1:9403/
 
 ## Pacote de decisão — Swarm Inova-TI (`chat.inovatitech.com.br`)
 
-**Proibido:** `docker service scale …=0` sem autorização **explícita** do dono Inova-TI.
+**Proibido:** `docker service scale …=0` sem autorização **explícita** do dono Inova-TI.  
+**Aplicado 2026-08-19:** scale **0/0** (operador CRM) — stack estava em loop Rejected (vxlan); CRM `chat-crm` intacto.
 
-### Snapshot 2026-08-03
+### Snapshot 2026-08-19 (atual)
+
+| Service                             | Replicas | Estado            |
+| ----------------------------------- | -------- | ----------------- |
+| `chatwoot-admin_chatwoot-admin`     | **0/0**  | Pausado (scale 0) |
+| `chatwoot-sidekiq_chatwoot-sidekiq` | **0/0**  | Pausado (scale 0) |
+
+Antes: `0/1` com Rejected — `network sandbox join failed` / vxlan `10.0.1.0/24: file exists`.
+
+### Snapshot 2026-08-03 (histórico)
 
 | Service                             | Replicas | Image                      | Estado task                       |
 | ----------------------------------- | -------- | -------------------------- | --------------------------------- |
@@ -115,14 +125,15 @@ Histórico: tasks anteriores com **Exit 137** (OOM/kill) — stack instável sob
 2. Cloudflare Tunnel / DNS: hostname legado aponta para Swarm — migrar ou desligar?
 3. Backup / export se houver dados vivos no Postgres Swarm
 4. Rotação de secrets (ver § Segurança) **antes** de expor de novo
+5. Corrigir overlay Swarm (vxlan) **antes** de voltar a 1/1 — runbook: [`swarm-vxlan-chatwoot-fix.md`](./swarm-vxlan-chatwoot-fix.md)
 
 ### Checklist dono Inova-TI
 
-| Decisão         | Marcar | Efeito                                              |
-| --------------- | ------ | --------------------------------------------------- |
-| Manter ativo    | [ ]    | Continua 1/1; CRM não toca                          |
-| Scale 0 (pause) | [ ]    | Libera RAM; Tunnel pode 502 até DNS/Tunnel ajustado |
-| Remover stack   | [ ]    | Só após backup + confirmação escrita                |
+| Decisão         | Marcar         | Efeito                               |
+| --------------- | -------------- | ------------------------------------ |
+| Manter ativo    | [ ]            | Continua 1/1; CRM não toca           |
+| Scale 0 (pause) | [x] 2026-08-19 | Pausado; Tunnel legado pode 502      |
+| Remover stack   | [ ]            | Só após backup + confirmação escrita |
 
 ### Comandos (comentados — só após confirmação)
 
@@ -132,10 +143,10 @@ Histórico: tasks anteriores com **Exit 137** (OOM/kill) — stack instável sob
 # docker service ps chatwoot-admin_chatwoot-admin --no-trunc | head
 # docker service ps chatwoot-sidekiq_chatwoot-sidekiq --no-trunc | head
 
-# Scale 0 (NÃO executar sem dono Inova-TI)
+# Scale 0 (aplicado 2026-08-19)
 # docker service scale chatwoot-admin_chatwoot-admin=0 chatwoot-sidekiq_chatwoot-sidekiq=0
 
-# Voltar 1/1
+# Voltar 1/1 (só após fix vxlan + dono Inova-TI)
 # docker service scale chatwoot-admin_chatwoot-admin=1 chatwoot-sidekiq_chatwoot-sidekiq=1
 ```
 
@@ -149,7 +160,7 @@ Antes de pausar ou remover uma instância, o **dono do produto** confirma:
 | ------------------------------- | ------------ | --------------- | ------- |
 | CRM `chat-crm`                  | [x]          | [ ]             | [ ]     |
 | Casa da Paz `casadapaz-chat`    | [ ]          | [ ]             | [ ]     |
-| Swarm `chat.inovatitech.com.br` | [ ]          | [ ]             | [ ]     |
+| Swarm `chat.inovatitech.com.br` | [ ]          | [x] 2026-08-19  | [ ]     |
 
 ### Comandos de referência (só após confirmação explícita)
 
@@ -174,6 +185,8 @@ O service Swarm já foi observado com secrets/placeholders fracos em variáveis 
 
 ## Relacionados
 
-- [ports.md](../ports.md) — bloco `9400–9419` (CRM)
+- [ports.md](../ports.md) — bloco `9400–9419` (CRM) · SSH VPS `:65022`
+- [vps-ssh.md](./vps-ssh.md) — acesso SSH
+- [swarm-vxlan-chatwoot-fix.md](./swarm-vxlan-chatwoot-fix.md) — voltar Swarm Chatwoot a 1/1
 - [vps-ram-hardening.md](./vps-ram-hardening.md) — pause de sidekiq em rebuilds
 - [webhook-signing.md](../webhook-signing.md) — HMAC CRM ↔ n8n

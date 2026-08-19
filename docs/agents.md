@@ -133,16 +133,16 @@ Build: **um C-\* (ou um bloco P0) por vez**; marcar DONE só após R-90.
 
 ## 6. Embed / ops — papéis EMB-\*
 
-| ID     | Ação                                        | Quando                        |
-| ------ | ------------------------------------------- | ----------------------------- |
-| EMB-01 | `check-ports` / mapa 9400–9419              | compose up / conflito         |
-| EMB-02 | Build images CI → `load-ci-images-vps.sh`   | pós gate + push               |
-| EMB-03 | `migrate-api-vps.sh`                        | schema mudou                  |
-| EMB-04 | Audit/recreate Chatwoot CRM PID             | PID ≥ 80% ou 500/`can't fork` |
-| EMB-05 | `vps-ram-guard.sh` pause/resume             | rebuild pesado                |
-| EMB-06 | WABA checklist + cutover Meta               | Spec 027                      |
-| EMB-07 | Inventário Chatwoot multi-instância         | ops VPS                       |
-| EMB-08 | Pacote decisão Swarm (sem scale automático) | dono Inova-TI                 |
+| ID     | Ação                                        | Quando                                                                                    |
+| ------ | ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| EMB-01 | `check-ports` / mapa 9400–9419              | compose up / conflito                                                                     |
+| EMB-02 | Build images CI → `load-ci-images-vps.sh`   | pós gate + push                                                                           |
+| EMB-03 | `migrate-api-vps.sh`                        | schema mudou                                                                              |
+| EMB-04 | Audit/recreate Chatwoot CRM PID             | PID ≥ 80% ou 500/`can't fork`                                                             |
+| EMB-05 | `vps-ram-guard.sh` pause/resume             | rebuild pesado                                                                            |
+| EMB-06 | WABA checklist + cutover Meta               | Spec 027                                                                                  |
+| EMB-07 | Inventário Chatwoot multi-instância         | ops VPS                                                                                   |
+| EMB-08 | Pacote decisão Swarm + recovery vxlan → 1/1 | dono Inova-TI · [`swarm-vxlan-chatwoot-fix.md`](./operations/swarm-vxlan-chatwoot-fix.md) |
 
 ---
 
@@ -163,7 +163,7 @@ Build: **um C-\* (ou um bloco P0) por vez**; marcar DONE só após R-90.
 - Canal WhatsApp fora do Chatwoot
 - Redis como barramento de domínio
 - Marcar DONE com gate vermelho
-- Scale Swarm Chatwoot sem dono Inova-TI
+- Scale Swarm Chatwoot sem dono Inova-TI (recovery documentado em `swarm-vxlan-chatwoot-fix.md`)
 - Commit de `.env` / secrets
 
 ---

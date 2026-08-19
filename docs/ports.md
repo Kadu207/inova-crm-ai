@@ -8,6 +8,10 @@ Antes de `docker compose up`, executar `infrastructure/scripts/check-ports.ps1` 
 
 Roteamento externo via **Cloudflare Tunnel** — sem bind público em 80/443/5432/6379/5672.
 
+**SSH admin VPS:** host `128.140.77.31` · porta **`65022`** · user `gestaoti` — [`operations/vps-ssh.md`](./operations/vps-ssh.md).
+
+**Chatwoot legado Swarm** (`chat.inovatitech.com.br`) **não** usa porta do bloco 9400–9419 — overlay Docker; recovery: [`operations/swarm-vxlan-chatwoot-fix.md`](./operations/swarm-vxlan-chatwoot-fix.md). CRM Chatwoot = **9403** apenas.
+
 ---
 
 ## Serviços publicados (Tunnel / SSH)

@@ -1,6 +1,7 @@
 # Deploy VPS — Inova CRM AI (próximo passo operacional)
 
-**Alvo:** `gestaoti@128.140.77.31` → `/opt/inova-crm-ai`  
+**Alvo:** `gestaoti@128.140.77.31` porta SSH **`65022`** → `/opt/inova-crm-ai`  
+Ver: [operations/vps-ssh.md](./operations/vps-ssh.md)  
 **Pré-requisito:** Redis público já fechado (BSI OK).
 
 SSH deste agente não tem sua chave — rode no **seu** terminal (onde `ssh gestaoti@...` já funciona).

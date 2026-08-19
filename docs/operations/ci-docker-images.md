@@ -14,6 +14,7 @@ Procedimento **oficial** de deploy de API + Frontend: build no GitHub Actions, c
 - GitHub CLI autenticado: `gh auth status`
 - SSH key: `%USERPROFILE%\.ssh\id_ed25519_inova`
 - Host VPS: `gestaoti@128.140.77.31`
+- **Porta SSH: `65022`** (não 22) — ver [`vps-ssh.md`](./vps-ssh.md)
 - Path remoto: `/opt/inova-crm-ai`
 
 ### VPS
@@ -152,9 +153,9 @@ CRM_FRONTEND_IMAGE=inova-crm-frontend:ci
 $key = "$env:USERPROFILE\.ssh\id_ed25519_inova"
 $remote = "gestaoti@128.140.77.31"
 
-ssh -o BatchMode=yes -i $key $remote "mkdir -p /opt/inova-crm-ai/dist/images"
+ssh -p 65022 -o BatchMode=yes -i $key $remote "mkdir -p /opt/inova-crm-ai/dist/images"
 
-scp -o BatchMode=yes -i $key `
+scp -P 65022 -o BatchMode=yes -i $key `
   dist\images\*.tar.gz `
   dist\images\images.env `
   dist\images\SHA.txt `

@@ -30,6 +30,9 @@ Detalhe copiável: seção 2 de [`agents.md`](./agents.md).
 ## Ops ligados ao harness
 
 - Chatwoot PID / Swarm: [`operations/vps-chatwoot-instances.md`](./operations/vps-chatwoot-instances.md)
+- Swarm vxlan → 1/1: [`operations/swarm-vxlan-chatwoot-fix.md`](./operations/swarm-vxlan-chatwoot-fix.md)
+- SSH VPS (`:65022`): [`operations/vps-ssh.md`](./operations/vps-ssh.md)
+- Ops abertos: [`operations/ops-open-items-2026-08-18.md`](./operations/ops-open-items-2026-08-18.md)
 - CI images: [`operations/ci-docker-images.md`](./operations/ci-docker-images.md)
 - Quality Gate: [`operations/quality-gate.md`](./operations/quality-gate.md)
 

@@ -9,7 +9,7 @@ Substitua a senha quando o SSH pedir. Para `sudo` na VPS, use sessão interativa
 ## A) Criar pasta (SSH interativo — 1 minuto)
 
 ```powershell
-ssh gestaoti@128.140.77.31
+ssh -p 65022 gestaoti@128.140.77.31
 ```
 
 Na VPS:
@@ -42,13 +42,13 @@ tar -czf "$env:TEMP\inova-crm-ai.tgz" `
   .
 
 # Envia
-scp "$env:TEMP\inova-crm-ai.tgz" gestaoti@128.140.77.31:/tmp/inova-crm-ai.tgz
+scp -P 65022 "$env:TEMP\inova-crm-ai.tgz" gestaoti@128.140.77.31:/tmp/inova-crm-ai.tgz
 ```
 
 Na VPS:
 
 ```powershell
-ssh gestaoti@128.140.77.31
+ssh -p 65022 gestaoti@128.140.77.31
 ```
 
 ```bash
@@ -80,7 +80,7 @@ cd "C:\Projetos DEV\Inova CRM AI"
 # Zip nativo
 Compress-Archive -Path * -DestinationPath "$env:TEMP\inova-crm-ai.zip" -Force
 # Se Compress-Archive incluir node_modules e ficar gigante, use o tar acima ou exclua pastas antes.
-scp "$env:TEMP\inova-crm-ai.zip" gestaoti@128.140.77.31:/tmp/
+scp -P 65022 "$env:TEMP\inova-crm-ai.zip" gestaoti@128.140.77.31:/tmp/
 ```
 
 Na VPS: `cd /opt/inova-crm-ai && unzip -o /tmp/inova-crm-ai.zip` (instale `unzip` se precisar: `sudo apt install -y unzip`).

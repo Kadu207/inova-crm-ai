@@ -4,7 +4,7 @@
 Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.  
 Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
-**Última atualização:** 2026-08-18  
+**Última atualização:** 2026-08-19  
 **Versão produto:** **1.1.1**  
 **Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
@@ -12,14 +12,14 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Snapshot operacional
 
-| Item         | Valor                                                                                |
-| ------------ | ------------------------------------------------------------------------------------ |
-| Repo         | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                            |
-| VPS          | `gestaoti@128.140.77.31` · path `/opt/inova-crm-ai`                                  |
-| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                     |
-| Gate         | PASS — `reports/quality-gate/2026-08-18T05-40-35-457Z.md` (Spec 030)                 |
-| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `26cc829d0e05`, run `32104291388`) |
-| Plano Mestre | 1.2                                                                                  |
+| Item         | Valor                                                                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Repo         | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                           |
+| VPS          | `gestaoti@128.140.77.31` · **SSH `:65022`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
+| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
+| Gate         | PASS — `reports/quality-gate/2026-08-18T05-40-35-457Z.md` (Spec 030)                                                                |
+| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `26cc829d0e05`, run `32104291388`)                                                |
+| Plano Mestre | 1.2                                                                                                                                 |
 
 ### Stack
 
@@ -55,11 +55,13 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 Inventário: [`docs/operations/vps-chatwoot-instances.md`](docs/operations/vps-chatwoot-instances.md)
 
-| Instância      | Domínio                             | Estado 2026-08-03                                                              |
-| -------------- | ----------------------------------- | ------------------------------------------------------------------------------ |
-| CRM            | `chat-crm` · `127.0.0.1:9403`       | rails **recreated** — PIDs **~17/512 (~3%)**, healthy, `AUDIT_CRM_CHATWOOT_OK` |
-| Casa da Paz    | `casadapaz-chat` · `127.0.0.1:3001` | bind OK                                                                        |
-| Swarm Inova-TI | `chat.inovatitech.com.br`           | **1/1** admin+sidekiq — **aguarda dono** (sem scale 0)                         |
+| Instância      | Domínio                             | Estado 2026-08-19                                                                                                                            |
+| -------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| CRM            | `chat-crm` · `127.0.0.1:9403`       | recreate 2026-08-19 — PIDs **~15/512 (~2%)**, healthy, `AUDIT_CRM_CHATWOOT_OK`                                                               |
+| Casa da Paz    | `casadapaz-chat` · `127.0.0.1:3001` | bind OK (última verificação)                                                                                                                 |
+| Swarm Inova-TI | `chat.inovatitech.com.br`           | **scale 0 (0/0)** — pausado 2026-08-19 (vxlan); recovery → 1/1: [`swarm-vxlan-chatwoot-fix.md`](docs/operations/swarm-vxlan-chatwoot-fix.md) |
+
+**Webhook secrets:** seed OK 2026-08-19 (`inova`, `rls-test-a`, `rls-test-b`).
 
 **Regra:** se `crm_chatwoot_rails` PID ≥ 80% do `pids_limit` (512) → recreate rails/sidekiq **antes** de feature work.
 

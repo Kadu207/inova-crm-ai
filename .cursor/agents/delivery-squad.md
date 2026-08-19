@@ -33,10 +33,12 @@ bash /opt/inova-crm-ai/chatwoot/scripts/audit-crm-chatwoot.sh
 
 ## Swarm
 
-**Não** scale 0 em `chatwoot-admin` / `chatwoot-sidekiq` sem dono Inova-TI. Pacote: `docs/operations/vps-chatwoot-instances.md`.
+Scale / recovery só com dono Inova-TI. Estado 2026-08-19: **0/0** (vxlan).  
+Voltar a 1/1: `docs/operations/swarm-vxlan-chatwoot-fix.md` · inventário: `docs/operations/vps-chatwoot-instances.md`.
 
 ## Proibido
 
 - Deploy com gate FAIL
 - Wipe / recriar `infrastructure/.env` vazio
 - Misturar secrets Swarm com `.env` CRM
+- Scale Swarm sem confirmação do dono (exceto quando o dono já pediu recovery documentado)
