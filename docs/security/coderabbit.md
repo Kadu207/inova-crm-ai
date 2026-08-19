@@ -37,3 +37,7 @@ O CodeRabbit continua revisando código de produto (`backend/`, `frontend/`, `ai
 ## Relação com Quality Gate
 
 CodeRabbit **complementa** `npm run gate` — não o substitui. Gate FAIL continua hard-stop.
+
+## Validacao App
+
+PR de smoke para confirmar que o GitHub App CodeRabbit responde com `@coderabbitai review`.
