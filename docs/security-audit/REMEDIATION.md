@@ -19,9 +19,24 @@ Referência: [`relatorio-auditoria-seguranca.pdf`](./relatorio-auditoria-seguran
 
 ## Ops VPS (F-06 + smoke)
 
+> **2026-09-01:** commit `3d2145c` em `main` + CI Build images. SSH `:65022` a partir do agente timeout — executar na VPS (Putty/local):
+
 ```bash
 # SSH :65022 → /opt/inova-crm-ai
-# 1) Rotacionar SEED_ADMIN_PASSWORD / senhas admin se ainda forem defaults históricos
-# 2) bash infrastructure/scripts/seed-tenant-webhook-secrets.sh
-# 3) Após load images: smoke VIEWER 403 nos GETs privilegiados; API_TOKEN ok em /lgpd/purge
+# 1) Após CI: baixar artifacts e load
+#    docs/operations/ci-docker-images.md Passos 2–5
+# 2) Rotacionar secrets webhook por tenant
+bash infrastructure/scripts/seed-tenant-webhook-secrets.sh
+
+# 3) Smoke RBAC (substitua TOKEN_VIEWER / API_TOKEN / TENANT)
+API=https://api-crm.inovatitech.com.br/api/v1
+# VIEWER deve 403:
+curl -sS -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN_VIEWER" -H "x-tenant-id: $TENANT" "$API/invoices"
+curl -sS -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN_VIEWER" -H "x-tenant-id: $TENANT" "$API/bulk/jobs"
+curl -sS -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN_VIEWER" -H "x-tenant-id: $TENANT" "$API/webhook-subscriptions"
+curl -sS -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN_VIEWER" -H "x-tenant-id: $TENANT" "$API/lgpd/purge" -X POST
+# API_TOKEN platform OK (não 401):
+curl -sS -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $API_TOKEN" -X POST "$API/lgpd/purge"
+
+# 4) Se senhas históricas pré-029 ainda autenticam → trocar admin imediatamente
 ```
