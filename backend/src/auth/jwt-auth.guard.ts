@@ -66,6 +66,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
+    // Platform routes (LGPD purge, SLA check-all) must not accept human JWTs.
+    if (isPlatformApi) {
+      throw new UnauthorizedException('Platform API requires API_TOKEN bearer');
+    }
+
     return super.canActivate(context);
   }
 

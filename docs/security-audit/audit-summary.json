@@ -1,0 +1,99 @@
+{
+  "pdf": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\relatorio-auditoria-seguranca.pdf",
+  "date": "2026-09-01",
+  "findings": 10,
+  "by_severity": {
+    "critica": 2,
+    "alta": 3,
+    "media": 4,
+    "baixa": 1
+  },
+  "by_category": {
+    "Permiss\u00e3o no navegador": 6,
+    "Banco sem tranca": 1,
+    "Chaves expostas": 3
+  },
+  "verification": {
+    "pages": 13,
+    "previews": [
+      {
+        "page": 1,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-01.png"
+      },
+      {
+        "page": 2,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-02.png"
+      },
+      {
+        "page": 3,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-03.png"
+      },
+      {
+        "page": 4,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-04.png"
+      },
+      {
+        "page": 5,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-05.png"
+      },
+      {
+        "page": 6,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-06.png"
+      },
+      {
+        "page": 7,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-07.png"
+      },
+      {
+        "page": 8,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-08.png"
+      },
+      {
+        "page": 9,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-09.png"
+      },
+      {
+        "page": 10,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-10.png"
+      },
+      {
+        "page": 11,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-11.png"
+      },
+      {
+        "page": 12,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-12.png"
+      },
+      {
+        "page": 13,
+        "w": 893,
+        "h": 1263,
+        "preview": "C:\\Projetos DEV\\Inova CRM AI\\docs\\security-audit\\_preview\\page-13.png"
+      }
+    ]
+  }
+}

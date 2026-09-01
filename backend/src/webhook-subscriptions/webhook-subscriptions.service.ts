@@ -7,27 +7,44 @@ import {
   UpdateWebhookSubscriptionDto,
 } from './dto/webhook-subscription.dto';
 
+/** API response: never expose outbound HMAC secret in clear text. */
+export type WebhookSubscriptionSafe = Omit<WebhookSubscription, 'secret'> & {
+  secretMasked: string | null;
+};
+
+export function toSafeWebhookSubscription(row: WebhookSubscription): WebhookSubscriptionSafe {
+  const { secret, ...rest } = row;
+  return {
+    ...rest,
+    secretMasked: secret ? '********' : null,
+  };
+}
+
 @Injectable()
 export class WebhookSubscriptionsService {
   private readonly logger = new Logger(WebhookSubscriptionsService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(tenantId: string): Promise<WebhookSubscription[]> {
-    return this.prisma.webhookSubscription.findMany({
+  async findAll(tenantId: string): Promise<WebhookSubscriptionSafe[]> {
+    const rows = await this.prisma.webhookSubscription.findMany({
       where: { tenantId },
       orderBy: { createdAt: 'desc' },
     });
+    return rows.map(toSafeWebhookSubscription);
   }
 
-  async findOne(tenantId: string, id: string): Promise<WebhookSubscription> {
+  async findOne(tenantId: string, id: string): Promise<WebhookSubscriptionSafe> {
     const row = await this.prisma.webhookSubscription.findFirst({ where: { id, tenantId } });
     if (!row) throw new NotFoundException(`WebhookSubscription ${id} not found`);
-    return row;
+    return toSafeWebhookSubscription(row);
   }
 
-  create(tenantId: string, dto: CreateWebhookSubscriptionDto): Promise<WebhookSubscription> {
-    return this.prisma.webhookSubscription.create({
+  async create(
+    tenantId: string,
+    dto: CreateWebhookSubscriptionDto,
+  ): Promise<WebhookSubscriptionSafe> {
+    const row = await this.prisma.webhookSubscription.create({
       data: {
         tenantId,
         url: dto.url,
@@ -36,14 +53,15 @@ export class WebhookSubscriptionsService {
         active: dto.active ?? true,
       },
     });
+    return toSafeWebhookSubscription(row);
   }
 
   async update(
     tenantId: string,
     id: string,
     dto: UpdateWebhookSubscriptionDto,
-  ): Promise<WebhookSubscription> {
-    await this.findOne(tenantId, id);
+  ): Promise<WebhookSubscriptionSafe> {
+    await this.requireRow(tenantId, id);
     const result = await this.prisma.webhookSubscription.updateMany({
       where: { id, tenantId },
       data: {
@@ -58,8 +76,14 @@ export class WebhookSubscriptionsService {
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
-    await this.findOne(tenantId, id);
+    await this.requireRow(tenantId, id);
     await this.prisma.webhookSubscription.deleteMany({ where: { id, tenantId } });
+  }
+
+  private async requireRow(tenantId: string, id: string): Promise<WebhookSubscription> {
+    const row = await this.prisma.webhookSubscription.findFirst({ where: { id, tenantId } });
+    if (!row) throw new NotFoundException(`WebhookSubscription ${id} not found`);
+    return row;
   }
 
   /**

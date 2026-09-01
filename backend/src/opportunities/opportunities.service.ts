@@ -8,6 +8,7 @@ import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import { BlueprintService } from '../blueprint/blueprint.service';
+import { runWithTenant } from '../tenancy/tenant-context';
 import {
   CreateOpportunityDto,
   MoveOpportunityDto,
@@ -257,7 +258,7 @@ export class OpportunitiesService {
     const breached: Array<{ tenantId: string; opportunityId: string }> = [];
 
     for (const tenant of tenants) {
-      const result = await this.checkSla(tenant.id);
+      const result = await runWithTenant(tenant.id, () => this.checkSla(tenant.id));
       checked += result.checked;
       for (const opportunityId of result.breached) {
         breached.push({ tenantId: tenant.id, opportunityId });

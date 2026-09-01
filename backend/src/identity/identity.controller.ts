@@ -19,6 +19,7 @@ export class IdentityController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.identityService.findOne(tenantId, id);
   }

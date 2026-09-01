@@ -10,6 +10,9 @@ type DelegateMap = Record<string, Record<string, (args: unknown) => Promise<unkn
 
 const baseClient = new PrismaClient();
 
+/** Models without tenant_id — allowed when ALS has no tenant (platform SaaS). */
+const MODELS_ALLOWED_WITHOUT_TENANT = new Set(['Tenant']);
+
 const extendedClient = baseClient.$extends({
   query: {
     $allModels: {
@@ -18,7 +21,12 @@ const extendedClient = baseClient.$extends({
         const key = modelDelegateKey(model);
 
         if (!tenantId) {
-          return (baseClient as unknown as DelegateMap)[key][operation](args);
+          if (MODELS_ALLOWED_WITHOUT_TENANT.has(model)) {
+            return (baseClient as unknown as DelegateMap)[key][operation](args);
+          }
+          throw new Error(
+            `Prisma ${model}.${operation} requires tenant context (ALS app.tenant_id)`,
+          );
         }
 
         return baseClient.$transaction(async (tx) => {

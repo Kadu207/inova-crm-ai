@@ -7,8 +7,22 @@ const TENANT_SLUG = process.env.SEED_TENANT_SLUG ?? 'inova';
 const TENANT_NAME = process.env.SEED_TENANT_NAME ?? 'Inova TI';
 const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? 'admin@inovatitech.com.br';
 /** Em produção use SEED_ADMIN_PASSWORD (ver .credentials-operator.txt na VPS). */
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? 'ChangeMeLocalOnly@2026!';
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
 const ADMIN_NAME = process.env.SEED_ADMIN_NAME ?? 'Admin Inova TI';
+
+function resolveAdminPassword(): string {
+  const nodeEnv = (process.env.NODE_ENV ?? 'development').trim();
+  if (ADMIN_PASSWORD && ADMIN_PASSWORD.length > 0) {
+    return ADMIN_PASSWORD;
+  }
+  if (nodeEnv === 'production') {
+    throw new Error(
+      'SEED_ADMIN_PASSWORD is required when NODE_ENV=production (no default password)',
+    );
+  }
+  // Local/test only — never used when NODE_ENV=production
+  return 'ChangeMeLocalOnly@2026!';
+}
 
 async function withTenantTx<T>(
   tenantId: string,
@@ -25,7 +39,8 @@ async function withTenantTx<T>(
 }
 
 async function main(): Promise<void> {
-  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
+  const password = resolveAdminPassword();
+  const passwordHash = await bcrypt.hash(password, 12);
 
   const chatwootAccountId = Number(process.env.SEED_CHATWOOT_ACCOUNT_ID ?? '1');
 
@@ -101,7 +116,7 @@ async function main(): Promise<void> {
   console.log(`  tenant: ${tenant.slug} (${tenant.id})`);
   console.log(`  chatwootAccountId: ${tenant.chatwootAccountId}`);
   console.log(`  admin:  ${user.email}`);
-  console.log(`  pass:   ${ADMIN_PASSWORD}`);
+  console.log(`  pass:   (set via SEED_ADMIN_PASSWORD — not logged)`);
 }
 
 main()

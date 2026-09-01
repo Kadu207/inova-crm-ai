@@ -13,7 +13,7 @@ export const ALL_ROLES: UserRole[] = [
 /** Admin tenant + gestores (config, usuários, auditoria, bulk, financeiro). */
 export const ADMIN_MANAGER_ROLES: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'MANAGER'];
 
-/** Relatórios comerciais (API: ADMIN + SALES). */
+/** Relatórios comerciais — alinhado a @Roles da API (ADMIN/MANAGER/SALES/SUPER_ADMIN). */
 export const REPORTS_ROLES: UserRole[] = ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'SALES'];
 
 export type NavItem = {

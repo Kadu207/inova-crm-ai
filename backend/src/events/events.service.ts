@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { generateCorrelationId, generateIdempotencyKey } from '../common/utils';
 import { WebhookSubscriptionsService } from '../webhook-subscriptions/webhook-subscriptions.service';
+import { runWithTenant } from '../tenancy/tenant-context';
 
 interface DomainEventEnvelope {
   eventType: string;
@@ -105,36 +106,42 @@ export class EventsService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    const pending = await this.prisma.outboxEvent.findMany({
-      where: { publishedAt: null },
-      take: 50,
-      orderBy: { createdAt: 'asc' },
-    });
+    const tenants = await this.prisma.tenant.findMany({ select: { id: true } });
 
-    for (const event of pending) {
-      const envelope: DomainEventEnvelope = {
-        eventType: event.eventType,
-        tenantId: event.tenantId,
-        correlationId: event.correlationId,
-        idempotencyKey: event.idempotencyKey,
-        timestamp: event.createdAt.toISOString(),
-        payload: event.payload as Record<string, unknown>,
-      };
-
-      try {
-        this.channel.publish(
-          this.exchange,
-          event.eventType,
-          Buffer.from(JSON.stringify(envelope)),
-          { persistent: true, contentType: 'application/json' },
-        );
-        await this.prisma.outboxEvent.update({
-          where: { id: event.id },
-          data: { publishedAt: new Date() },
+    for (const tenant of tenants) {
+      await runWithTenant(tenant.id, async () => {
+        const pending = await this.prisma.outboxEvent.findMany({
+          where: { publishedAt: null, tenantId: tenant.id },
+          take: 50,
+          orderBy: { createdAt: 'asc' },
         });
-      } catch (err) {
-        this.logger.error(`Failed to publish event ${event.id}`, err);
-      }
+
+        for (const event of pending) {
+          const envelope: DomainEventEnvelope = {
+            eventType: event.eventType,
+            tenantId: event.tenantId,
+            correlationId: event.correlationId,
+            idempotencyKey: event.idempotencyKey,
+            timestamp: event.createdAt.toISOString(),
+            payload: event.payload as Record<string, unknown>,
+          };
+
+          try {
+            this.channel!.publish(
+              this.exchange,
+              event.eventType,
+              Buffer.from(JSON.stringify(envelope)),
+              { persistent: true, contentType: 'application/json' },
+            );
+            await this.prisma.outboxEvent.update({
+              where: { id: event.id },
+              data: { publishedAt: new Date() },
+            });
+          } catch (err) {
+            this.logger.error(`Failed to publish event ${event.id}`, err);
+          }
+        }
+      });
     }
   }
 }

@@ -8,3 +8,6 @@ reports
 pnpm-lock.yaml
 package-lock.json
 *.code-workspace
+docs/security-audit/.venv
+docs/security-audit/_preview
+docs/security-audit/_charts

@@ -1,0 +1,4 @@
+.venv/
+_preview/
+__pycache__/
+*.pyc

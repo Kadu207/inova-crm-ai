@@ -13,7 +13,7 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Get('pipeline')
-  @Roles(UserRole.ADMIN, UserRole.SALES)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary: 'Open opportunities count and value by pipeline stage (tenant-scoped)',
   })
@@ -22,7 +22,7 @@ export class ReportsController {
   }
 
   @Get('lead-conversion')
-  @Roles(UserRole.ADMIN, UserRole.SALES)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary:
       'Lead conversion in period (CONVERTED status or linked opportunity; tenant-scoped)',
@@ -32,7 +32,7 @@ export class ReportsController {
   }
 
   @Get('revenue')
-  @Roles(UserRole.ADMIN, UserRole.SALES)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary: 'Forecast (OPEN) vs realized (WON) opportunity value in period',
   })
@@ -41,7 +41,7 @@ export class ReportsController {
   }
 
   @Get('sla')
-  @Roles(UserRole.ADMIN, UserRole.SALES)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPER_ADMIN)
   @ApiOperation({
     summary:
       'SLA indicators (conversations + opportunity breaches); meta.partial when first-response unavailable',
@@ -51,7 +51,7 @@ export class ReportsController {
   }
 
   @Get(':kind/export.csv')
-  @Roles(UserRole.ADMIN, UserRole.SALES)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPER_ADMIN)
   @Header('Content-Type', 'text/csv; charset=utf-8')
   @ApiOperation({ summary: 'Export report kind as CSV (pipeline|lead-conversion|revenue|sla)' })
   exportCsv(

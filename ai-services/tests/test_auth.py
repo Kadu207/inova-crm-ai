@@ -29,7 +29,10 @@ def test_require_ai_token_missing_in_production(monkeypatch):
     assert exc.value.status_code == 503
 
 
-def test_require_ai_token_missing_in_dev_allows(monkeypatch):
-    monkeypatch.delenv("AI_API_TOKEN", raising=False)
-    monkeypatch.delenv("NODE_ENV", raising=False)
-    assert require_ai_token(None) is None
+def test_require_ai_token_weak_in_production(monkeypatch):
+    monkeypatch.setenv("AI_API_TOKEN", "change_me_ai_api_token")
+    monkeypatch.setenv("NODE_ENV", "production")
+    creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials="change_me_ai_api_token")
+    with pytest.raises(HTTPException) as exc:
+        require_ai_token(creds)
+    assert exc.value.status_code == 503

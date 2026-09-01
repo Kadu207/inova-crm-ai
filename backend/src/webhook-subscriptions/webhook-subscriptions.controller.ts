@@ -26,11 +26,13 @@ export class WebhookSubscriptionsController {
   constructor(private readonly service: WebhookSubscriptionsService) {}
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   findAll(@TenantId() tenantId: string) {
     return this.service.findAll(tenantId);
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.service.findOne(tenantId, id);
   }

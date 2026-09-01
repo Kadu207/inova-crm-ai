@@ -13,12 +13,14 @@ export class FinanceController {
   constructor(private readonly financeService: FinanceService) {}
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'List invoices' })
   findAll(@TenantId() tenantId: string) {
     return this.financeService.findAll(tenantId);
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({ summary: 'Get invoice' })
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.financeService.findOne(tenantId, id);

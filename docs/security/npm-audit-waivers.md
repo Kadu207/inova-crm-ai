@@ -4,9 +4,9 @@
 
 ## Active waivers
 
-| Package                                                                                        | Severity | Advisory | Rationale                                                       | Owner    | Expires    |
-| ---------------------------------------------------------------------------------------------- | -------- | -------- | --------------------------------------------------------------- | -------- | ---------- |
-| _(none reviewed yet — gate treats production high findings as WARN until first harden sprint)_ | —        | —        | Transitive deps from Nest/Next scaffolds; tracked for Fase obs. | Squad QA | 2026-08-15 |
+| Package                                                                                        | Severity | Advisory | Rationale                                                            | Owner    | Expires    |
+| ---------------------------------------------------------------------------------------------- | -------- | -------- | -------------------------------------------------------------------- | -------- | ---------- |
+| _(none reviewed yet — gate treats production high findings as WARN until first harden sprint)_ | —        | —        | Transitive deps from Nest/Next scaffolds; tracked for harden sprint. | Squad QA | 2026-10-01 |
 
 ## Process
 

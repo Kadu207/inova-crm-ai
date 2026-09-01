@@ -14,16 +14,19 @@ export class BulkController {
   constructor(private readonly bulkService: BulkService) {}
 
   @Get('jobs')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   list(@TenantId() tenantId: string) {
     return this.bulkService.findAll(tenantId);
   }
 
   @Get('jobs/:id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   get(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.bulkService.findOne(tenantId, id);
   }
 
   @Get('jobs/:id/download')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @Header('Content-Type', 'text/csv')
   @ApiOperation({ summary: 'Download export CSV' })
   async download(@TenantId() tenantId: string, @Param('id') id: string) {
