@@ -35,24 +35,26 @@ Define stack, estrutura de pastas, design system, roteamento e padrões de consu
 
 ```
 frontend/
-  app/           # rotas App Router
-  components/    # UI compartilhada
-  lib/           # api client, auth, utils
-  styles/        # tokens globais
+  app/           # rotas App Router (+ icon.png / apple-icon.png)
+  components/    # UI compartilhada (BrandLogo com mark flame)
+  lib/           # api client, auth, navigation (RBAC Spec 030)
+  public/        # favicon, apple-touch-icon, icons PWA, site.webmanifest
 ```
 
 ## Design system
 
 - Tokens: [design/tokens.md](./design/tokens.md)
+- Brand assets (favicon/PWA): [design/brand-assets.md](./design/brand-assets.md)
 - System (Ember Studio): [design/system.md](./design/system.md)
 - Prompts Claude Design: [design/prompts-claude-design.md](./design/prompts-claude-design.md)
 - **Marca Inova TI** — flame/void/bone; **não** usar defaults purple/cream de AI
 
 ## Autenticação e tenant
 
-- JWT em cookie httpOnly ou header Bearer
-- Tenant derivado do token — nunca de query param manipulável
-- Redirect 401 → login
+- JWT em `localStorage` (sessão cliente) + header Bearer
+- Tenant derivado do token / `x-tenant-id` — nunca de query param manipulável
+- 401 `Authentication required` → limpar sessão e ir a `/login` (JWT rotacionado invalida tokens antigos)
+- Navegação filtrada por papel (Spec 030): `lib/navigation.ts`
 
 ## Módulos UI
 

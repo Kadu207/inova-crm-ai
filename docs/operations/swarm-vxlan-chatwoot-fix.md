@@ -1,7 +1,7 @@
 # Swarm overlay — corrigir vxlan e voltar Chatwoot Inova-TI a 1/1
 
 **Dono:** Inova-TI (você).  
-**Host:** `inovati-server` · SSH `gestaoti@128.140.77.31` porta **`65022`** — [`vps-ssh.md`](./vps-ssh.md)  
+**Host:** `inovati-server` · SSH `gestaoti@128.140.77.31` porta **`65025`** — [`vps-ssh.md`](./vps-ssh.md)  
 **Serviços:** `chatwoot-admin_chatwoot-admin`, `chatwoot-sidekiq_chatwoot-sidekiq`  
 **Domínio legado:** `chat.inovatitech.com.br`  
 **CRM:** **não** misturar com `chat-crm` / `crm_chatwoot_*` (compose separado).

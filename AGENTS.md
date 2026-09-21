@@ -6,7 +6,7 @@ Front door para agentes Cursor. Detalhe: [`memory.md`](memory.md) · [`docs/agen
 
 CRM omnichannel multi-tenant (Inova TI): Next.js + NestJS/Prisma + FastAPI + workers, Chatwoot e n8n **dedicados**, RabbitMQ (eventos) + Redis (cache/filas n8n), MinIO, deploy VPS Hetzner via Cloudflare Tunnel (portas **9400–9419**).
 
-Fases 0–7 **DONE**. Pós-fase: Spec Kit `026+`. Versão atual **1.1.1** (Spec 028–030 DONE; Spec 027 Meta **BLOCKED**).
+Fases 0–7 **DONE**. Pós-fase: Spec Kit `026+`. Versão atual **1.1.2** (Spec 028–030 DONE; brand favicon; Spec 027 Meta **BLOCKED**).
 
 ## Antes de qualquer tarefa
 
@@ -31,7 +31,7 @@ npm run format:check
 ```
 
 Deploy imagens: [`docs/operations/ci-docker-images.md`](docs/operations/ci-docker-images.md)  
-VPS: `gestaoti@128.140.77.31` · SSH **`:65022`** · `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)
+VPS: `gestaoti@128.140.77.31` · SSH **`:65025`** · `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)
 
 ## Hard rules
 

@@ -19,13 +19,14 @@ Referência: [`relatorio-auditoria-seguranca.pdf`](./relatorio-auditoria-seguran
 
 ## Ops VPS (F-06 + smoke)
 
-> **2026-09-01:** commit `3d2145c` em `main` + CI Build images. SSH `:65022` a partir do agente timeout — executar na VPS (Putty/local):
+> **2026-09-21:** imagens do commit `3d2145c` carregadas (`SHA.txt` = `3d2145ca7fc5`). n8n com `API_BASE_URL=http://api:3000` e `API_TOKEN` alinhado à API.  
+> F-06 (rotação humana de senhas históricas) permanece checklist — não automatizado.
 
 ```bash
-# SSH :65022 → /opt/inova-crm-ai
+# SSH :65025 → /opt/inova-crm-ai
 # 1) Após CI: baixar artifacts e load
 #    docs/operations/ci-docker-images.md Passos 2–5
-# 2) Rotacionar secrets webhook por tenant
+# 2) Rotacionar secrets webhook por tenant (se novos tenants ACTIVE)
 bash infrastructure/scripts/seed-tenant-webhook-secrets.sh
 
 # 3) Smoke RBAC (substitua TOKEN_VIEWER / API_TOKEN / TENANT)

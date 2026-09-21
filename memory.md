@@ -4,8 +4,8 @@
 Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.  
 Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
-**Última atualização:** 2026-09-01  
-**Versão produto:** **1.1.1**  
+**Última atualização:** 2026-09-21  
+**Versão produto:** **1.1.2**  
 **Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
 ---
@@ -14,11 +14,12 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 | Item         | Valor                                                                                                                               |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Repo         | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                           |
-| VPS          | `gestaoti@128.140.77.31` · **SSH `:65022`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
+| Repo GitHub  | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                           |
+| Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
+| VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
-| Gate         | PASS — `reports/quality-gate/2026-08-18T05-40-35-457Z.md` (Spec 030)                                                                |
-| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `26cc829d0e05`, run `32104291388`)                                                |
+| Gate         | PASS — Spec 030 (`2026-08-18T05-40-35-457Z`); brand 1.1.2 em deploy                                                                 |
+| Images CI    | SHA VPS `3d2145ca7fc5` (security) · FE brand após load do commit desta sessão                                                       |
 | Plano Mestre | 1.2                                                                                                                                 |
 
 ### Stack
@@ -32,6 +33,7 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | n8n                     | main+worker+Redis | `n8n-crm.inovatitech.com.br` · 9404  |
 | MinIO                   | S3 API + console  | 9405 / 9406                          |
 | RabbitMQ UI             | VPN/SSH           | 9407                                 |
+| Evolution (QR)          | profile opcional  | `127.0.0.1:9416`                     |
 | Postgres / Redis / AMQP | rede Docker only  | sem publish público                  |
 
 ---
@@ -51,19 +53,23 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ---
 
-## Chatwoot / Swarm (ops vivos)
+## Chatwoot / Swarm / WhatsApp (ops vivos)
 
 Inventário: [`docs/operations/vps-chatwoot-instances.md`](docs/operations/vps-chatwoot-instances.md)
 
-| Instância      | Domínio                             | Estado 2026-08-19                                                                                                                            |
-| -------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| CRM            | `chat-crm` · `127.0.0.1:9403`       | recreate 2026-08-19 — PIDs **~15/512 (~2%)**, healthy, `AUDIT_CRM_CHATWOOT_OK`                                                               |
-| Casa da Paz    | `casadapaz-chat` · `127.0.0.1:3001` | bind OK (última verificação)                                                                                                                 |
-| Swarm Inova-TI | `chat.inovatitech.com.br`           | **scale 0 (0/0)** — pausado 2026-08-19 (vxlan); recovery → 1/1: [`swarm-vxlan-chatwoot-fix.md`](docs/operations/swarm-vxlan-chatwoot-fix.md) |
+| Instância      | Domínio                             | Estado 2026-09-21                                                                                                                 |
+| -------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| CRM            | `chat-crm` · `127.0.0.1:9403`       | healthy · Evolution `crm-whatsapp` **open** (QR transitório)                                                                      |
+| Casa da Paz    | `casadapaz-chat` · `127.0.0.1:3001` | bind OK (última verificação)                                                                                                      |
+| Swarm Inova-TI | `chat.inovatitech.com.br`           | **scale 0 (0/0)** — pausado (vxlan); recovery → 1/1: [`swarm-vxlan-chatwoot-fix.md`](docs/operations/swarm-vxlan-chatwoot-fix.md) |
+
+**n8n CRM:** `API_BASE_URL=http://api:3000` · `API_TOKEN` sync com API · webhooks Chatwoot → `lead-inbound` / `sync-conversation` OK (2026-09-21).
 
 **Webhook secrets:** seed OK 2026-08-19 (`inova`, `rls-test-a`, `rls-test-b`).
 
-**Security audit 2026-09-01:** remediação código em `3d2145c` (F-01..F-10) — [`docs/security-audit/REMEDIATION.md`](docs/security-audit/REMEDIATION.md). CI images OK (`33518353377`). **Ops VPS** (load + rotate + smoke) pendente — SSH timeout do agente; rodar na VPS.
+**Security audit:** código `3d2145c` loaded VPS · F-06 rotação humana ainda checklist.
+
+**Brand:** favicon/PWA — [`docs/design/brand-assets.md`](docs/design/brand-assets.md).
 
 **Regra:** se `crm_chatwoot_rails` PID ≥ 80% do `pids_limit` (512) → recreate rails/sidekiq **antes** de feature work.
 

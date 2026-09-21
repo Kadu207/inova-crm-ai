@@ -4,14 +4,14 @@
 | ------------- | ------------------------------------- |
 | Host          | `128.140.77.31`                       |
 | User          | `gestaoti`                            |
-| **Porta SSH** | **`65022`** (não é 22)                |
+| **Porta SSH** | **`65025`** (não é 22)                |
 | Path CRM      | `/opt/inova-crm-ai`                   |
 | Key (PC)      | `%USERPROFILE%\.ssh\id_ed25519_inova` |
 
 ## PuTTY
 
 - Host Name: `128.140.77.31`
-- Port: `65022`
+- Port: `65025`
 - Connection type: SSH  
   Depois de logado, rode **só bash** (não cole blocos PowerShell — isso fecha/quebra a sessão).
 
@@ -20,13 +20,13 @@
 ```powershell
 $key = "$env:USERPROFILE\.ssh\id_ed25519_inova"
 $remote = "gestaoti@128.140.77.31"
-ssh -p 65022 -o BatchMode=yes -i $key $remote "hostname; date -u"
+ssh -p 65025 -o BatchMode=yes -i $key $remote "hostname; date -u"
 ```
 
 SCP:
 
 ```powershell
-scp -P 65022 -o BatchMode=yes -i $key LOCAL_FILE "${remote}:/opt/inova-crm-ai/..."
+scp -P 65025 -o BatchMode=yes -i $key LOCAL_FILE "${remote}:/opt/inova-crm-ai/..."
 ```
 
 ## Bash já na VPS

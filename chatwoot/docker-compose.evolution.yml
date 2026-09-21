@@ -88,7 +88,8 @@ services:
       CONFIG_SESSION_PHONE_VERSION: ${EVOLUTION_PHONE_VERSION:-}
       NODE_OPTIONS: ${EVOLUTION_NODE_OPTIONS:---dns-result-order=ipv4first}
       QRCODE_LIMIT: 30
-      QRCODE_COLOR: '#0047AB'
+      # Preto: WhatsApp escaneia mal QR colorido (azul Inova falhava no celular)
+      QRCODE_COLOR: '#000000'
       CHATWOOT_ENABLED: 'true'
       CHATWOOT_MESSAGE_READ: 'true'
       CHATWOOT_MESSAGE_DELETE: 'true'

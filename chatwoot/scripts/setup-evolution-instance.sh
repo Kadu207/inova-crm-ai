@@ -83,22 +83,23 @@ sys.exit(0 if b else 1)' 2>/dev/null; then
 done
 echo "$QR_JSON" | python3 -m json.tool || echo "$QR_JSON"
 
-echo "$QR_JSON" | python3 - <<'PY'
-import json, sys, base64, re
+printf '%s' "$QR_JSON" >/tmp/evo-connect.json
+python3 - <<'PY'
+import json, base64, re
 from pathlib import Path
 try:
-    d = json.load(sys.stdin)
+    d = json.load(open("/tmp/evo-connect.json"))
 except Exception:
-    sys.exit(0)
+    raise SystemExit(0)
 b64 = d.get("base64") or (d.get("qrcode") or {}).get("base64")
 if not b64:
-    print("No QR base64 yet — retry: curl -sS http://127.0.0.1:9416/instance/connect/crm-whatsapp -H \"apikey: \$EVOLUTION_API_KEY\"")
-    sys.exit(0)
+    print("No QR base64 yet — retry connect endpoint with EVOLUTION_API_KEY")
+    raise SystemExit(0)
 b64 = re.sub(r"^data:image/[^;]+;base64,", "", b64)
 out = Path("/tmp/evolution-qr.png")
 out.write_bytes(base64.b64decode(b64))
 print(f"QR saved to {out}")
-print("Copy to PC: scp gestaoti@128.140.77.31:/tmp/evolution-qr.png .")
+print("Copy to PC: scp -P 65025 gestaoti@128.140.77.31:/tmp/evolution-qr.png .")
 PY
 
 echo

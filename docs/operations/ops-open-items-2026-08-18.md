@@ -1,7 +1,7 @@
 # Ops abertos — Chatwoot PID + Swarm + webhook secrets
 
 **Data:** 2026-08-19 (atualizado)  
-**SSH:** `gestaoti@128.140.77.31` porta **`65022`** — [`vps-ssh.md`](./vps-ssh.md)
+**SSH:** `gestaoti@128.140.77.31` porta **`65025`** — [`vps-ssh.md`](./vps-ssh.md)
 
 ## Status
 

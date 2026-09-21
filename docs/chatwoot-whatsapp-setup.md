@@ -84,19 +84,25 @@ Compose: [`chatwoot/docker-compose.evolution.yml`](../chatwoot/docker-compose.ev
 ./scripts/setup-evolution-instance.sh
 ```
 
-O script:
+O script (versão atual):
 
-1. Cria instância Evolution (`POST /instance/create`)
-2. Imprime/base64 do QR (`GET /instance/connect/{name}`)
-3. Configura integração Chatwoot (`POST /chatwoot/set/{name}`)
+1. Aguarda Evolution API ready (`EVOLUTION_PUBLIC_URL`, default `http://127.0.0.1:9416`)
+2. Cria instância Evolution (`POST /instance/create`) — 403 se já existir é OK
+3. Gera QR (`GET /instance/connect/{name}`) → salva `/tmp/evolution-qr.png`
+4. Configura integração Chatwoot (`POST /chatwoot/set/{name}`)
+
+**QR:** use `QRCODE_COLOR=#000000` (preto). QR azul falha com frequência no app WhatsApp.  
+**Sem QR:** `./scripts/pair-by-number.sh 5531XXXXXXXXX` (código de pareamento).
 
 Fluxo: **Celular (QR) → Evolution → Chatwoot → n8n → Nest**.
 
 ### Validação E2E (Evolution)
 
-1. Escanear QR no WhatsApp (Dispositivos vinculados)
-2. Mensagem chega no inbox Chatwoot criado pela Evolution
-3. Mesmos webhooks n8n / leads CRM
+1. Escanear QR (WhatsApp > Dispositivos vinculados) — estado `open`
+2. Mensagem chega no inbox Chatwoot (`CRM WhatsApp Evolution`)
+3. n8n `lead-inbound` / `sync-conversation` → lead/conversa no CRM
+   - Exige `API_BASE_URL=http://api:3000` e `API_TOKEN` **igual** ao da API (ver [integracao-n8n.md](./integracao-n8n.md))
+4. Se a UI CRM mostrar `Authentication required` → relogar em `/login` (JWT antigo)
 
 ---
 

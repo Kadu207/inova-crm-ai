@@ -107,6 +107,12 @@ Origem típica: webhooks Chatwoot (HMAC) → n8n → API (Bearer). Ver [webhook-
 | `WEBHOOK_SECRET`     | `infrastructure/.env` | HMAC webhooks externos       |
 | `N8N_SUBDOMAIN`      | `infrastructure/.env` | Host público + `WEBHOOK_URL` |
 
+**VPS / Docker (obrigatório):**
+
+- `API_BASE_URL=http://api:3000` — hostname do serviço Compose. **Não** use `http://127.0.0.1:9401` (o worker n8n não alcança a porta host → `ECONNREFUSED`).
+- `API_TOKEN` do n8n **deve** ser idêntico ao da API (mesmo valor em `infrastructure/.env`). Após mudar o `.env`, recreate:  
+  `docker compose … up -d --no-deps --force-recreate n8n n8n-worker`
+
 Nunca commitar `.env` — usar `infrastructure/.env.example`.
 
 ## Smoke e operação
@@ -115,11 +121,13 @@ Nunca commitar `.env` — usar `infrastructure/.env.example`.
 # Health n8n
 curl -sf http://127.0.0.1:9404/healthz
 
-# Webhook lead-inbound
+# Webhook lead-inbound (espera {"ok":true,"workflow":"lead-inbound",…})
 curl -sS -X POST "http://127.0.0.1:9404/webhook/lead-inbound" \
   -H "Content-Type: application/json" \
-  -d '{"event":"message_created","account":{"id":1},"conversation":{"id":1},"sender":{"name":"Test"},"content":"oi"}'
+  -d '{"event":"message_created","account":{"id":1},"conversation":{"id":1},"sender":{"name":"Test","phone_number":"+550000"},"content":"oi"}'
 ```
+
+Se HTTP 500: confira logs `inova-crm-n8n-worker` (token mismatch ou `API_BASE_URL` errado).
 
 Export periódico: workflows já versionados no git; após edição no UI, re-exportar para `n8n/workflows/`.
 

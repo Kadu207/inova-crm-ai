@@ -16,8 +16,36 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Inova CRM AI',
+  title: {
+    default: 'Inova CRM AI',
+    template: '%s · Inova CRM AI',
+  },
   description: 'Plataforma CRM SaaS — Inova TI',
+  applicationName: 'Inova CRM AI',
+  authors: [{ name: 'Inova TI' }],
+  manifest: '/site.webmanifest',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: ['/favicon-32x32.png'],
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Inova CRM',
+    statusBarStyle: 'black-translucent',
+  },
+  openGraph: {
+    title: 'Inova CRM AI',
+    description: 'Plataforma CRM SaaS — Inova TI',
+    siteName: 'Inova CRM AI',
+    type: 'website',
+  },
 };
 
 export const viewport = {

@@ -120,9 +120,16 @@ Inova<b>CRM</b> AI
 
 ---
 
+## Brand assets (favicon / PWA / logo UI)
+
+Ícone chama Inova (desktop + mobile): [`brand-assets.md`](./brand-assets.md) · arquivos em `frontend/public/` e `frontend/app/icon.png`.
+
+---
+
 ## Referências
 
 - Origem: Inova-TI `painel-next/app/globals.css`
 - [prompts-claude-design.md](./prompts-claude-design.md)
 - [system.md](./system.md) — Ember Studio (shell + piloto)
 - [arquitetura-frontend.md](../arquitetura-frontend.md)
+- [brand-assets.md](./brand-assets.md)

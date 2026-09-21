@@ -185,7 +185,7 @@ O service Swarm já foi observado com secrets/placeholders fracos em variáveis 
 
 ## Relacionados
 
-- [ports.md](../ports.md) — bloco `9400–9419` (CRM) · SSH VPS `:65022`
+- [ports.md](../ports.md) — bloco `9400–9419` (CRM) · SSH VPS `:65025`
 - [vps-ssh.md](./vps-ssh.md) — acesso SSH
 - [swarm-vxlan-chatwoot-fix.md](./swarm-vxlan-chatwoot-fix.md) — voltar Swarm Chatwoot a 1/1
 - [vps-ram-hardening.md](./vps-ram-hardening.md) — pause de sidekiq em rebuilds
