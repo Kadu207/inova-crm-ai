@@ -18,8 +18,8 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
 | VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
-| Gate         | PASS — Spec 030 (`2026-08-18T05-40-35-457Z`); brand 1.1.2 em deploy                                                                 |
-| Images CI    | SHA VPS `3d2145ca7fc5` (security) · FE brand após load do commit desta sessão                                                       |
+| Gate         | PASS — brand 1.1.2 deploy (`42048a5842e9`)                                                                                          |
+| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `42048a5842e9`, run `35556316644`) · VPS OK                                       |
 | Plano Mestre | 1.2                                                                                                                                 |
 
 ### Stack
