@@ -1,7 +1,7 @@
 # Histórico de versões — Inova CRM AI
 
 **Produto:** Inova CRM AI  
-**Versão atual do sistema:** **1.1.2** (2026-09-21)  
+**Versão atual do sistema:** **1.1.2** (2026-09-22)  
 **Plano Mestre:** 1.2  
 **Fonte de verdade operacional:** [`.specify/memory/baseline.md`](../.specify/memory/baseline.md)
 
@@ -32,7 +32,8 @@ Convenção SemVer do produto:
      │
 2026-07-26  v1.1.0  Spec 026 Zoho Blueprint/COQL
 2026-08-03  v1.1.1  Spec 028 Relatórios comerciais
-2026-09-21  v1.1.2  Brand favicon/PWA + ops Evolution/n8n   ← ATUAL
+2026-09-21  v1.1.2  Brand favicon/PWA + ops Evolution/n8n
+2026-09-22  v1.1.2  Audit F-01..F-10 em prod + WA reconnect   ← ATUAL
 depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 ```
 
@@ -40,11 +41,13 @@ depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 
 ## Changelog
 
-### [1.1.2] — 2026-09-21 — Brand assets + ops WhatsApp transitório
+### [1.1.2] — 2026-09-21 / 2026-09-22 — Brand assets + ops WhatsApp + audit remediação
 
 - Favicon / apple-touch / PWA icons (chama Inova) + `BrandLogo` com mark
 - Docs: `docs/design/brand-assets.md`; n8n `API_BASE_URL=http://api:3000`; Evolution QR preto + pair-by-number
-- Ops VPS: Evolution `crm-whatsapp` open; sync `API_TOKEN` n8n↔API
+- Ops VPS: Evolution `crm-whatsapp` **open** (reconnect 2026-09-22); sync `API_TOKEN` n8n↔API
+- Security: remediação F-01..F-10 (`3d2145c`) loaded; prod images SHA `42048a5842e9`; F-06 humano ainda aberto
+- SSH canônico VPS: **`:65025`** (`docs/operations/vps-ssh.md`)
 
 ### [1.1.1] — 2026-08-03 — Spec 028 Relatórios comerciais / funil
 

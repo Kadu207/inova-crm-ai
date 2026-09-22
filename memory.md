@@ -4,7 +4,7 @@
 Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.  
 Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
-**Última atualização:** 2026-09-21  
+**Última atualização:** 2026-09-22  
 **Versão produto:** **1.1.2**  
 **Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
@@ -18,8 +18,8 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
 | VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
-| Gate         | PASS — brand 1.1.2 deploy (`42048a5842e9`)                                                                                          |
-| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `42048a5842e9`, run `35556316644`) · VPS OK                                       |
+| Gate         | PASS — brand 1.1.2 + remediação F-01..F-10 (`42048a5842e9` ⊃ `3d2145c`)                                                             |
+| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `42048a5842e9`, run `35556316644`) · VPS **loaded**                               |
 | Plano Mestre | 1.2                                                                                                                                 |
 
 ### Stack
@@ -57,9 +57,9 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 Inventário: [`docs/operations/vps-chatwoot-instances.md`](docs/operations/vps-chatwoot-instances.md)
 
-| Instância      | Domínio                             | Estado 2026-09-21                                                                                                                 |
+| Instância      | Domínio                             | Estado 2026-09-22                                                                                                                 |
 | -------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| CRM            | `chat-crm` · `127.0.0.1:9403`       | healthy · Evolution `crm-whatsapp` **open** (QR transitório)                                                                      |
+| CRM            | `chat-crm` · `127.0.0.1:9403`       | healthy · Evolution `crm-whatsapp` **open** (reconnect QR 2026-09-22; sincronizando)                                              |
 | Casa da Paz    | `casadapaz-chat` · `127.0.0.1:3001` | bind OK (última verificação)                                                                                                      |
 | Swarm Inova-TI | `chat.inovatitech.com.br`           | **scale 0 (0/0)** — pausado (vxlan); recovery → 1/1: [`swarm-vxlan-chatwoot-fix.md`](docs/operations/swarm-vxlan-chatwoot-fix.md) |
 
@@ -67,7 +67,7 @@ Inventário: [`docs/operations/vps-chatwoot-instances.md`](docs/operations/vps-c
 
 **Webhook secrets:** seed OK 2026-08-19 (`inova`, `rls-test-a`, `rls-test-b`).
 
-**Security audit:** código `3d2145c` loaded VPS · F-06 rotação humana ainda checklist.
+**Security audit:** F-01..F-10 código em prod (`42048a5842e9`) · F-06 rotação humana ainda checklist · smoke VIEWER opcional — [`docs/security-audit/REMEDIATION.md`](docs/security-audit/REMEDIATION.md).
 
 **Brand:** favicon/PWA — [`docs/design/brand-assets.md`](docs/design/brand-assets.md).
 

@@ -104,6 +104,15 @@ Fluxo: **Celular (QR) → Evolution → Chatwoot → n8n → Nest**.
    - Exige `API_BASE_URL=http://api:3000` e `API_TOKEN` **igual** ao da API (ver [integracao-n8n.md](./integracao-n8n.md))
 4. Se a UI CRM mostrar `Authentication required` → relogar em `/login` (JWT antigo)
 
+**Estado prod (2026-09-22):** instância `crm-whatsapp` → `connectionState` = `open` (reconnect QR após sessão caída). Confirmar:
+
+```bash
+cd /opt/inova-crm-ai/chatwoot
+set -a; source <(grep -E '^EVOLUTION_API_KEY=' evolution.env | sed 's/\r$//'); set +a
+curl -sS -H "apikey: $EVOLUTION_API_KEY" \
+  http://127.0.0.1:9416/instance/connectionState/crm-whatsapp | python3 -m json.tool
+```
+
 ---
 
 ## Checklist de cutover Evolution → Meta Oficial

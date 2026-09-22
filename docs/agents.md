@@ -6,7 +6,7 @@
 
 **Harness completo.** Entrada Cursor: [`AGENTS.md`](../AGENTS.md) · Memória viva: [`memory.md`](../memory.md) · Constituição: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md)
 
-**Última revisão:** 2026-08-03
+**Última revisão:** 2026-09-22
 
 ---
 

@@ -30,7 +30,7 @@ Squads: `.cursor/agents/{spec,build,qa,delivery}-squad.md`. Ciclo completo em `d
 
 Se `bash chatwoot/scripts/audit-crm-chatwoot.sh` indicar rails PID ≥ 80% do limite (512) ou health unhealthy / `can't fork` → recreate rails/sidekiq **antes** de feature work (EMB-04 em `docs/agents.md`).
 
-SSH VPS: porta **`65022`** (`docs/operations/vps-ssh.md`). Swarm legado em **0/0** até recovery vxlan pelo dono.
+SSH VPS: porta **`65025`** (`docs/operations/vps-ssh.md`). Swarm legado em **0/0** até recovery vxlan pelo dono.
 
 ## Spec Kit
 

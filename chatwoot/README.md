@@ -108,6 +108,8 @@ docker compose -f docker-compose.yml -f docker-compose.vps.yml `
 
 Porta Evolution: `127.0.0.1:9416` (ADR 005). Cutover Meta no mesmo doc § checklist.
 
+**Prod (2026-09-22):** instância `crm-whatsapp` em `state: open`. Validar: `GET /instance/connectionState/crm-whatsapp` (ver [`docs/chatwoot-whatsapp-setup.md`](../docs/chatwoot-whatsapp-setup.md) § B).
+
 ## Webhooks → n8n
 
 Configure no Chatwoot (Settings → Integrations → Webhooks):

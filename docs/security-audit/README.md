@@ -1,5 +1,8 @@
 # Auditoria de Segurança — artefatos
 
+**Remediação:** [`REMEDIATION.md`](./REMEDIATION.md) — F-01..F-10 **CODE** em prod (`42048a5842e9`); F-06 **OPS** (humano).  
+**PDF:** [`relatorio-auditoria-seguranca.pdf`](./relatorio-auditoria-seguranca.pdf)
+
 ## Gerar / regenerar o PDF
 
 ```powershell

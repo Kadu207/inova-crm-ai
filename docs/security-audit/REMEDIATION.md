@@ -19,8 +19,10 @@ Referência: [`relatorio-auditoria-seguranca.pdf`](./relatorio-auditoria-seguran
 
 ## Ops VPS (F-06 + smoke)
 
-> **2026-09-21:** imagens do commit `3d2145c` carregadas (`SHA.txt` = `3d2145ca7fc5`). n8n com `API_BASE_URL=http://api:3000` e `API_TOKEN` alinhado à API.  
-> F-06 (rotação humana de senhas históricas) permanece checklist — não automatizado.
+> **2026-09-22:** deploy **fechado** — imagens prod em `SHA.txt` = `42048a5842e9` (run `35556316644`; inclui remediação `3d2145c`). n8n com `API_BASE_URL=http://api:3000` e `API_TOKEN` alinhado à API.  
+> Evolution `crm-whatsapp` → `state: open` (reconnect QR; sincronizando).  
+> F-06 (rotação humana de senhas históricas) permanece checklist — não automatizado.  
+> Smoke VIEWER (403 em invoices/bulk/webhooks) — opcional; criar VIEWER só via API (`POST /users`, não pela UI CrmPage).
 
 ```bash
 # SSH :65025 → /opt/inova-crm-ai
