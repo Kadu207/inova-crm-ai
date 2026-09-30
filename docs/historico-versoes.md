@@ -49,7 +49,7 @@ depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 - Workers: retry com backoff (`x-retry`, máx. 5); ApiClient retry 5xx/429
 - Outbox unique `(tenant_id, idempotency_key)`; FilterEngine escapa wildcards em `contains`
 - Commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · doc [`architecture/spec-031-fts-idempotency-retry.md`](./architecture/spec-031-fts-idempotency-retry.md)
-- Ops: Evolution `crm-whatsapp` reconnect **open** (2026-09-29); VPS ainda precisa load CI + `migrate deploy`
+- Ops VPS: load CI `0a5266634480` (run `36661857102`) + migrate `20260930010000_fts_idempotency` **OK** (2026-09-30); Evolution `crm-whatsapp` **open** (2026-09-29)
 
 ### [1.1.2] — 2026-09-21 / 2026-09-22 — Brand assets + ops WhatsApp + audit remediação
 
