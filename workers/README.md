@@ -17,6 +17,15 @@ RabbitMQ consumers for domain events. Single process registers all five workers.
 **Prefer backend HTTP API** for mutations (`API_BASE_URL` + `API_TOKEN`).  
 Direct Prisma/DB access is reserved for simple idempotent reads/updates only.
 
+## Spec 031 — idempotency & retry
+
+- Before handling: `POST /api/v1/platform/idempotency/claim` (Redis `SET NX`). On handler failure: `…/release`.
+- HTTP client retries 5xx/429/network (max 3, exponential backoff).
+- On consumer error: republish with `x-retry` header (max 5), then discard poison.
+- Fallback in-memory claim only when `API_TOKEN` unset (local/tests).
+
+Docs: [`docs/architecture/spec-031-fts-idempotency-retry.md`](../docs/architecture/spec-031-fts-idempotency-retry.md).
+
 ## Run
 
 ```bash

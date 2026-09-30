@@ -1,5 +1,8 @@
 # Spec 031 — Full-text search, idempotência e retry
 
+**Status:** DONE no `main` · commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · versão **1.1.3**  
+**VPS:** aguarda CI image load + `prisma migrate deploy` (índices GIN).
+
 ## Problema
 
 - Listagens `?q=` usavam Prisma `contains` → SQL `LIKE '%q%'` (sem índice, wildcards do usuário).
@@ -35,7 +38,17 @@
 
 `backend/prisma/migrations/20260930010000_fts_idempotency/`
 
+## Deploy VPS (checklist)
+
+1. CI `Build images (CI)` no SHA `0a52666` (ou tip de `main` que o contenha)
+2. `load-ci-images-vps.sh` — ver [`../operations/ci-docker-images.md`](../operations/ci-docker-images.md)
+3. `bash infrastructure/scripts/migrate-api-vps.sh` (ou `npx prisma migrate deploy` no container api)
+4. Smoke: `GET /api/v1/contacts?q=teste` (e leads) com tenant JWT — sem timeout / 500
+5. Workers: logs sem loop de poison; claim Redis ativo se `REDIS_URL` set
+
 ## Referências
 
-- Spec: `specs/031-fts-idempotency-retry/spec.md`
-- Catálogo eventos: `docs/events/catalog-v0.md`
+- Spec: [`../../specs/031-fts-idempotency-retry/spec.md`](../../specs/031-fts-idempotency-retry/spec.md)
+- Catálogo eventos: [`../events/catalog-v0.md`](../events/catalog-v0.md)
+- Banco: [`../arquitetura-banco-dados.md`](../arquitetura-banco-dados.md) § Índices
+- Eventos: [`../arquitetura-event-driven.md`](../arquitetura-event-driven.md)

@@ -1,8 +1,8 @@
 # Arquitetura Event-Driven — Inova CRM AI
 
 **Volume:** 05  
-**Versão:** 0.1 (Fase 0 — skeleton)  
-**Status:** em construção
+**Versão:** 1.1.3 (Spec 031 idempotência/retry)  
+**Status:** ativo
 
 ---
 
@@ -36,22 +36,27 @@ Define o modelo event-driven com RabbitMQ, outbox, workers, papéis do Redis e i
 
 ## Outbox pattern
 
-Transação única: persistir entidade + registro outbox. Worker publica e marca `published_at`.
+Transação única: persistir entidade + registro outbox. Worker publica e marca `published_at`.  
+Unique `(tenant_id, idempotency_key)` evita duplicata de publish (Spec 031).
 
 ## RabbitMQ
 
 - Exchange por domínio ou topic único `crm.events`
 - Filas por consumer (`worker-crm-leads`, etc.)
 - UI admin: porta host `9407` (VPN/SSH only)
+- Retry: consumer republica com header `x-retry` + backoff (máx. 5); depois poison discard
 
 ## Redis (não é event bus)
 
-| Uso                 | OK  |
-| ------------------- | --- |
-| Cache de leitura    | ✅  |
-| Sessão / rate-limit | ✅  |
-| Fila n8n (Bull)     | ✅  |
-| Eventos de domínio  | ❌  |
+| Uso                             | OK  |
+| ------------------------------- | --- |
+| Cache de leitura                | ✅  |
+| Sessão / rate-limit             | ✅  |
+| Fila n8n (Bull)                 | ✅  |
+| Claim idempotência (`SET NX`)   | ✅  |
+| Eventos de domínio (barramento) | ❌  |
+
+Claim: `POST /api/v1/platform/idempotency/claim` (+ `release` se o handler falhar). Chave `crm:idem:{tenantId}:{key}`, TTL 7 dias.
 
 ## Workers
 
@@ -62,6 +67,8 @@ Transação única: persistir entidade + registro outbox. Worker publica e marca
 | worker-crm-billing  | `invoice.*`             |
 | worker-crm-ai       | `ai.*`                  |
 | worker-crm-audit    | todos (auditoria async) |
+
+Antes de processar: claim via API (`API_TOKEN`). ApiClient: retry HTTP 5xx/429 com backoff (máx. 3).
 
 ## Catálogo de eventos
 

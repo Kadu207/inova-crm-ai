@@ -5,7 +5,7 @@ Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.
 Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
 **Última atualização:** 2026-09-29  
-**Versão produto:** **1.1.2** (+ Spec 031 FTS/idempotency/retry em código)  
+**Versão produto:** **1.1.3**  
 **Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
 ---
@@ -18,8 +18,8 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
 | VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
-| Gate         | PASS — brand 1.1.2 + remediação F-01..F-10 (`42048a5842e9` ⊃ `3d2145c`)                                                             |
-| Images CI    | `inova-crm-api:ci` / `inova-crm-frontend:ci` (SHA `42048a5842e9`, run `35556316644`) · VPS **loaded**                               |
+| Gate         | PASS — Spec 031 (`0a52666`, relatório `2026-09-30T02-32-29-884Z` / push `2026-09-30T02-52-49-577Z`)                                 |
+| Images CI    | Prod loaded: `42048a5842e9` · **pendente load** Spec 031 SHA `0a52666` + `migrate deploy` FTS                                       |
 | Plano Mestre | 1.2                                                                                                                                 |
 
 ### Stack
@@ -40,17 +40,18 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Specs (pós-fase)
 
-| Spec    | Entrega                                           | Status                                                                                                                                                    |
-| ------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 019–025 | Paridade Zoho onda 1                              | DONE                                                                                                                                                      |
-| **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                                                         |
-| **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                                                           |
-| **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                                                                |
-| **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md)             |
-| **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                                  |
-| **031** | FTS Postgres + idempotência Redis + retry workers | **DONE** · gate `2026-09-30T02-32-29-884Z` · [`docs/architecture/spec-031-fts-idempotency-retry.md`](docs/architecture/spec-031-fts-idempotency-retry.md) |
+| Spec    | Entrega                                           | Status                                                                                                                                                                                                           |
+| ------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 019–025 | Paridade Zoho onda 1                              | DONE                                                                                                                                                                                                             |
+| **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                                                                                                                |
+| **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                                                                                                                  |
+| **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                                                                                                                       |
+| **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md)                                                                    |
+| **031** | FTS Postgres + idempotência Redis + retry workers | **DONE** · commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · [`docs/architecture/spec-031-fts-idempotency-retry.md`](docs/architecture/spec-031-fts-idempotency-retry.md) · **VPS: load + migrate pendentes** |
+| **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                                                                                         |
 
-**Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”.
+**Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”.  
+**Próximo ops:** Delivery Spec 031 — CI images `0a52666` → VPS load → `migrate-api-vps.sh` (GIN FTS).
 
 ---
 
@@ -58,9 +59,9 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 Inventário: [`docs/operations/vps-chatwoot-instances.md`](docs/operations/vps-chatwoot-instances.md)
 
-| Instância      | Domínio                             | Estado 2026-09-22                                                                                                                 |
+| Instância      | Domínio                             | Estado 2026-09-29                                                                                                                 |
 | -------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| CRM            | `chat-crm` · `127.0.0.1:9403`       | healthy · Evolution `crm-whatsapp` **open** (reconnect QR 2026-09-22; sincronizando)                                              |
+| CRM            | `chat-crm` · `127.0.0.1:9403`       | healthy · Evolution `crm-whatsapp` **open** (reconnect QR 2026-09-29)                                                             |
 | Casa da Paz    | `casadapaz-chat` · `127.0.0.1:3001` | bind OK (última verificação)                                                                                                      |
 | Swarm Inova-TI | `chat.inovatitech.com.br`           | **scale 0 (0/0)** — pausado (vxlan); recovery → 1/1: [`swarm-vxlan-chatwoot-fix.md`](docs/operations/swarm-vxlan-chatwoot-fix.md) |
 
@@ -68,7 +69,7 @@ Inventário: [`docs/operations/vps-chatwoot-instances.md`](docs/operations/vps-c
 
 **Webhook secrets:** seed OK 2026-08-19 (`inova`, `rls-test-a`, `rls-test-b`).
 
-**Security audit:** F-01..F-10 código em prod (`42048a5842e9`) · F-06 rotação humana ainda checklist · smoke VIEWER opcional — [`docs/security-audit/REMEDIATION.md`](docs/security-audit/REMEDIATION.md).
+**Security audit:** F-01..F-10 em prod (`42048a5842e9`) · F-06 rotação humana ainda checklist — [`docs/security-audit/REMEDIATION.md`](docs/security-audit/REMEDIATION.md).
 
 **Brand:** favicon/PWA — [`docs/design/brand-assets.md`](docs/design/brand-assets.md).
 
@@ -86,8 +87,9 @@ bash /opt/inova-crm-ai/chatwoot/scripts/audit-crm-chatwoot.sh
 2. Agentes / n8n / AI só via API NestJS (toolbelt)
 3. n8n = orquestrador only
 4. Canais só via Chatwoot CRM
-5. RabbitMQ = eventos · Redis = cache/sessão/filas n8n
+5. RabbitMQ = eventos · Redis = cache/sessão/filas n8n / claim idempotência (Spec 031)
 6. Quality Gate PASS antes de DONE / baseline / merge
+7. Listagens `?q=` = Postgres FTS (não `LIKE '%q%'`)
 
 ---
 
@@ -101,6 +103,7 @@ npm run smoke
 # CI images → VPS (após push main com backend/frontend)
 # docs/operations/ci-docker-images.md Passos 2–5
 bash infrastructure/scripts/load-ci-images-vps.sh dist/images   # na VPS
+bash infrastructure/scripts/migrate-api-vps.sh                  # se schema/FTS mudou
 ```
 
 ---

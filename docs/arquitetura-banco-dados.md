@@ -1,8 +1,8 @@
 # Arquitetura de Banco de Dados — Inova CRM AI
 
 **Volume:** 04  
-**Versão:** 0.1 (Fase 0 — skeleton)  
-**Status:** em construção
+**Versão:** 1.1.3 (Spec 031 FTS)  
+**Status:** ativo
 
 ---
 
@@ -70,11 +70,14 @@ Migration: `backend/prisma/migrations/20260720050000_tenant_rls/`.
 
 - Compostos: `(tenant_id, status)`, `(tenant_id, created_at DESC)`
 - Evitar full scan cross-tenant
+- **Full-text search (Spec 031):** índices GIN por expressão `to_tsvector('portuguese', …)` em `contacts`, `leads`, `companies`, `products`, `services`, `tasks`, `opportunities`. Listagens `?q=` usam `plainto_tsquery` (sanitizado) — **não** `LIKE '%q%'`. Ver [`architecture/spec-031-fts-idempotency-retry.md`](./architecture/spec-031-fts-idempotency-retry.md).
+- Migration: `backend/prisma/migrations/20260930010000_fts_idempotency/`
 
 ## Migrações
 
-- `prisma migrate dev` em dev; `migrate deploy` em produção
+- `prisma migrate dev` em dev; `migrate deploy` em produção (`migrate-api-vps.sh`)
 - Validar no Quality Gate
+- Após Spec 031: obrigatório `migrate deploy` na VPS antes de depender de busca FTS em prod
 
 ## Backup e restore
 

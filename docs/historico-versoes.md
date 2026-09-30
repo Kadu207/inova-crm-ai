@@ -1,7 +1,7 @@
 # Histórico de versões — Inova CRM AI
 
 **Produto:** Inova CRM AI  
-**Versão atual do sistema:** **1.1.2** (2026-09-22)  
+**Versão atual do sistema:** **1.1.3** (2026-09-29)  
 **Plano Mestre:** 1.2  
 **Fonte de verdade operacional:** [`.specify/memory/baseline.md`](../.specify/memory/baseline.md)
 
@@ -33,13 +33,23 @@ Convenção SemVer do produto:
 2026-07-26  v1.1.0  Spec 026 Zoho Blueprint/COQL
 2026-08-03  v1.1.1  Spec 028 Relatórios comerciais
 2026-09-21  v1.1.2  Brand favicon/PWA + ops Evolution/n8n
-2026-09-22  v1.1.2  Audit F-01..F-10 em prod + WA reconnect   ← ATUAL
+2026-09-22  v1.1.2  Audit F-01..F-10 em prod + WA reconnect
+2026-09-29  v1.1.3  Spec 031 FTS + idempotência + retry   ← ATUAL
 depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 ```
 
 ---
 
 ## Changelog
+
+### [1.1.3] — 2026-09-29 — Spec 031 FTS / idempotência / retry
+
+- Listagens `?q=` com Postgres full-text search (`plainto_tsquery` + GIN) — sem `LIKE '%q%'`
+- Idempotência de eventos: Redis claim `POST /api/v1/platform/idempotency/claim` (+ release em falha)
+- Workers: retry com backoff (`x-retry`, máx. 5); ApiClient retry 5xx/429
+- Outbox unique `(tenant_id, idempotency_key)`; FilterEngine escapa wildcards em `contains`
+- Commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · doc [`architecture/spec-031-fts-idempotency-retry.md`](./architecture/spec-031-fts-idempotency-retry.md)
+- Ops: Evolution `crm-whatsapp` reconnect **open** (2026-09-29); VPS ainda precisa load CI + `migrate deploy`
 
 ### [1.1.2] — 2026-09-21 / 2026-09-22 — Brand assets + ops WhatsApp + audit remediação
 

@@ -44,7 +44,7 @@ Cada tenant é um cliente SaaS isolado com:
 - Prisma middleware injeta tenant do JWT — queries sem filtro = bug crítico
 - Eventos RabbitMQ rejeitam envelope sem `tenantId`
 - Redis: chaves prefixadas `crm:{tenantId}:...`
-- Consumers idempotentes com `idempotencyKey`
+- Consumers idempotentes com `idempotencyKey` — claim Redis via `POST /api/v1/platform/idempotency/claim` (Spec 031)
 
 ## Autenticação e contexto
 

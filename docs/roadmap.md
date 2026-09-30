@@ -92,11 +92,13 @@ Deploy Hetzner, backups, observabilidade, hardening LGPD, Admin SaaS, CI docker 
 
 ### Fila ativa
 
-| Ordem | Spec    | Entrega                                                                    | Status                                                                                                                             |
-| ----- | ------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| —     | **026** | Zoho Blueprint light + filtros avançados + COQL (read-only, tenant-scoped) | **DONE** (v1.1.0)                                                                                                                  |
-| —     | **028** | Relatórios comerciais + métricas de funil (API + UI `/relatorios`)         | **DONE** (v1.1.1) · [`architecture/spec-028-commercial-reports.md`](./architecture/spec-028-commercial-reports.md)                 |
-| 1     | **027** | Meta Cloud API — cutover WhatsApp oficial (WABA)                           | QUEUED · **BLOCKED** até WABA · checklist [`operations/waba-credentials-checklist.md`](./operations/waba-credentials-checklist.md) |
+| Ordem | Spec    | Entrega                                                                    | Status                                                                                                                                               |
+| ----- | ------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| —     | **026** | Zoho Blueprint light + filtros avançados + COQL (read-only, tenant-scoped) | **DONE** (v1.1.0)                                                                                                                                    |
+| —     | **028** | Relatórios comerciais + métricas de funil (API + UI `/relatorios`)         | **DONE** (v1.1.1) · [`architecture/spec-028-commercial-reports.md`](./architecture/spec-028-commercial-reports.md)                                   |
+| —     | **030** | RBAC navegação / páginas por papel                                         | **DONE** · [`architecture/spec-030-rbac-navigation.md`](./architecture/spec-030-rbac-navigation.md)                                                  |
+| —     | **031** | FTS Postgres + idempotência Redis + retry workers                          | **DONE** (v1.1.3) · [`architecture/spec-031-fts-idempotency-retry.md`](./architecture/spec-031-fts-idempotency-retry.md) · VPS load/migrate pendente |
+| 1     | **027** | Meta Cloud API — cutover WhatsApp oficial (WABA)                           | QUEUED · **BLOCKED** até WABA · checklist [`operations/waba-credentials-checklist.md`](./operations/waba-credentials-checklist.md)                   |
 
 Premissa Zoho: **não** clonar Zoho (Deluge completo, Multi-DC, OAuth apps marketplace). Usar referência pública como checklist e entregar valor comercial no Inova.
 
