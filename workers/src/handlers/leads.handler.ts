@@ -1,14 +1,5 @@
 import { DomainEventEnvelope } from '../types';
-
-const processedKeys = new Set<string>();
-
-export function isDuplicate(idempotencyKey: string): boolean {
-  if (processedKeys.has(idempotencyKey)) {
-    return true;
-  }
-  processedKeys.add(idempotencyKey);
-  return false;
-}
+import { claimIdempotencyMemory } from '../idempotency';
 
 export interface LeadsHandlerDeps {
   log: (msg: string, meta?: Record<string, unknown>) => void;
@@ -17,6 +8,11 @@ export interface LeadsHandlerDeps {
     tenantId: string,
     body: Record<string, unknown>,
   ) => Promise<{ ok: boolean }>;
+  /** Spec 031 — Redis claim via API; defaults to in-memory for tests. */
+  claimIdempotency?: (
+    tenantId: string,
+    idempotencyKey: string,
+  ) => Promise<'claimed' | 'duplicate'> | 'claimed' | 'duplicate';
 }
 
 /**
@@ -31,7 +27,9 @@ export async function handleLeadsEvent(
     throw new Error('Event missing tenantId');
   }
 
-  if (isDuplicate(event.idempotencyKey)) {
+  const claimFn = deps.claimIdempotency ?? claimIdempotencyMemory;
+  const claim = await Promise.resolve(claimFn(event.tenantId, event.idempotencyKey));
+  if (claim === 'duplicate') {
     deps.log('Skipping duplicate event', { idempotencyKey: event.idempotencyKey });
     return;
   }

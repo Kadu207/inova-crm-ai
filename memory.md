@@ -4,8 +4,8 @@
 Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.  
 Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
-**Última atualização:** 2026-09-22  
-**Versão produto:** **1.1.2**  
+**Última atualização:** 2026-09-29  
+**Versão produto:** **1.1.2** (+ Spec 031 FTS/idempotency/retry em código)  
 **Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
 ---
@@ -40,14 +40,15 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Specs (pós-fase)
 
-| Spec    | Entrega                                           | Status                                                                                                                                        |
-| ------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 019–025 | Paridade Zoho onda 1                              | DONE                                                                                                                                          |
-| **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                                             |
-| **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                                               |
-| **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                                                    |
-| **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md) |
-| **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                      |
+| Spec    | Entrega                                           | Status                                                                                                                                                    |
+| ------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 019–025 | Paridade Zoho onda 1                              | DONE                                                                                                                                                      |
+| **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                                                         |
+| **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                                                           |
+| **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                                                                |
+| **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md)             |
+| **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                                  |
+| **031** | FTS Postgres + idempotência Redis + retry workers | **DONE** · gate `2026-09-30T02-32-29-884Z` · [`docs/architecture/spec-031-fts-idempotency-retry.md`](docs/architecture/spec-031-fts-idempotency-retry.md) |
 
 **Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”.
 

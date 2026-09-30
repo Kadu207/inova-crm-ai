@@ -44,6 +44,20 @@ describe('FilterEngine', () => {
     });
   });
 
+  it('strips LIKE wildcards from contains values', () => {
+    const where = compileFilterToPrisma('lead', 't1', {
+      field: 'title',
+      op: 'contains',
+      value: 'ac%me_co\\rp',
+    });
+    expect(where).toMatchObject({
+      AND: [
+        { tenantId: 't1', deletedAt: null },
+        { title: { contains: 'acmecorp', mode: 'insensitive' } },
+      ],
+    });
+  });
+
   it('rejects unknown fields', () => {
     expect(() =>
       compileFilterToPrisma('lead', 't1', { field: 'passwordHash', op: 'eq', value: 'x' }),

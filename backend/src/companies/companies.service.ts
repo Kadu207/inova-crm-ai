@@ -3,6 +3,7 @@ import { Company, Prisma } from '@prisma/client';
 import { actorCreateFields, actorUpdateFields, detailAuditInclude } from '../common/audit-fields';
 import { listResult, ListQueryInput, ListResult, parseListQuery } from '../common/list-query';
 import { notDeleted } from '../common/soft-delete';
+import { ftsSearchPage, orderByIds } from '../common/full-text-search';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 
@@ -12,17 +13,16 @@ export class CompaniesService {
 
   async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Company>> {
     const q = parseListQuery(query);
+    const fts = q.q
+      ? await ftsSearchPage(this.prisma, 'company', tenantId, q.q, q.skip, q.pageSize)
+      : null;
+    if (fts && fts.ids.length === 0) {
+      return listResult([], 0, q.page, q.pageSize);
+    }
     const where: Prisma.CompanyWhereInput = {
       tenantId,
       ...notDeleted,
-      ...(q.q
-        ? {
-            OR: [
-              { name: { contains: q.q, mode: 'insensitive' } },
-              { document: { contains: q.q, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
+      ...(fts ? { id: { in: fts.ids } } : {}),
       ...(q.createdFrom || q.createdTo
         ? {
             createdAt: {
@@ -32,6 +32,10 @@ export class CompaniesService {
           }
         : {}),
     };
+    if (fts) {
+      const data = await this.prisma.company.findMany({ where });
+      return listResult(orderByIds(data, fts.ids), fts.total, q.page, q.pageSize);
+    }
     const [data, total] = await Promise.all([
       this.prisma.company.findMany({
         where,

@@ -38,12 +38,14 @@ import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { BlueprintModule } from './blueprint/blueprint.module';
 import { CoqlModule } from './coql/coql.module';
 import { ReportsModule } from './reports/reports.module';
+import { PlatformModule } from './platform/platform.module';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     RedisModule,
+    PlatformModule,
     StorageModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],

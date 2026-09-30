@@ -3,6 +3,7 @@ import { Task, TaskStatus, Prisma } from '@prisma/client';
 import { actorCreateFields, actorUpdateFields, detailOwnerInclude } from '../common/audit-fields';
 import { listResult, ListQueryInput, ListResult, parseListQuery } from '../common/list-query';
 import { notDeleted } from '../common/soft-delete';
+import { ftsSearchPage, orderByIds } from '../common/full-text-search';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto, UpdateTaskDto } from './dto/task.dto';
 
@@ -12,13 +13,23 @@ export class TasksService {
 
   async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Task>> {
     const q = parseListQuery({ ...query, sort: query.sort ?? 'dueDate' });
+    const fts = q.q
+      ? await ftsSearchPage(this.prisma, 'task', tenantId, q.q, q.skip, q.pageSize)
+      : null;
+    if (fts && fts.ids.length === 0) {
+      return listResult([], 0, q.page, q.pageSize);
+    }
     const where: Prisma.TaskWhereInput = {
       tenantId,
       ...notDeleted,
       ...(q.status ? { status: q.status as TaskStatus } : {}),
       ...(q.assignedToId ? { assignedToId: q.assignedToId } : {}),
-      ...(q.q ? { title: { contains: q.q, mode: 'insensitive' } } : {}),
+      ...(fts ? { id: { in: fts.ids } } : {}),
     };
+    if (fts) {
+      const data = await this.prisma.task.findMany({ where });
+      return listResult(orderByIds(data, fts.ids), fts.total, q.page, q.pageSize);
+    }
     const [data, total] = await Promise.all([
       this.prisma.task.findMany({
         where,

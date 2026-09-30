@@ -124,7 +124,7 @@ Assinaturas em `WebhookSubscription`; dispatch no `EventsService.publish` com HM
 
 1. Novo evento → PR atualizando este catálogo **antes** do código publisher.
 2. `tenantId` obrigatório — consumer rejeita sem tenant.
-3. Idempotência via `idempotencyKey` (store Redis ou DB por consumer).
+3. Idempotência via `idempotencyKey` — claim Redis `SET NX` em `POST /api/v1/platform/idempotency/claim` (workers; Spec 031). Fallback in-memory só em dev/test sem Redis.
 4. n8n só recebe notificações no limiar (`*.sla.breached`, `invoice.overdue`) — via webhook HTTP, não consumer Rabbit direto.
 5. Redis **não** transporta estes eventos.
 

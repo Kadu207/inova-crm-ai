@@ -132,8 +132,14 @@ function compileScalar(field: string, op: FilterOp, value: unknown): Record<stri
       return { [field]: value };
     case 'neq':
       return { [field]: { not: value } };
-    case 'contains':
-      return { [field]: { contains: String(value ?? ''), mode: 'insensitive' } };
+    case 'contains': {
+      // Escape LIKE wildcards — prefer list ?q= (FTS / Spec 031) for free-text search.
+      const safe = String(value ?? '')
+        .replace(/\\/g, '')
+        .replace(/[%_]/g, '')
+        .slice(0, 200);
+      return { [field]: { contains: safe, mode: 'insensitive' } };
+    }
     case 'in':
       if (!Array.isArray(value)) throw new BadRequestException('in requires array value');
       return { [field]: { in: value } };
@@ -161,8 +167,13 @@ function compileJsonPath(apiName: string, op: FilterOp, value: unknown): Record<
       return { customFields: { path, equals: value } };
     case 'neq':
       return { NOT: { customFields: { path, equals: value } } };
-    case 'contains':
-      return { customFields: { path, string_contains: String(value ?? '') } };
+    case 'contains': {
+      const safe = String(value ?? '')
+        .replace(/\\/g, '')
+        .replace(/[%_]/g, '')
+        .slice(0, 200);
+      return { customFields: { path, string_contains: safe } };
+    }
     case 'in':
       if (!Array.isArray(value)) throw new BadRequestException('in requires array value');
       return {

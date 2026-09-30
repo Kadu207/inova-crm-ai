@@ -660,6 +660,7 @@ model OutboxEvent {
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([tenantId, idempotencyKey])
   @@index([tenantId])
   @@index([publishedAt])
   @@map("outbox_events")

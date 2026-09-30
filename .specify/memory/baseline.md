@@ -1,9 +1,9 @@
 # Baseline — Inova CRM AI
 
-**Última atualização:** 2026-09-22  
+**Última atualização:** 2026-09-29  
 **Versão do sistema:** **1.1.2** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
 **Plano Mestre:** 1.2  
-**Quality Gate:** PASS — Spec 030 + brand assets (1.1.2) + remediação audit F-01..F-10  
+**Quality Gate:** PASS — Spec 031 FTS/idempotency/retry (`2026-09-30T02-32-29-884Z`)  
 **Harness:** ativo — [`memory.md`](../../memory.md) · [`docs/agents.md`](../../docs/agents.md) · [`AGENTS.md`](../../AGENTS.md)
 
 ## Estado
@@ -21,7 +21,8 @@
 | **030 RBAC navegação**             | **DONE** — nav + deep-link por papel (`frontend/lib/navigation.ts`)                    |
 | **Brand favicon/PWA**              | **DONE** (v1.1.2) — [`docs/design/brand-assets.md`](../../docs/design/brand-assets.md) |
 | **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                                                      |
-| Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (reconnect 2026-09-22) · transitório até Spec 027              |
+| **031 FTS + idempotency + retry**  | **DONE** — GIN FTS, claim Redis, worker retry · gate `2026-09-30T02-32-29-884Z`        |
+| Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (reconnect 2026-09-29) · transitório até Spec 027              |
 | n8n → API                          | `API_BASE_URL=http://api:3000` · token sync OK (2026-09-21)                            |
 | Chatwoot CRM PID                   | healthy (audit periódico)                                                              |
 | Swarm Inova-TI Chatwoot            | **scale 0 (0/0)** — pausado (vxlan); CRM `chat-crm` intacto                            |

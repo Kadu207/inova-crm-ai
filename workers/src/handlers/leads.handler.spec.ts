@@ -1,5 +1,6 @@
 import { handleLeadsEvent } from './leads.handler';
 import { DomainEventEnvelope } from '../types';
+import { resetIdempotencyMemory } from '../idempotency';
 
 describe('handleLeadsEvent', () => {
   const baseEvent: DomainEventEnvelope = {
@@ -10,6 +11,10 @@ describe('handleLeadsEvent', () => {
     timestamp: new Date().toISOString(),
     payload: { leadId: 'lead-1' },
   };
+
+  beforeEach(() => {
+    resetIdempotencyMemory();
+  });
 
   it('processes lead.created event', async () => {
     const logs: string[] = [];

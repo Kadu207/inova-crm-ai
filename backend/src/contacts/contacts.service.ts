@@ -6,6 +6,7 @@ import { notDeleted } from '../common/soft-delete';
 import { compileFilterToPrisma, parseSearchBody } from '../common/filter-engine/filter-engine';
 import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
+import { ftsSearchPage, orderByIds } from '../common/full-text-search';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateContactDto, UpdateContactDto } from './dto/contact.dto';
 
@@ -18,18 +19,16 @@ export class ContactsService {
 
   async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Contact>> {
     const q = parseListQuery(query);
+    const fts = q.q
+      ? await ftsSearchPage(this.prisma, 'contact', tenantId, q.q, q.skip, q.pageSize)
+      : null;
+    if (fts && fts.ids.length === 0) {
+      return listResult([], 0, q.page, q.pageSize);
+    }
     const where: Prisma.ContactWhereInput = {
       tenantId,
       ...notDeleted,
-      ...(q.q
-        ? {
-            OR: [
-              { name: { contains: q.q, mode: 'insensitive' } },
-              { email: { contains: q.q, mode: 'insensitive' } },
-              { phone: { contains: q.q, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
+      ...(fts ? { id: { in: fts.ids } } : {}),
       ...(q.createdFrom || q.createdTo
         ? {
             createdAt: {
@@ -39,6 +38,10 @@ export class ContactsService {
           }
         : {}),
     };
+    if (fts) {
+      const data = await this.prisma.contact.findMany({ where });
+      return listResult(orderByIds(data, fts.ids), fts.total, q.page, q.pageSize);
+    }
     const [data, total] = await Promise.all([
       this.prisma.contact.findMany({
         where,

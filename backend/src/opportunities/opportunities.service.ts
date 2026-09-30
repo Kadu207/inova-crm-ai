@@ -5,6 +5,7 @@ import { listResult, ListQueryInput, ListResult, parseListQuery } from '../commo
 import { notDeleted } from '../common/soft-delete';
 import { compileFilterToPrisma, parseSearchBody } from '../common/filter-engine/filter-engine';
 import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
+import { ftsSearchPage, orderByIds } from '../common/full-text-search';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import { BlueprintService } from '../blueprint/blueprint.service';
@@ -28,12 +29,18 @@ export class OpportunitiesService {
 
   async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Opportunity>> {
     const q = parseListQuery(query);
+    const fts = q.q
+      ? await ftsSearchPage(this.prisma, 'opportunity', tenantId, q.q, q.skip, q.pageSize)
+      : null;
+    if (fts && fts.ids.length === 0) {
+      return listResult([], 0, q.page, q.pageSize);
+    }
     const where: Prisma.OpportunityWhereInput = {
       tenantId,
       ...notDeleted,
       ...(q.status ? { status: q.status as OpportunityStatus } : {}),
       ...(q.assignedToId ? { assignedToId: q.assignedToId } : {}),
-      ...(q.q ? { title: { contains: q.q, mode: 'insensitive' } } : {}),
+      ...(fts ? { id: { in: fts.ids } } : {}),
       ...(q.createdFrom || q.createdTo
         ? {
             createdAt: {
@@ -43,6 +50,10 @@ export class OpportunitiesService {
           }
         : {}),
     };
+    if (fts) {
+      const data = await this.prisma.opportunity.findMany({ where });
+      return listResult(orderByIds(data, fts.ids), fts.total, q.page, q.pageSize);
+    }
     const [data, total] = await Promise.all([
       this.prisma.opportunity.findMany({
         where,

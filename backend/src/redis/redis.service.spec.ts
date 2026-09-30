@@ -11,4 +11,15 @@ describe('RedisService', () => {
     await expect(service.tryAcquireLock('k', 10)).resolves.toBe(true);
     await service.onModuleDestroy();
   });
+
+  it('claimIdempotency dedupes in memory when REDIS_URL unset', async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [RedisService, { provide: ConfigService, useValue: { get: () => undefined } }],
+    }).compile();
+    const service = module.get(RedisService);
+    const key = `spec031-${Date.now()}`;
+    await expect(service.claimIdempotency('t1', key)).resolves.toBe('claimed');
+    await expect(service.claimIdempotency('t1', key)).resolves.toBe('duplicate');
+    await service.onModuleDestroy();
+  });
 });

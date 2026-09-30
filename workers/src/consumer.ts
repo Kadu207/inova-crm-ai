@@ -8,6 +8,8 @@ import {
   handleAiEvent,
   handleAuditEvent,
 } from './handlers';
+import { claimIdempotencyMemory, releaseIdempotencyMemory } from './idempotency';
+import { backoffMs, MAX_EVENT_RETRIES, parseRetryCount } from './retry';
 
 const log = (msg: string, meta?: Record<string, unknown>): void => {
   console.log(JSON.stringify({ level: 'info', msg, ...meta, ts: new Date().toISOString() }));
@@ -31,7 +33,7 @@ export async function startConsumers(): Promise<void> {
     }
 
     await channel.consume(queue, (msg) => {
-      void processMessage(channel, msg, queue, api);
+      void processMessage(channel, msg, queue, api, exchange);
     });
 
     log('Consumer registered', { queue, routingKeys: keys });
@@ -52,11 +54,30 @@ async function processMessage(
   msg: ConsumeMessage | null,
   queue: string,
   api: ApiClient | null,
+  exchange: string,
 ): Promise<void> {
   if (!msg) return;
 
+  let event: DomainEventEnvelope | null = null;
+  let claimed = false;
+
   try {
-    const event = JSON.parse(msg.content.toString()) as DomainEventEnvelope;
+    event = JSON.parse(msg.content.toString()) as DomainEventEnvelope;
+
+    const claim = api
+      ? await api.claimIdempotency(event.tenantId, event.idempotencyKey, event.eventType)
+      : claimIdempotencyMemory(event.tenantId, event.idempotencyKey);
+
+    if (claim === 'duplicate') {
+      log('Skipping duplicate event', {
+        queue,
+        idempotencyKey: event.idempotencyKey,
+        tenantId: event.tenantId,
+      });
+      channel.ack(msg);
+      return;
+    }
+    claimed = true;
 
     switch (queue) {
       case WORKER_QUEUES.LEADS:
@@ -68,6 +89,8 @@ async function processMessage(
                 return { ok: res.ok };
               }
             : undefined,
+          // Already claimed at consumer level — skip second claim
+          claimIdempotency: async (): Promise<'claimed' | 'duplicate'> => 'claimed',
         });
         break;
       case WORKER_QUEUES.PIPELINE:
@@ -88,7 +111,43 @@ async function processMessage(
 
     channel.ack(msg);
   } catch (err) {
-    log('Consumer error', { queue, error: String(err) });
+    if (claimed && event) {
+      if (api) {
+        await api.releaseIdempotency(event.tenantId, event.idempotencyKey);
+      } else {
+        releaseIdempotencyMemory(event.tenantId, event.idempotencyKey);
+      }
+    }
+
+    const retries = parseRetryCount(msg.properties.headers as Record<string, unknown> | undefined);
+    log('Consumer error', { queue, error: String(err), retries });
+
+    if (retries < MAX_EVENT_RETRIES) {
+      const content = Buffer.from(msg.content);
+      const routingKey = msg.fields.routingKey;
+      const headers = {
+        ...(msg.properties.headers ?? {}),
+        'x-retry': retries + 1,
+      };
+      // Ack first so broker does not redeliver during backoff wait.
+      channel.ack(msg);
+      const delay = backoffMs(retries);
+      setTimeout(() => {
+        try {
+          channel.publish(exchange, routingKey, content, {
+            persistent: true,
+            contentType: 'application/json',
+            headers,
+          });
+          log('Event republished for retry', { queue, retries: retries + 1, delayMs: delay });
+        } catch (publishErr) {
+          log('Retry publish failed', { error: String(publishErr) });
+        }
+      }, delay);
+      return;
+    }
+
+    log('Poison message discarded after max retries', { queue, retries });
     channel.nack(msg, false, false);
   }
 }

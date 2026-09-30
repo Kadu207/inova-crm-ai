@@ -7,6 +7,7 @@ import { compileFilterToPrisma, parseSearchBody } from '../common/filter-engine/
 import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ftsSearchPage, orderByIds } from '../common/full-text-search';
 import { EventsService } from '../events/events.service';
 import {
   ConvertLeadDto,
@@ -32,19 +33,18 @@ export class LeadsService {
 
   async findAll(tenantId: string, query: ListQueryInput = {}): Promise<ListResult<Lead>> {
     const q = parseListQuery(query);
+    const fts = q.q
+      ? await ftsSearchPage(this.prisma, 'lead', tenantId, q.q, q.skip, q.pageSize)
+      : null;
+    if (fts && fts.ids.length === 0) {
+      return listResult([], 0, q.page, q.pageSize);
+    }
     const where: Prisma.LeadWhereInput = {
       tenantId,
       ...notDeleted,
       ...(q.status ? { status: q.status as LeadStatus } : {}),
       ...(q.assignedToId ? { assignedToId: q.assignedToId } : {}),
-      ...(q.q
-        ? {
-            OR: [
-              { title: { contains: q.q, mode: 'insensitive' } },
-              { notes: { contains: q.q, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
+      ...(fts ? { id: { in: fts.ids } } : {}),
       ...(q.createdFrom || q.createdTo
         ? {
             createdAt: {
@@ -54,6 +54,10 @@ export class LeadsService {
           }
         : {}),
     };
+    if (fts) {
+      const data = await this.prisma.lead.findMany({ where });
+      return listResult(orderByIds(data, fts.ids), fts.total, q.page, q.pageSize);
+    }
     const [data, total] = await Promise.all([
       this.prisma.lead.findMany({
         where,
