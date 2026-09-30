@@ -337,8 +337,8 @@ Gera `dist/images/*.tar.gz` — depois siga Passos 3–5.
 
 ## Última validação conhecida
 
-| Campo     | Valor                                       |
-| --------- | ------------------------------------------- |
-| Run       | `30184019868`                               |
-| SHA       | `cdd215ca2788`                              |
-| Resultado | `LOAD_CI_IMAGES_OK` — api/fe/bulk/admin 200 |
+| Campo     | Valor                                                                                     |
+| --------- | ----------------------------------------------------------------------------------------- |
+| Run       | `36661857102`                                                                             |
+| SHA       | `0a5266634480` (Spec 031)                                                                 |
+| Resultado | `LOAD_CI_IMAGES_OK` — api/fe/bulk/admin 200 · migrate `20260930010000_fts_idempotency` OK |
