@@ -6,7 +6,7 @@
 
 **Harness completo.** Entrada Cursor: [`AGENTS.md`](../AGENTS.md) · Memória viva: [`memory.md`](../memory.md) · Constituição: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md)
 
-**Última revisão:** 2026-09-29
+**Última revisão:** 2026-10-27
 
 ---
 
@@ -154,6 +154,7 @@ Build: **um C-\* (ou um bloco P0) por vez**; marcar DONE só após R-90.
 | 028 Relatórios     | DONE    | C-13, C-04, C-08       | R-90 + EMB-02 done                     |
 | 030 RBAC nav       | DONE    | C-04, C-08             | R-90 + EMB-02 done                     |
 | 031 FTS/idem/retry | DONE    | C-01, C-11, C-19, C-25 | R-90 + EMB-02/03 done (`0a5266634480`) |
+| 032 Telegram       | DONE    | C-09, C-04, C-08       | gate `2026-10-27T03-47-39-321Z`        |
 | 027 Meta/WABA      | BLOCKED | C-09, C-10             | EMB-06                                 |
 
 ---

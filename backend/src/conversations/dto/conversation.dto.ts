@@ -108,4 +108,21 @@ export class SyncConversationDto {
   @IsOptional()
   @IsString()
   whatsappExternalId?: string;
+
+  /** Raw Chatwoot channel, e.g. Channel::Telegram. API normalizes it. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  channel?: string;
+
+  /** Chatwoot sender identifier. API routes Telegram vs WhatsApp. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  senderIdentifier?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  telegramUsername?: string;
 }

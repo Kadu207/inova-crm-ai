@@ -17,7 +17,13 @@ type ConversationRow = {
   channel?: string | null;
   chatwootId?: number | null;
   lastMessageAt?: string | null;
-  contact?: { id: string; name: string; phone?: string | null; email?: string | null } | null;
+  contact?: {
+    id: string;
+    name: string;
+    phone?: string | null;
+    email?: string | null;
+    telegramUsername?: string | null;
+  } | null;
   lead?: { id: string; title: string; status: string } | null;
 };
 
@@ -26,6 +32,39 @@ function formatDate(value?: string | null): string {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+function channelLabel(channel?: string | null): string {
+  switch ((channel ?? '').toLowerCase()) {
+    case 'telegram':
+      return 'Telegram';
+    case 'whatsapp':
+      return 'WhatsApp';
+    case 'email':
+      return 'Email';
+    case 'instagram':
+      return 'Instagram';
+    case 'facebook':
+      return 'Facebook';
+    case 'api':
+      return 'API';
+    case 'web':
+      return 'Web';
+    case 'sms':
+      return 'SMS';
+    case 'chatwoot':
+      return 'Chatwoot';
+    default: {
+      if (!channel) return '—';
+      return channel;
+    }
+  }
+}
+
+function contactMeta(contact?: ConversationRow['contact']): string | null {
+  if (!contact) return null;
+  if (contact.telegramUsername) return `@${contact.telegramUsername.replace(/^@+/, '')}`;
+  return contact.phone ?? null;
 }
 
 function convTone(status: string): 'ok' | 'warn' | 'neutral' | 'bad' | 'flame' {
@@ -126,7 +165,11 @@ export function AtendimentoClient() {
                   badge={<StatusBadge label={c.status} tone={convTone(c.status)} />}
                   meta={
                     <p>
-                      {[c.channel, c.contact?.phone, c.lead ? `Lead: ${c.lead.title}` : null]
+                      {[
+                        channelLabel(c.channel),
+                        contactMeta(c.contact),
+                        c.lead ? `Lead: ${c.lead.title}` : null,
+                      ]
                         .filter(Boolean)
                         .join(' · ')}
                       <br />
@@ -173,7 +216,12 @@ export function AtendimentoClient() {
                         <p className="mt-0.5 text-xs text-smoke">Lead: {c.lead.title}</p>
                       ) : null}
                     </td>
-                    <td className="py-3 pr-4 text-smoke">{c.channel ?? '—'}</td>
+                    <td className="py-3 pr-4 text-smoke">
+                      {channelLabel(c.channel)}
+                      {contactMeta(c.contact) ? (
+                        <p className="mt-0.5 text-xs">{contactMeta(c.contact)}</p>
+                      ) : null}
+                    </td>
                     <td className="py-3 pr-4">
                       <StatusBadge label={c.status} tone={convTone(c.status)} />
                     </td>

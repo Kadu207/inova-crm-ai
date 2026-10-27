@@ -287,6 +287,10 @@ model Contact {
   phone              String?
   /// WhatsApp identity: Evolution jid/wa_id or future Meta BSUID
   whatsappExternalId String?   @map("whatsapp_external_id")
+  /// Telegram user id from Chatwoot Channel::Telegram (not a phone, not a WhatsApp id)
+  telegramExternalId String?   @map("telegram_external_id")
+  /// Telegram @username without the leading @; display only, not a dedupe key
+  telegramUsername   String?   @map("telegram_username")
   title              String?
   customFields       Json?     @map("custom_fields")
   createdById        String?   @map("created_by_id")
@@ -306,6 +310,7 @@ model Contact {
   @@index([tenantId])
   @@index([tenantId, email])
   @@index([tenantId, whatsappExternalId])
+  @@index([tenantId, telegramExternalId])
   @@index([tenantId, deletedAt])
   @@map("contacts")
 }

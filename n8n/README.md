@@ -43,6 +43,8 @@ Arquivos versionados em `n8n/workflows/`:
 | `sync-conversation.json` | `/webhook/sync-conversation` | `POST /v1/conversations/sync`     |
 | `notify-api.json`        | `/webhook/notify-api`        | `POST /v1/notifications/dispatch` |
 
+`lead-inbound` e `sync-conversation` encaminham `channel`, `senderIdentifier` e `telegramUsername`. A API decide se o identificador é Telegram ou WhatsApp.
+
 1. Acesse `https://n8n-crm.inovatitech.com.br` (ou `http://127.0.0.1:9404` em dev).
 2. **Workflows → Import from file** para cada JSON.
 3. Ative cada workflow (toggle **Active**).

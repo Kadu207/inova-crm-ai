@@ -1,9 +1,9 @@
 # Baseline — Inova CRM AI
 
-**Última atualização:** 2026-09-30  
-**Versão do sistema:** **1.1.3** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
+**Última atualização:** 2026-10-27  
+**Versão do sistema:** **1.1.4** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
 **Plano Mestre:** 1.2  
-**Quality Gate:** PASS — Spec 031 FTS/idempotency/retry (`2026-09-30T02-32-29-884Z`) · commit `0a52666`  
+**Quality Gate:** PASS — Spec 032 Telegram via Chatwoot (`2026-10-27T03-47-39-321Z`)  
 **Harness:** ativo — [`memory.md`](../../memory.md) · [`docs/agents.md`](../../docs/agents.md) · [`AGENTS.md`](../../AGENTS.md)
 
 ## Estado
@@ -21,6 +21,7 @@
 | **030 RBAC navegação**             | **DONE** — nav + deep-link por papel (`frontend/lib/navigation.ts`)                    |
 | **Brand favicon/PWA**              | **DONE** (v1.1.2) — [`docs/design/brand-assets.md`](../../docs/design/brand-assets.md) |
 | **031 FTS + idempotency + retry**  | **DONE** prod — load `0a5266634480` + migrate `20260930010000_fts_idempotency` OK      |
+| **032 Telegram via Chatwoot**      | **DONE** código — gate `2026-10-27T03-47-39-321Z` · inbox do bot é passo humano        |
 | **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                                                      |
 | Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (reconnect 2026-09-29) · transitório até Spec 027              |
 | n8n → API                          | `API_BASE_URL=http://api:3000` · token sync OK (2026-09-21)                            |
@@ -36,4 +37,4 @@
 4. **F-06:** rotação humana de senhas históricas (checklist remediação)
 5. **Nota migrate:** tabelas CRM owned by `inova`; `crm_app` não cria INDEX — Spec 031 aplicou SQL como superuser + `prisma migrate resolve --applied`
 
-Docs: `docs/harness.md`, `docs/operations/vps-ssh.md`, `docs/architecture/spec-031-fts-idempotency-retry.md`, `docs/design/brand-assets.md`, `docs/chatwoot-whatsapp-setup.md`, `docs/integracao-n8n.md`, `docs/operations/ci-docker-images.md`, `docs/operations/waba-credentials-checklist.md`
+Docs: `docs/harness.md`, `docs/operations/vps-ssh.md`, `docs/architecture/spec-031-fts-idempotency-retry.md`, `docs/design/brand-assets.md`, `docs/chatwoot-whatsapp-setup.md`, `docs/chatwoot-telegram-setup.md`, `docs/integracao-n8n.md`, `docs/operations/ci-docker-images.md`, `docs/operations/waba-credentials-checklist.md`

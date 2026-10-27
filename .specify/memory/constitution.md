@@ -32,8 +32,8 @@ Fases 0–7 do escopo 1C estão **DONE**; trabalho contínuo via Specs `026+` (v
 
 ## 5. Canais só via Chatwoot
 
-- WhatsApp, Instagram, Facebook, email entram **somente** pelo Chatwoot dedicado (`chat-crm`).
-- CRM não fala direto com Meta.
+- WhatsApp, Instagram, Facebook, email e Telegram entram **somente** pelo Chatwoot dedicado (`chat-crm`).
+- CRM não fala direto com Meta nem com a Bot API do Telegram.
 - Webhooks assinados (HMAC `X-Inova-Signature` / `WEBHOOK_SECRET`).
 
 ## 6. Mensageria — papéis claros

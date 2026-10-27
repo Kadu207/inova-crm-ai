@@ -8,6 +8,7 @@ import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ftsSearchPage, orderByIds } from '../common/full-text-search';
+import { resolveChatwootIdentity } from '../common/chatwoot-channel';
 import { EventsService } from '../events/events.service';
 import {
   ConvertLeadDto,
@@ -140,11 +141,14 @@ export class LeadsService {
    * upsert Conversation linked to lead (RN-LEAD-01/03, RN-CONV-01).
    */
   async inboundFromChatwoot(tenantId: string, dto: InboundLeadDto): Promise<Lead> {
+    const identity = resolveChatwootIdentity(dto);
     const who =
       dto.name?.trim() ||
       dto.phone?.trim() ||
       dto.email?.trim() ||
-      dto.whatsappExternalId?.trim() ||
+      (identity.telegramUsername ? `@${identity.telegramUsername}` : undefined) ||
+      identity.telegramExternalId ||
+      identity.whatsappExternalId ||
       'Chatwoot contact';
     const snippet = dto.message?.trim().slice(0, 80);
     const title = snippet ? `Lead Chatwoot: ${who} — ${snippet}` : `Lead Chatwoot: ${who}`;
@@ -152,9 +156,11 @@ export class LeadsService {
       dto.event ? `event=${dto.event}` : null,
       dto.accountId != null ? `accountId=${dto.accountId}` : null,
       dto.conversationId != null ? `conversationId=${dto.conversationId}` : null,
+      identity.channel ? `channel=${identity.channel}` : null,
       dto.phone ? `phone=${dto.phone}` : null,
       dto.email ? `email=${dto.email}` : null,
-      dto.whatsappExternalId ? `whatsappExternalId=${dto.whatsappExternalId}` : null,
+      identity.telegramExternalId ? `telegramExternalId=${identity.telegramExternalId}` : null,
+      identity.whatsappExternalId ? `whatsappExternalId=${identity.whatsappExternalId}` : null,
       dto.message ? `message=${dto.message}` : null,
     ]
       .filter(Boolean)
@@ -164,7 +170,9 @@ export class LeadsService {
       name: dto.name?.trim() || who,
       phone: dto.phone?.trim() || undefined,
       email: dto.email?.trim() || undefined,
-      whatsappExternalId: dto.whatsappExternalId?.trim() || undefined,
+      whatsappExternalId: identity.whatsappExternalId,
+      telegramExternalId: identity.telegramExternalId,
+      telegramUsername: identity.telegramUsername,
     });
 
     const existing = await this.findOpenLeadByContact(tenantId, contact.id);
@@ -209,6 +217,8 @@ export class LeadsService {
         accountId: dto.accountId,
         contactId: contact.id,
         leadId: lead.id,
+        channel: identity.channel,
+        channelProvided: Boolean(dto.channel?.trim()),
       });
     }
 
@@ -382,8 +392,37 @@ export class LeadsService {
 
   private async findOrCreateContact(
     tenantId: string,
-    input: { name: string; phone?: string; email?: string; whatsappExternalId?: string },
+    input: {
+      name: string;
+      phone?: string;
+      email?: string;
+      whatsappExternalId?: string;
+      telegramExternalId?: string;
+      telegramUsername?: string;
+    },
   ): Promise<Contact> {
+    const telegramPatch = {
+      ...(input.telegramExternalId ? { telegramExternalId: input.telegramExternalId } : {}),
+      ...(input.telegramUsername ? { telegramUsername: input.telegramUsername } : {}),
+    };
+
+    if (input.telegramExternalId) {
+      const byTg = await this.prisma.contact.findFirst({
+        where: { tenantId, telegramExternalId: input.telegramExternalId, ...notDeleted },
+      });
+      if (byTg) {
+        return this.prisma.contact.update({
+          where: { id: byTg.id },
+          data: {
+            name: input.name || byTg.name,
+            phone: input.phone ?? byTg.phone,
+            email: input.email ?? byTg.email,
+            ...telegramPatch,
+          },
+        });
+      }
+    }
+
     if (input.whatsappExternalId) {
       const byWa = await this.prisma.contact.findFirst({
         where: { tenantId, whatsappExternalId: input.whatsappExternalId, ...notDeleted },
@@ -395,6 +434,7 @@ export class LeadsService {
             name: input.name || byWa.name,
             phone: input.phone ?? byWa.phone,
             email: input.email ?? byWa.email,
+            ...telegramPatch,
           },
         });
       }
@@ -411,6 +451,7 @@ export class LeadsService {
             name: input.name || byEmail.name,
             phone: input.phone ?? byEmail.phone,
             whatsappExternalId: input.whatsappExternalId ?? byEmail.whatsappExternalId,
+            ...telegramPatch,
           },
         });
       }
@@ -427,6 +468,7 @@ export class LeadsService {
             name: input.name || byPhone.name,
             email: input.email ?? byPhone.email,
             whatsappExternalId: input.whatsappExternalId ?? byPhone.whatsappExternalId,
+            ...telegramPatch,
           },
         });
       }
@@ -439,6 +481,8 @@ export class LeadsService {
         phone: input.phone,
         email: input.email,
         whatsappExternalId: input.whatsappExternalId,
+        telegramExternalId: input.telegramExternalId,
+        telegramUsername: input.telegramUsername,
       },
     });
   }
@@ -450,6 +494,8 @@ export class LeadsService {
       accountId?: number;
       contactId: string;
       leadId: string;
+      channel: string;
+      channelProvided: boolean;
     },
   ): Promise<void> {
     const existing = await this.prisma.conversation.findFirst({
@@ -464,6 +510,7 @@ export class LeadsService {
           leadId: input.leadId,
           lastMessageAt: new Date(),
           ...(input.accountId != null ? { chatwootAccountId: input.accountId } : {}),
+          ...(input.channelProvided ? { channel: input.channel } : {}),
         },
       });
       return;
@@ -476,7 +523,7 @@ export class LeadsService {
         chatwootAccountId: input.accountId,
         contactId: input.contactId,
         leadId: input.leadId,
-        channel: 'chatwoot',
+        channel: input.channel,
         status: 'OPEN',
         lastMessageAt: new Date(),
       },

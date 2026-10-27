@@ -1,7 +1,7 @@
 # Histórico de versões — Inova CRM AI
 
 **Produto:** Inova CRM AI  
-**Versão atual do sistema:** **1.1.3** (2026-09-29)  
+**Versão atual do sistema:** **1.1.4** (2026-10-27)  
 **Plano Mestre:** 1.2  
 **Fonte de verdade operacional:** [`.specify/memory/baseline.md`](../.specify/memory/baseline.md)
 
@@ -34,13 +34,23 @@ Convenção SemVer do produto:
 2026-08-03  v1.1.1  Spec 028 Relatórios comerciais
 2026-09-21  v1.1.2  Brand favicon/PWA + ops Evolution/n8n
 2026-09-22  v1.1.2  Audit F-01..F-10 em prod + WA reconnect
-2026-09-29  v1.1.3  Spec 031 FTS + idempotência + retry   ← ATUAL
+2026-09-29  v1.1.3  Spec 031 FTS + idempotência + retry
+2026-10-27  v1.1.4  Spec 032 Telegram via Chatwoot   ← ATUAL
 depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 ```
 
 ---
 
 ## Changelog
+
+### [1.1.4] — 2026-10-27 — Spec 032 Telegram via Chatwoot
+
+- Canal Telegram entra só pelo inbox nativo do Chatwoot (`Channel::Telegram`); o CRM não chama a Bot API
+- Contato guarda `telegram_external_id` separado de `whatsapp_external_id`; conversa grava `channel=telegram`
+- `/atendimento` mostra o rótulo Telegram e `@username` quando existir
+- n8n `lead-inbound` e `sync-conversation` encaminham `channel` e `senderIdentifier`
+- Gate PASS: `2026-10-27T03-47-39-321Z` · runbook [`chatwoot-telegram-setup.md`](./chatwoot-telegram-setup.md)
+- Inbox do bot (token) continua passo humano na VPS; reimport dos workflows n8n após o load
 
 ### [1.1.3] — 2026-09-29 — Spec 031 FTS / idempotência / retry
 

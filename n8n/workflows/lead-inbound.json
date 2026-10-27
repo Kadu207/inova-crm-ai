@@ -68,6 +68,24 @@
               "name": "whatsappExternalId",
               "value": "={{ $json.body?.sender?.identifier || $json.sender?.identifier || $json.body?.meta?.sender?.identifier || $json.meta?.sender?.identifier || $json.body?.sender?.source_id || $json.sender?.source_id || '' }}",
               "type": "string"
+            },
+            {
+              "id": "senderId",
+              "name": "senderIdentifier",
+              "value": "={{ $json.body?.sender?.identifier || $json.sender?.identifier || $json.body?.meta?.sender?.identifier || $json.meta?.sender?.identifier || $json.body?.sender?.source_id || $json.sender?.source_id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "channel",
+              "name": "channel",
+              "value": "={{ $json.body?.conversation?.channel || $json.conversation?.channel || $json.body?.inbox?.channel_type || $json.inbox?.channel_type || $json.body?.channel || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "tgUser",
+              "name": "telegramUsername",
+              "value": "={{ $json.body?.sender?.additional_attributes?.username || $json.body?.meta?.sender?.additional_attributes?.username || $json.body?.conversation?.meta?.sender?.additional_attributes?.username || $json.body?.sender?.additional_attributes?.social_telegram_user_name || '' }}",
+              "type": "string"
             }
           ]
         },
@@ -106,7 +124,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, email: $json.senderEmail, whatsappExternalId: $json.whatsappExternalId || undefined, message: $json.messageContent }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, email: $json.senderEmail, whatsappExternalId: $json.whatsappExternalId || undefined, senderIdentifier: $json.senderIdentifier || undefined, channel: $json.channel || undefined, telegramUsername: $json.telegramUsername || undefined, message: $json.messageContent }) }}",
         "options": {}
       },
       "id": "lead-http",

@@ -76,7 +76,9 @@ Seed demo: `SEED_CHATWOOT_ACCOUNT_ID=1` (account Chatwoot padrão).
 
 ## Canais suportados
 
-WhatsApp Business, Email, Instagram DM, Facebook Messenger — configurados por tenant no painel Chatwoot.
+WhatsApp Business, Email, Instagram DM, Facebook Messenger e Telegram — configurados por tenant no painel Chatwoot.
+
+Telegram (bot do BotFather, `Channel::Telegram`): [`docs/chatwoot-telegram-setup.md`](chatwoot-telegram-setup.md) + `chatwoot/scripts/create_telegram_inbox.rb`. O CRM grava `conversations.channel=telegram` e `contacts.telegram_external_id`. O id do Telegram não entra em `whatsapp_external_id`. `source` do lead continua `CHATWOOT`.
 
 WhatsApp dual-path (ADR 005):
 

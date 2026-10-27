@@ -194,6 +194,87 @@ describe('LeadsService', () => {
     });
   });
 
+  it('inbound telegram stores telegram id and does not write whatsappExternalId', async () => {
+    prisma.contact.findFirst.mockResolvedValue(null);
+    prisma.contact.create.mockResolvedValue({
+      id: 'contact-tg',
+      name: 'Ada',
+      phone: null,
+      email: null,
+      telegramExternalId: '99887766',
+      telegramUsername: 'ada',
+    });
+    prisma.lead.findFirst.mockResolvedValue(null);
+    prisma.lead.create.mockResolvedValue({
+      ...mockLead,
+      id: 'lead-tg',
+      contactId: 'contact-tg',
+      source: LeadSource.CHATWOOT,
+    });
+    prisma.conversation.findFirst.mockResolvedValue(null);
+    prisma.conversation.create.mockResolvedValue({ id: 'conv-tg', channel: 'telegram' });
+
+    const result = await service.inboundFromChatwoot(tenantId, {
+      name: 'Ada',
+      channel: 'Channel::Telegram',
+      senderIdentifier: '99887766',
+      whatsappExternalId: '99887766',
+      telegramUsername: '@ada',
+      message: 'oi telegram',
+      conversationId: 7,
+    });
+
+    expect(result.source).toBe(LeadSource.CHATWOOT);
+    expect(prisma.contact.findFirst).toHaveBeenCalledWith({
+      where: expect.objectContaining({
+        tenantId,
+        telegramExternalId: '99887766',
+        deletedAt: null,
+      }),
+    });
+    expect(prisma.contact.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tenantId,
+        telegramExternalId: '99887766',
+        telegramUsername: 'ada',
+        whatsappExternalId: undefined,
+      }),
+    });
+    expect(prisma.conversation.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ channel: 'telegram', tenantId }),
+    });
+  });
+
+  it('inbound telegram lookup stays inside the tenant', async () => {
+    prisma.contact.findFirst.mockResolvedValue({
+      id: 'contact-tg',
+      name: 'Ada',
+      telegramExternalId: '99887766',
+    });
+    prisma.contact.update.mockResolvedValue({
+      id: 'contact-tg',
+      name: 'Ada',
+      telegramExternalId: '99887766',
+    });
+    prisma.lead.findFirst.mockResolvedValue(mockLead);
+    prisma.lead.updateMany.mockResolvedValue({ count: 1 });
+    prisma.conversation.findFirst.mockResolvedValue({ id: 'conv-tg' });
+    prisma.conversation.update.mockResolvedValue({ id: 'conv-tg' });
+
+    await service.inboundFromChatwoot('tenant-b', {
+      channel: 'Channel::Telegram',
+      senderIdentifier: '99887766',
+      conversationId: 8,
+    });
+
+    expect(prisma.contact.findFirst).toHaveBeenCalledWith({
+      where: expect.objectContaining({ tenantId: 'tenant-b', telegramExternalId: '99887766' }),
+    });
+    expect(prisma.conversation.findFirst).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-b', chatwootId: 8 },
+    });
+  });
+
   it('convert creates opportunity and marks CONVERTED', async () => {
     const converted = { ...mockLead, status: LeadStatus.CONVERTED };
     prisma.lead.findFirst.mockResolvedValueOnce(mockLead).mockResolvedValueOnce(converted);

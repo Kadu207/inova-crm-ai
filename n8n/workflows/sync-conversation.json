@@ -72,7 +72,25 @@
             {
               "id": "waExt",
               "name": "whatsappExternalId",
-              "value": "={{ $json.body?.meta?.sender?.identifier || $json.body?.conversation?.meta?.sender?.identifier || $json.body?.meta?.sender?.source_id || '' }}",
+              "value": "={{ $json.body?.meta?.sender?.identifier || $json.body?.conversation?.meta?.sender?.identifier || $json.body?.sender?.identifier || $json.body?.meta?.sender?.source_id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "senderId",
+              "name": "senderIdentifier",
+              "value": "={{ $json.body?.meta?.sender?.identifier || $json.body?.conversation?.meta?.sender?.identifier || $json.body?.sender?.identifier || $json.body?.meta?.sender?.source_id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "channel",
+              "name": "channel",
+              "value": "={{ $json.body?.conversation?.channel || $json.conversation?.channel || $json.body?.inbox?.channel_type || $json.inbox?.channel_type || $json.body?.channel || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "tgUser",
+              "name": "telegramUsername",
+              "value": "={{ $json.body?.meta?.sender?.additional_attributes?.username || $json.body?.conversation?.meta?.sender?.additional_attributes?.username || $json.body?.sender?.additional_attributes?.username || $json.body?.meta?.sender?.additional_attributes?.social_telegram_user_name || '' }}",
               "type": "string"
             }
           ]
@@ -112,7 +130,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId, name: $json.contactName, phone: $json.contactPhone, email: $json.contactEmail, whatsappExternalId: $json.whatsappExternalId || undefined }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, status: $json.conversationStatus, assigneeId: $json.assigneeId, name: $json.contactName, phone: $json.contactPhone, email: $json.contactEmail, whatsappExternalId: $json.whatsappExternalId || undefined, senderIdentifier: $json.senderIdentifier || undefined, channel: $json.channel || undefined, telegramUsername: $json.telegramUsername || undefined }) }}",
         "options": {}
       },
       "id": "sync-http",

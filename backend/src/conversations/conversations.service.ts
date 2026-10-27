@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Conversation, ConversationStatus } from '@prisma/client';
 import { notDeleted } from '../common/soft-delete';
+import { resolveChatwootIdentity } from '../common/chatwoot-channel';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsService } from '../events/events.service';
 import {
@@ -21,7 +22,9 @@ export class ConversationsService {
       where: { tenantId },
       orderBy: { lastMessageAt: 'desc' },
       include: {
-        contact: { select: { id: true, name: true, phone: true, email: true } },
+        contact: {
+          select: { id: true, name: true, phone: true, email: true, telegramUsername: true },
+        },
         lead: { select: { id: true, title: true, status: true } },
       },
     });
@@ -31,7 +34,9 @@ export class ConversationsService {
     const conv = await this.prisma.conversation.findFirst({
       where: { id, tenantId },
       include: {
-        contact: { select: { id: true, name: true, phone: true, email: true } },
+        contact: {
+          select: { id: true, name: true, phone: true, email: true, telegramUsername: true },
+        },
         lead: { select: { id: true, title: true, status: true } },
       },
     });
@@ -55,15 +60,25 @@ export class ConversationsService {
    */
   async syncFromChatwoot(tenantId: string, dto: SyncConversationDto): Promise<Conversation> {
     const chatwootId = dto.conversationId;
+    const identity = resolveChatwootIdentity(dto);
     const status = mapChatwootStatus(dto.status);
 
     let contactId = dto.contactId;
-    if (!contactId && (dto.phone || dto.email || dto.name || dto.whatsappExternalId)) {
+    if (
+      !contactId &&
+      (dto.phone ||
+        dto.email ||
+        dto.name ||
+        identity.whatsappExternalId ||
+        identity.telegramExternalId)
+    ) {
       contactId = await this.resolveContactId(tenantId, {
         name: dto.name,
         phone: dto.phone,
         email: dto.email,
-        whatsappExternalId: dto.whatsappExternalId,
+        whatsappExternalId: identity.whatsappExternalId,
+        telegramExternalId: identity.telegramExternalId,
+        telegramUsername: identity.telegramUsername,
       });
     }
 
@@ -92,6 +107,7 @@ export class ConversationsService {
             ...(status ? { status } : {}),
             ...(contactId ? { contactId } : {}),
             ...(leadId ? { leadId } : {}),
+            ...(dto.channel?.trim() ? { channel: identity.channel } : {}),
             lastMessageAt: new Date(),
             ...(dto.accountId != null ? { chatwootAccountId: dto.accountId } : {}),
           },
@@ -108,7 +124,7 @@ export class ConversationsService {
 
     const conv = await this.create(tenantId, {
       chatwootId: chatwootId ?? undefined,
-      channel: 'chatwoot',
+      channel: identity.channel,
       status,
       contactId,
       leadId,
@@ -139,8 +155,38 @@ export class ConversationsService {
 
   private async resolveContactId(
     tenantId: string,
-    input: { name?: string; phone?: string; email?: string; whatsappExternalId?: string },
+    input: {
+      name?: string;
+      phone?: string;
+      email?: string;
+      whatsappExternalId?: string;
+      telegramExternalId?: string;
+      telegramUsername?: string;
+    },
   ): Promise<string | undefined> {
+    const telegramPatch = {
+      ...(input.telegramExternalId ? { telegramExternalId: input.telegramExternalId } : {}),
+      ...(input.telegramUsername ? { telegramUsername: input.telegramUsername } : {}),
+    };
+
+    if (input.telegramExternalId) {
+      const byTg = await this.prisma.contact.findFirst({
+        where: { tenantId, telegramExternalId: input.telegramExternalId, ...notDeleted },
+      });
+      if (byTg) {
+        await this.prisma.contact.update({
+          where: { id: byTg.id },
+          data: {
+            name: input.name?.trim() || byTg.name,
+            phone: input.phone ?? byTg.phone,
+            email: input.email ?? byTg.email,
+            ...telegramPatch,
+          },
+        });
+        return byTg.id;
+      }
+    }
+
     if (input.whatsappExternalId) {
       const byWa = await this.prisma.contact.findFirst({
         where: { tenantId, whatsappExternalId: input.whatsappExternalId, ...notDeleted },
@@ -152,6 +198,7 @@ export class ConversationsService {
             name: input.name?.trim() || byWa.name,
             phone: input.phone ?? byWa.phone,
             email: input.email ?? byWa.email,
+            ...telegramPatch,
           },
         });
         return byWa.id;
@@ -168,6 +215,7 @@ export class ConversationsService {
             whatsappExternalId: input.whatsappExternalId ?? byEmail.whatsappExternalId,
             phone: input.phone ?? byEmail.phone,
             name: input.name?.trim() || byEmail.name,
+            ...telegramPatch,
           },
         });
         return byEmail.id;
@@ -184,12 +232,19 @@ export class ConversationsService {
             whatsappExternalId: input.whatsappExternalId ?? byPhone.whatsappExternalId,
             email: input.email ?? byPhone.email,
             name: input.name?.trim() || byPhone.name,
+            ...telegramPatch,
           },
         });
         return byPhone.id;
       }
     }
-    if (!input.name && !input.phone && !input.email && !input.whatsappExternalId) {
+    if (
+      !input.name &&
+      !input.phone &&
+      !input.email &&
+      !input.whatsappExternalId &&
+      !input.telegramExternalId
+    ) {
       return undefined;
     }
 
@@ -200,11 +255,15 @@ export class ConversationsService {
           input.name?.trim() ||
           input.phone ||
           input.email ||
+          (input.telegramUsername ? `@${input.telegramUsername}` : undefined) ||
+          input.telegramExternalId ||
           input.whatsappExternalId ||
           'Chatwoot contact',
         phone: input.phone,
         email: input.email,
         whatsappExternalId: input.whatsappExternalId,
+        telegramExternalId: input.telegramExternalId,
+        telegramUsername: input.telegramUsername,
       },
     });
     return created.id;
