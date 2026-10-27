@@ -12,15 +12,15 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Snapshot operacional
 
-| Item         | Valor                                                                                                                               |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Repo GitHub  | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                           |
-| Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
-| VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
-| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
-| Gate         | PASS — Spec 032 Telegram (`2026-10-27T03-47-39-321Z`) · Spec 031 permanece em prod até o load desta versão                          |
-| Images CI    | Prod loaded: **`0a5266634480`** (run `36661857102`) · migrate `20260930010000_fts_idempotency` **OK** · 2026-09-30T03:10Z           |
-| Plano Mestre | 1.2                                                                                                                                 |
+| Item         | Valor                                                                                                                                               |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Repo GitHub  | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                                           |
+| Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                                  |
+| VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)                 |
+| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                                    |
+| Gate         | PASS — Spec 032 Telegram (`2026-10-27T03-47-39-321Z`) · prod `cf8a42e175c8`                                                                         |
+| Images CI    | Prod loaded: **`cf8a42e175c8`** (run `40446671776`) · migrate `20261027033000_contact_telegram_identity` **OK** (owner `inova`) · 2026-10-27T03:59Z |
+| Plano Mestre | 1.2                                                                                                                                                 |
 
 ### Stack
 
@@ -48,10 +48,10 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                                                                                                                                  |
 | **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md)                                                                               |
 | **031** | FTS Postgres + idempotência Redis + retry workers | **DONE** · commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · VPS load `0a5266634480` + migrate FTS **OK** · [`docs/architecture/spec-031-fts-idempotency-retry.md`](docs/architecture/spec-031-fts-idempotency-retry.md) |
-| **032** | Telegram via Chatwoot                             | **DONE** · gate `2026-10-27T03-47-39-321Z` · inbox do bot é passo humano ([`docs/chatwoot-telegram-setup.md`](docs/chatwoot-telegram-setup.md))                                                                             |
+| **032** | Telegram via Chatwoot                             | **DONE** · gate `2026-10-27T03-47-39-321Z` · prod `cf8a42e175c8` · inbox do bot ainda depende de token ([`docs/chatwoot-telegram-setup.md`](docs/chatwoot-telegram-setup.md))                                               |
 | **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                                                                                                    |
 
-**Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”. Spec **032** (Telegram) está no código; o bot do tenant ainda depende de token no Chatwoot.  
+**Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”. Spec **032** está em prod; o bot do tenant ainda depende de token no Chatwoot.  
 **Próximo ops:** checklist WABA / cutover Spec 027; Chatwoot audit periódico.
 
 ---

@@ -8,26 +8,26 @@
 
 ## Estado
 
-| Item                               | Status                                                                                 |
-| ---------------------------------- | -------------------------------------------------------------------------------------- |
-| Fases 0–7 + Delivery               | DONE                                                                                   |
-| Produto 019–025 + Admin/Bulk/RAM   | DONE                                                                                   |
-| Deploy API/FE via CI → docker load | DONE em prod: **`0a5266634480`** (CI run `36661857102`, 2026-09-30T03:10Z)             |
-| Swap `/swapfile-inova`             | DONE (4G ativo)                                                                        |
-| **Harness Cursor**                 | **DONE** — agents/skills/rule + memory/agentes                                         |
-| **026 Zoho Blueprint/COQL**        | **DONE** (v1.1.0)                                                                      |
-| **028 Relatórios / funil**         | **DONE** (v1.1.1) — API + UI `/relatorios` em prod                                     |
-| **029 Security hardening**         | **DONE** (P0+P1) — SHA `878a92fd5969` + remediação `3d2145c` ⊂ prior prod              |
-| **030 RBAC navegação**             | **DONE** — nav + deep-link por papel (`frontend/lib/navigation.ts`)                    |
-| **Brand favicon/PWA**              | **DONE** (v1.1.2) — [`docs/design/brand-assets.md`](../../docs/design/brand-assets.md) |
-| **031 FTS + idempotency + retry**  | **DONE** prod — load `0a5266634480` + migrate `20260930010000_fts_idempotency` OK      |
-| **032 Telegram via Chatwoot**      | **DONE** código — gate `2026-10-27T03-47-39-321Z` · inbox do bot é passo humano        |
-| **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                                                      |
-| Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (reconnect 2026-09-29) · transitório até Spec 027              |
-| n8n → API                          | `API_BASE_URL=http://api:3000` · token sync OK (2026-09-21)                            |
-| Chatwoot CRM PID                   | healthy (audit periódico)                                                              |
-| Swarm Inova-TI Chatwoot            | **scale 0 (0/0)** — pausado (vxlan); CRM `chat-crm` intacto                            |
-| Webhook secrets tenant             | Seed OK — tenants `inova`, `rls-test-a`, `rls-test-b`                                  |
+| Item                               | Status                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Fases 0–7 + Delivery               | DONE                                                                                                 |
+| Produto 019–025 + Admin/Bulk/RAM   | DONE                                                                                                 |
+| Deploy API/FE via CI → docker load | DONE em prod: **`cf8a42e175c8`** (CI run `40446671776`, 2026-10-27)                                  |
+| Swap `/swapfile-inova`             | DONE (4G ativo)                                                                                      |
+| **Harness Cursor**                 | **DONE** — agents/skills/rule + memory/agentes                                                       |
+| **026 Zoho Blueprint/COQL**        | **DONE** (v1.1.0)                                                                                    |
+| **028 Relatórios / funil**         | **DONE** (v1.1.1) — API + UI `/relatorios` em prod                                                   |
+| **029 Security hardening**         | **DONE** (P0+P1) — SHA `878a92fd5969` + remediação `3d2145c` ⊂ prior prod                            |
+| **030 RBAC navegação**             | **DONE** — nav + deep-link por papel (`frontend/lib/navigation.ts`)                                  |
+| **Brand favicon/PWA**              | **DONE** (v1.1.2) — [`docs/design/brand-assets.md`](../../docs/design/brand-assets.md)               |
+| **031 FTS + idempotency + retry**  | **DONE** prod — load `0a5266634480` + migrate `20260930010000_fts_idempotency` OK                    |
+| **032 Telegram via Chatwoot**      | **DONE** prod — load `cf8a42e175c8` + migrate telegram identity **OK** · inbox do bot é passo humano |
+| **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                                                                    |
+| Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (reconnect 2026-09-29) · transitório até Spec 027                            |
+| n8n → API                          | `API_BASE_URL=http://api:3000` · token sync OK (2026-09-21)                                          |
+| Chatwoot CRM PID                   | healthy (audit periódico)                                                                            |
+| Swarm Inova-TI Chatwoot            | **scale 0 (0/0)** — pausado (vxlan); CRM `chat-crm` intacto                                          |
+| Webhook secrets tenant             | Seed OK — tenants `inova`, `rls-test-a`, `rls-test-b`                                                |
 
 ## Sequência oficial
 

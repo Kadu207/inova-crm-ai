@@ -50,7 +50,8 @@ depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 - `/atendimento` mostra o rótulo Telegram e `@username` quando existir
 - n8n `lead-inbound` e `sync-conversation` encaminham `channel` e `senderIdentifier`
 - Gate PASS: `2026-10-27T03-47-39-321Z` · runbook [`chatwoot-telegram-setup.md`](./chatwoot-telegram-setup.md)
-- Inbox do bot (token) continua passo humano na VPS; reimport dos workflows n8n após o load
+- Prod: load CI `cf8a42e175c8` (run `40446671776`) + migrate `20261027033000_contact_telegram_identity` **OK** (SQL como `inova`; `crm_app` não é owner)
+- n8n `lead-inbound` / `sync-conversation` atualizados in-place e reiniciados; inbox do bot continua passo humano
 
 ### [1.1.3] — 2026-09-29 — Spec 031 FTS / idempotência / retry
 
