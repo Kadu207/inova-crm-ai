@@ -12,15 +12,15 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Snapshot operacional
 
-| Item         | Valor                                                                                                                                               |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Repo GitHub  | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                                           |
-| Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                                  |
-| VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)                 |
-| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                                    |
-| Gate         | PASS — Spec 033 mensagens omnichannel (`2026-11-17T17-59-58-044Z`) · prod ainda `cf8a42e175c8` até load CI                                          |
-| Images CI    | Prod loaded: **`cf8a42e175c8`** (run `40446671776`) · migrate `20261027033000_contact_telegram_identity` **OK** (owner `inova`) · 2026-10-27T03:59Z |
-| Plano Mestre | 1.2                                                                                                                                                 |
+| Item         | Valor                                                                                                                                              |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Repo GitHub  | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                                          |
+| Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                                 |
+| VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)                |
+| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                                   |
+| Gate         | PASS — Spec 033 mensagens omnichannel (`2026-11-17T17-59-58-044Z`) · prod loaded `f29f082b12c2`                                                    |
+| Images CI    | Prod loaded: **`f29f082b12c2`** (run `44154177443`) · migrate `conversation_messages` **OK** (SQL as `inova` + resolve) · Chatwoot CRM **v4.19.1** |
+| Plano Mestre | 1.2                                                                                                                                                |
 
 ### Stack
 
