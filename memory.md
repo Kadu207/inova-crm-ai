@@ -4,8 +4,8 @@
 Atualizar após gate PASS, deploy VPS, ou mudança de Spec ativa.  
 Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) · Constituição: [`.specify/memory/constitution.md`](.specify/memory/constitution.md) · Catálogo de agentes: [`docs/agents.md`](docs/agents.md)
 
-**Última atualização:** 2026-10-27  
-**Versão produto:** **1.1.4**  
+**Última atualização:** 2026-11-17  
+**Versão produto:** **1.1.5**  
 **Harness:** ativo (`docs/agents.md` + `AGENTS.md` + `.cursor/agents` + rule `inova-crm-harness`)
 
 ---
@@ -18,7 +18,7 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                                  |
 | VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)                 |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                                    |
-| Gate         | PASS — Spec 032 Telegram (`2026-10-27T03-47-39-321Z`) · prod `cf8a42e175c8`                                                                         |
+| Gate         | PASS — Spec 033 mensagens omnichannel (`2026-11-17T17-59-58-044Z`) · prod ainda `cf8a42e175c8` até load CI                                          |
 | Images CI    | Prod loaded: **`cf8a42e175c8`** (run `40446671776`) · migrate `20261027033000_contact_telegram_identity` **OK** (owner `inova`) · 2026-10-27T03:59Z |
 | Plano Mestre | 1.2                                                                                                                                                 |
 
@@ -29,7 +29,7 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Frontend                | Next.js           | `crm.inovatitech.com.br` · 9400      |
 | API                     | NestJS + Prisma   | `api-crm.inovatitech.com.br` · 9401  |
 | AI                      | FastAPI           | `ai-crm.inovatitech.com.br` · 9402   |
-| Chatwoot CRM            | v4.8.0 pin        | `chat-crm.inovatitech.com.br` · 9403 |
+| Chatwoot CRM            | v4.19.1 pin       | `chat-crm.inovatitech.com.br` · 9403 |
 | n8n                     | main+worker+Redis | `n8n-crm.inovatitech.com.br` · 9404  |
 | MinIO                   | S3 API + console  | 9405 / 9406                          |
 | RabbitMQ UI             | VPN/SSH           | 9407                                 |
@@ -49,10 +49,11 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md)                                                                               |
 | **031** | FTS Postgres + idempotência Redis + retry workers | **DONE** · commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · VPS load `0a5266634480` + migrate FTS **OK** · [`docs/architecture/spec-031-fts-idempotency-retry.md`](docs/architecture/spec-031-fts-idempotency-retry.md) |
 | **032** | Telegram via Chatwoot                             | **DONE** · gate `2026-10-27T03-47-39-321Z` · prod `cf8a42e175c8` · inbox do bot ainda depende de token ([`docs/chatwoot-telegram-setup.md`](docs/chatwoot-telegram-setup.md))                                               |
+| **033** | Mensagens omnichannel (WA/TG)                     | **DONE** · gate `2026-11-17T17-58-16-626Z` · migrate `conversation_messages` · UI filtro + fio ([`specs/033-omnichannel-messages/`](specs/033-omnichannel-messages/))                                                       |
 | **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                                                                                                    |
 
-**Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”. Spec **032** está em prod; o bot do tenant ainda depende de token no Chatwoot.  
-**Próximo ops:** checklist WABA / cutover Spec 027; Chatwoot audit periódico.
+**Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”. Spec **033** DONE local (gate PASS); deploy CI + migrate + reimport n8n ainda pendentes. Inbox Telegram continua passo humano.  
+**Próximo ops:** load CI Spec 033; reimport `lead-inbound`; checklist WABA; Chatwoot audit periódico.
 
 ---
 

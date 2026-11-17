@@ -60,3 +60,70 @@ export function resolveChatwootIdentity(input: ChatwootIdentityInput): ChatwootI
     whatsappExternalId: legacyWa || identifier,
   };
 }
+
+/**
+ * Chatwoot message_type: 0 incoming, 1 outgoing, 2 activity (and variants).
+ * Returns null when the payload must not become a ConversationMessage.
+ */
+export function resolveChatwootMessageDirection(input: {
+  messageType?: string | number | null;
+  private?: boolean | null;
+}): 'inbound' | 'outbound' | null {
+  if (input.private === true) return null;
+  const raw = input.messageType;
+  if (raw === undefined || raw === null || raw === '') {
+    return 'inbound';
+  }
+  const value = String(raw).trim().toLowerCase();
+  if (value === '2' || value === 'activity' || value === 'template' || value.includes('activity')) {
+    return null;
+  }
+  if (value === '1' || value === 'outgoing' || value === 'outbound') {
+    return 'outbound';
+  }
+  if (value === '0' || value === 'incoming' || value === 'inbound') {
+    return 'inbound';
+  }
+  // Unknown numeric / string — treat as inbound contact message
+  return 'inbound';
+}
+
+export type ChatwootAttachmentMeta = {
+  fileType?: string;
+  fileName?: string;
+  dataUrl?: string;
+  extension?: string;
+};
+
+/** Keep only safe metadata — no binary download. */
+export function normalizeChatwootAttachments(raw?: unknown): ChatwootAttachmentMeta[] | undefined {
+  if (!Array.isArray(raw) || raw.length === 0) return undefined;
+  const out: ChatwootAttachmentMeta[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    const fileType =
+      typeof row.file_type === 'string'
+        ? row.file_type
+        : typeof row.fileType === 'string'
+          ? row.fileType
+          : undefined;
+    const fileName =
+      typeof row.file_name === 'string'
+        ? row.file_name
+        : typeof row.fileName === 'string'
+          ? row.fileName
+          : undefined;
+    const dataUrl =
+      typeof row.data_url === 'string'
+        ? row.data_url
+        : typeof row.dataUrl === 'string'
+          ? row.dataUrl
+          : undefined;
+    const extension = typeof row.extension === 'string' ? row.extension : undefined;
+    if (fileType || fileName || dataUrl || extension) {
+      out.push({ fileType, fileName, dataUrl, extension });
+    }
+  }
+  return out.length > 0 ? out : undefined;
+}

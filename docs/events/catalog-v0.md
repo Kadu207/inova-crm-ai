@@ -86,13 +86,13 @@ Assinaturas em `WebhookSubscription`; dispatch no `EventsService.publish` com HM
 
 ## conversation.*
 
-| Evento                          | Publisher           | Consumers                       | Descrição           |
-| ------------------------------- | ------------------- | ------------------------------- | ------------------- |
-| `conversation.created`          | API (sync Chatwoot) | worker-crm-leads                | Nova conversa       |
-| `conversation.message.received` | API                 | worker-crm-leads, worker-crm-ai | Mensagem inbound    |
-| `conversation.message.sent`     | API                 | worker-crm-audit                | Mensagem outbound   |
-| `conversation.assigned`         | API                 | worker-crm-audit                | Atribuição a agente |
-| `conversation.resolved`         | API                 | worker-crm-pipeline             | Encerrada           |
+| Evento                          | Publisher              | Consumers                       | Descrição                    |
+| ------------------------------- | ---------------------- | ------------------------------- | ---------------------------- |
+| `conversation.created`          | API (sync Chatwoot)    | worker-crm-leads                | Nova conversa                |
+| `conversation.message.received` | API (inbound Chatwoot) | worker-crm-leads, worker-crm-ai | Mensagem inbound (Spec 033)  |
+| `conversation.message.sent`     | API (inbound Chatwoot) | worker-crm-audit                | Mensagem outbound (Spec 033) |
+| `conversation.assigned`         | API                    | worker-crm-audit                | Atribuição a agente          |
+| `conversation.resolved`         | API                    | worker-crm-pipeline             | Encerrada                    |
 
 ---
 

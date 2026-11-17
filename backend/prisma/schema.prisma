@@ -180,6 +180,7 @@ model Tenant {
   products                Product[]
   services                Service[]
   conversations           Conversation[]
+  conversationMessages    ConversationMessage[]
   auditLogs               AuditLog[]
   proposals               Proposal[]
   contracts               Contract[]
@@ -533,14 +534,41 @@ model Conversation {
   createdAt        DateTime           @default(now()) @map("created_at")
   updatedAt        DateTime           @updatedAt @map("updated_at")
 
-  tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  contact Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  lead    Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  tenant   Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact  Contact?               @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  lead     Lead?                  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  messages ConversationMessage[]
 
   @@unique([tenantId, chatwootId])
   @@index([tenantId])
   @@index([tenantId, leadId])
+  @@index([tenantId, channel])
   @@map("conversations")
+}
+
+/// Chatwoot message_created rows (WhatsApp / Telegram / other inboxes)
+model ConversationMessage {
+  id                String   @id @default(cuid())
+  tenantId          String   @map("tenant_id")
+  conversationId    String   @map("conversation_id")
+  chatwootMessageId Int?     @map("chatwoot_message_id")
+  /// inbound | outbound
+  direction         String
+  channel           String?
+  body              String?
+  contentType       String?  @map("content_type")
+  /// Chatwoot attachment metadata only (no MinIO download in Spec 033)
+  attachments       Json?
+  sentAt            DateTime @map("sent_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, chatwootMessageId])
+  @@index([tenantId])
+  @@index([tenantId, conversationId, sentAt])
+  @@map("conversation_messages")
 }
 
 model AuditLog {

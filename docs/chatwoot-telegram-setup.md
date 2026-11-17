@@ -1,7 +1,7 @@
 # Telegram via Chatwoot — Inova CRM AI
 
 **Spec:** `032-telegram-chatwoot`  
-**Canal:** inbox nativo `Channel::Telegram` no Chatwoot `v4.8.0` (`chat-crm`).  
+**Canal:** inbox nativo `Channel::Telegram` no Chatwoot `v4.19.1` (`chat-crm`).  
 O CRM não chama a Bot API. O token do bot fica só no Chatwoot.
 
 ## Pré-requisitos

@@ -1,4 +1,7 @@
 import {
+  Allow,
+  IsArray,
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -148,6 +151,39 @@ export class InboundLeadDto {
   @IsOptional()
   @IsString()
   telegramUsername?: string;
+
+  /** Chatwoot message id — unique per tenant for idempotent replay */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  messageId?: number;
+
+  /** Chatwoot message_type: 0 incoming, 1 outgoing, 2 activity */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Allow()
+  messageType?: string | number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  contentType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  sentAt?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  private?: boolean;
+
+  /** Attachment metadata from Chatwoot (file_type / data_url) — not downloaded */
+  @ApiPropertyOptional({ type: 'array', items: { type: 'object' } })
+  @IsOptional()
+  @IsArray()
+  attachments?: Record<string, unknown>[];
 }
 
 export class ConvertLeadDto {

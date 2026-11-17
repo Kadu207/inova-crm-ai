@@ -37,6 +37,7 @@ describe('LeadsService', () => {
     };
     contact: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock };
     conversation: { findFirst: jest.Mock; create: jest.Mock; update: jest.Mock };
+    conversationMessage: { findFirst: jest.Mock; create: jest.Mock };
     pipeline: { findFirst: jest.Mock };
     opportunity: { create: jest.Mock };
   };
@@ -55,6 +56,15 @@ describe('LeadsService', () => {
       },
       contact: { findFirst: jest.fn(), create: jest.fn(), update: jest.fn() },
       conversation: { findFirst: jest.fn(), create: jest.fn(), update: jest.fn() },
+      conversationMessage: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({
+          id: 'msg-1',
+          chatwootMessageId: 1001,
+          direction: 'inbound',
+          channel: 'whatsapp',
+        }),
+      },
       pipeline: { findFirst: jest.fn() },
       opportunity: { create: jest.fn() },
     };
@@ -273,6 +283,132 @@ describe('LeadsService', () => {
     expect(prisma.conversation.findFirst).toHaveBeenCalledWith({
       where: { tenantId: 'tenant-b', chatwootId: 8 },
     });
+  });
+
+  it('inbound persists message and publishes conversation.message.received', async () => {
+    prisma.contact.findFirst.mockResolvedValue(null);
+    prisma.contact.create.mockResolvedValue({
+      id: 'contact-1',
+      name: 'Alice',
+      phone: '+5511999',
+    });
+    prisma.lead.findFirst.mockResolvedValue(null);
+    prisma.lead.create.mockResolvedValue({
+      ...mockLead,
+      source: LeadSource.CHATWOOT,
+    });
+    prisma.conversation.findFirst.mockResolvedValue(null);
+    prisma.conversation.create.mockResolvedValue({ id: 'conv-1', channel: 'whatsapp' });
+    prisma.conversationMessage.create.mockResolvedValue({
+      id: 'msg-wa',
+      chatwootMessageId: 555,
+      direction: 'inbound',
+      channel: 'whatsapp',
+    });
+
+    await service.inboundFromChatwoot(tenantId, {
+      name: 'Alice',
+      phone: '+5511999',
+      channel: 'Channel::Whatsapp',
+      message: 'olá whatsapp',
+      messageId: 555,
+      messageType: 0,
+      conversationId: 42,
+    });
+
+    expect(prisma.conversationMessage.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tenantId,
+        conversationId: 'conv-1',
+        chatwootMessageId: 555,
+        direction: 'inbound',
+        channel: 'whatsapp',
+        body: 'olá whatsapp',
+      }),
+    });
+    expect(events.publish).toHaveBeenCalledWith(
+      tenantId,
+      'conversation.message.received',
+      expect.objectContaining({ conversationId: 'conv-1', messageId: 'msg-wa' }),
+    );
+    expect(prisma.lead.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        notes: expect.not.stringContaining('message=olá whatsapp'),
+      }),
+    });
+  });
+
+  it('inbound message replay with same chatwootMessageId does not duplicate', async () => {
+    prisma.contact.findFirst.mockResolvedValue({
+      id: 'contact-1',
+      name: 'Alice',
+      whatsappExternalId: '5511999999999',
+    });
+    prisma.contact.update.mockResolvedValue({
+      id: 'contact-1',
+      name: 'Alice',
+      whatsappExternalId: '5511999999999',
+    });
+    prisma.lead.findFirst.mockResolvedValueOnce(mockLead).mockResolvedValueOnce(mockLead);
+    prisma.lead.updateMany.mockResolvedValue({ count: 1 });
+    prisma.conversation.findFirst.mockResolvedValue({ id: 'conv-1' });
+    prisma.conversation.update.mockResolvedValue({ id: 'conv-1' });
+    prisma.conversationMessage.findFirst.mockResolvedValue({
+      id: 'msg-existing',
+      chatwootMessageId: 555,
+    });
+
+    await service.inboundFromChatwoot(tenantId, {
+      name: 'Alice',
+      whatsappExternalId: '5511999999999',
+      message: 'replay',
+      messageId: 555,
+      messageType: 0,
+      conversationId: 42,
+      channel: 'Channel::Whatsapp',
+    });
+
+    expect(prisma.conversationMessage.create).not.toHaveBeenCalled();
+  });
+
+  it('inbound skips private and activity messages', async () => {
+    prisma.contact.findFirst.mockResolvedValue({
+      id: 'contact-1',
+      name: 'Alice',
+      whatsappExternalId: '5511999999999',
+    });
+    prisma.contact.update.mockResolvedValue({
+      id: 'contact-1',
+      name: 'Alice',
+      whatsappExternalId: '5511999999999',
+    });
+    prisma.lead.findFirst.mockResolvedValue(mockLead);
+    prisma.lead.updateMany.mockResolvedValue({ count: 1 });
+    prisma.conversation.findFirst.mockResolvedValue({ id: 'conv-1' });
+    prisma.conversation.update.mockResolvedValue({ id: 'conv-1' });
+
+    await service.inboundFromChatwoot(tenantId, {
+      name: 'Alice',
+      whatsappExternalId: '5511999999999',
+      message: 'nota interna',
+      messageId: 9,
+      messageType: 0,
+      private: true,
+      conversationId: 42,
+      channel: 'Channel::Whatsapp',
+    });
+    expect(prisma.conversationMessage.create).not.toHaveBeenCalled();
+
+    await service.inboundFromChatwoot(tenantId, {
+      name: 'Alice',
+      whatsappExternalId: '5511999999999',
+      message: 'activity',
+      messageId: 10,
+      messageType: 2,
+      conversationId: 42,
+      channel: 'Channel::Whatsapp',
+    });
+    expect(prisma.conversationMessage.create).not.toHaveBeenCalled();
   });
 
   it('convert creates opportunity and marks CONVERTED', async () => {

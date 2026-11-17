@@ -96,6 +96,43 @@ describe('ConversationsService syncFromChatwoot', () => {
     expect(result.channel).toBe('telegram');
   });
 
+  it('findAll filters by channel when provided', async () => {
+    prisma.conversation.findMany.mockResolvedValue([]);
+    await service.findAll(tenantId, 'telegram');
+    expect(prisma.conversation.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { tenantId, channel: 'telegram' },
+      }),
+    );
+    await service.findAll(tenantId, 'all');
+    expect(prisma.conversation.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { tenantId },
+      }),
+    );
+  });
+
+  it('findOne includes messages scoped to tenant', async () => {
+    prisma.conversation.findFirst.mockResolvedValue({
+      id: 'conv-1',
+      tenantId,
+      messages: [{ id: 'msg-1', direction: 'inbound', channel: 'whatsapp', body: 'oi' }],
+    });
+    const result = await service.findOne(tenantId, 'conv-1');
+    expect(result.messages).toHaveLength(1);
+    expect(prisma.conversation.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'conv-1', tenantId },
+        include: expect.objectContaining({
+          messages: expect.objectContaining({
+            where: { tenantId },
+            orderBy: { sentAt: 'asc' },
+          }),
+        }),
+      }),
+    );
+  });
+
   it('keeps whatsapp identity for Channel::Api when creating a conversation', async () => {
     prisma.contact.findFirst.mockResolvedValue(null);
     prisma.contact.create.mockResolvedValue({ id: 'contact-wa', tenantId });

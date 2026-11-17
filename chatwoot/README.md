@@ -14,7 +14,7 @@ Inventário VPS: [docs/operations/vps-chatwoot-instances.md](../docs/operations/
 | Postgres | `crm_cw_postgres` (pgvector) | `cw`              | —                      |
 | Redis    | `crm_cw_redis`               | `cw`              | —                      |
 
-Imagem pinada: `${CHATWOOT_IMAGE:-chatwoot/chatwoot:v4.8.0}` (ver `.env.example`).
+Imagem pinada: `${CHATWOOT_IMAGE:-chatwoot/chatwoot:v4.19.1}` (ver `.env.example`).
 
 A rede Docker `inova-crm` é criada pelo stack `infrastructure/` e anexada aqui como **external**, permitindo que API/workers alcancem o Chatwoot por hostname `crm_chatwoot_rails` (ou `rails` dentro do projeto `crm-chatwoot`).
 
@@ -60,6 +60,23 @@ docker compose -f docker-compose.yml up -d
 # VPS (localhost:9403 para Cloudflare Tunnel)
 docker compose -f docker-compose.yml -f docker-compose.vps.yml up -d
 ```
+
+## Upgrade de imagem (ex.: v4.8.0 → v4.19.1)
+
+Só na instância **CRM** (`chatwoot/`). Não toca Swarm Inova-TI.
+
+```bash
+cd /opt/inova-crm-ai/chatwoot
+# opcional: fixar no .env
+# CHATWOOT_IMAGE=chatwoot/chatwoot:v4.19.1
+docker compose -f docker-compose.yml -f docker-compose.vps.yml pull rails sidekiq
+docker compose -f docker-compose.yml -f docker-compose.vps.yml up -d rails sidekiq
+docker compose -f docker-compose.yml -f docker-compose.vps.yml exec -T rails \
+  bundle exec rails db:chatwoot_prepare
+bash scripts/audit-crm-chatwoot.sh
+```
+
+Se PID rails ≥ 80% do limite (512) → recreate rails/sidekiq antes de seguir feature work.
 
 ## Primeira instalação (migrations + admin)
 

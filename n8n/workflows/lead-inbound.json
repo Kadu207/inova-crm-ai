@@ -86,6 +86,42 @@
               "name": "telegramUsername",
               "value": "={{ $json.body?.sender?.additional_attributes?.username || $json.body?.meta?.sender?.additional_attributes?.username || $json.body?.conversation?.meta?.sender?.additional_attributes?.username || $json.body?.sender?.additional_attributes?.social_telegram_user_name || '' }}",
               "type": "string"
+            },
+            {
+              "id": "msgId",
+              "name": "messageId",
+              "value": "={{ $json.body?.id || $json.id || $json.body?.message?.id || $json.message?.id || null }}",
+              "type": "number"
+            },
+            {
+              "id": "msgType",
+              "name": "messageType",
+              "value": "={{ $json.body?.message_type ?? $json.message_type ?? $json.body?.message?.message_type ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "contentType",
+              "name": "contentType",
+              "value": "={{ $json.body?.content_type || $json.content_type || $json.body?.message?.content_type || 'text' }}",
+              "type": "string"
+            },
+            {
+              "id": "sentAt",
+              "name": "sentAt",
+              "value": "={{ $json.body?.created_at || $json.created_at || $json.body?.message?.created_at || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "isPrivate",
+              "name": "isPrivate",
+              "value": "={{ $json.body?.private ?? $json.private ?? false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "attachments",
+              "name": "attachments",
+              "value": "={{ $json.body?.attachments || $json.attachments || [] }}",
+              "type": "array"
             }
           ]
         },
@@ -124,7 +160,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, email: $json.senderEmail, whatsappExternalId: $json.whatsappExternalId || undefined, senderIdentifier: $json.senderIdentifier || undefined, channel: $json.channel || undefined, telegramUsername: $json.telegramUsername || undefined, message: $json.messageContent }) }}",
+        "jsonBody": "={{ JSON.stringify({ source: 'chatwoot', event: $json.event, accountId: $json.accountId, conversationId: $json.conversationId, name: $json.senderName, phone: $json.senderPhone, email: $json.senderEmail, whatsappExternalId: $json.whatsappExternalId || undefined, senderIdentifier: $json.senderIdentifier || undefined, channel: $json.channel || undefined, telegramUsername: $json.telegramUsername || undefined, message: $json.messageContent, messageId: $json.messageId || undefined, messageType: $json.messageType === '' ? undefined : $json.messageType, contentType: $json.contentType || undefined, sentAt: $json.sentAt || undefined, private: $json.isPrivate === true, attachments: Array.isArray($json.attachments) && $json.attachments.length ? $json.attachments : undefined }) }}",
         "options": {}
       },
       "id": "lead-http",

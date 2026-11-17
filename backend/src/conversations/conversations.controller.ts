@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { ConversationsService } from './conversations.service';
 import {
@@ -17,8 +17,9 @@ export class ConversationsController {
   constructor(private readonly conversationsService: ConversationsService) {}
 
   @Get()
-  findAll(@TenantId() tenantId: string) {
-    return this.conversationsService.findAll(tenantId);
+  @ApiQuery({ name: 'channel', required: false, description: 'whatsapp | telegram | all' })
+  findAll(@TenantId() tenantId: string, @Query('channel') channel?: string) {
+    return this.conversationsService.findAll(tenantId, channel);
   }
 
   @Post('sync')

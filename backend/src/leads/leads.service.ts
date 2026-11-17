@@ -8,7 +8,11 @@ import { AdvancedSearchDto } from '../common/dto/advanced-search.dto';
 import { CustomFieldsService } from '../custom-fields/custom-fields.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ftsSearchPage, orderByIds } from '../common/full-text-search';
-import { resolveChatwootIdentity } from '../common/chatwoot-channel';
+import {
+  normalizeChatwootAttachments,
+  resolveChatwootIdentity,
+  resolveChatwootMessageDirection,
+} from '../common/chatwoot-channel';
 import { EventsService } from '../events/events.service';
 import {
   ConvertLeadDto,
@@ -23,6 +27,20 @@ const OPEN_LEAD_STATUSES: LeadStatus[] = [
   LeadStatus.CONTACTED,
   LeadStatus.QUALIFIED,
 ];
+
+function parseChatwootSentAt(raw?: string): Date {
+  if (!raw?.trim()) return new Date();
+  const trimmed = raw.trim();
+  if (/^\d+$/.test(trimmed)) {
+    const n = Number(trimmed);
+    // Chatwoot may send unix seconds or ms
+    const ms = n < 1e12 ? n * 1000 : n;
+    const fromUnix = new Date(ms);
+    if (!Number.isNaN(fromUnix.getTime())) return fromUnix;
+  }
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+}
 
 @Injectable()
 export class LeadsService {
@@ -138,7 +156,7 @@ export class LeadsService {
 
   /**
    * Chatwoot inbound: upsert Contact by phone/email, dedupe open Lead,
-   * upsert Conversation linked to lead (RN-LEAD-01/03, RN-CONV-01).
+   * upsert Conversation linked to lead, persist message when applicable (Spec 033).
    */
   async inboundFromChatwoot(tenantId: string, dto: InboundLeadDto): Promise<Lead> {
     const identity = resolveChatwootIdentity(dto);
@@ -152,16 +170,17 @@ export class LeadsService {
       'Chatwoot contact';
     const snippet = dto.message?.trim().slice(0, 80);
     const title = snippet ? `Lead Chatwoot: ${who} — ${snippet}` : `Lead Chatwoot: ${who}`;
+    // Short pointer only — full body lives in conversation_messages
     const noteLine = [
       dto.event ? `event=${dto.event}` : null,
       dto.accountId != null ? `accountId=${dto.accountId}` : null,
       dto.conversationId != null ? `conversationId=${dto.conversationId}` : null,
       identity.channel ? `channel=${identity.channel}` : null,
+      dto.messageId != null ? `messageId=${dto.messageId}` : null,
       dto.phone ? `phone=${dto.phone}` : null,
       dto.email ? `email=${dto.email}` : null,
       identity.telegramExternalId ? `telegramExternalId=${identity.telegramExternalId}` : null,
       identity.whatsappExternalId ? `whatsappExternalId=${identity.whatsappExternalId}` : null,
-      dto.message ? `message=${dto.message}` : null,
     ]
       .filter(Boolean)
       .join('\n');
@@ -212,7 +231,7 @@ export class LeadsService {
     }
 
     if (dto.conversationId != null) {
-      await this.upsertConversationForLead(tenantId, {
+      const conversationId = await this.upsertConversationForLead(tenantId, {
         chatwootId: dto.conversationId,
         accountId: dto.accountId,
         contactId: contact.id,
@@ -220,6 +239,7 @@ export class LeadsService {
         channel: identity.channel,
         channelProvided: Boolean(dto.channel?.trim()),
       });
+      await this.persistInboundMessage(tenantId, conversationId, identity.channel, dto);
     }
 
     return lead;
@@ -497,7 +517,7 @@ export class LeadsService {
       channel: string;
       channelProvided: boolean;
     },
-  ): Promise<void> {
+  ): Promise<string> {
     const existing = await this.prisma.conversation.findFirst({
       where: { tenantId, chatwootId: input.chatwootId },
     });
@@ -513,7 +533,7 @@ export class LeadsService {
           ...(input.channelProvided ? { channel: input.channel } : {}),
         },
       });
-      return;
+      return existing.id;
     }
 
     const conv = await this.prisma.conversation.create({
@@ -532,6 +552,75 @@ export class LeadsService {
       conversationId: conv.id,
       chatwootId: conv.chatwootId,
       leadId: input.leadId,
+    });
+    return conv.id;
+  }
+
+  /**
+   * Persist Chatwoot message_created as ConversationMessage (idempotent by chatwootMessageId).
+   * Skips activity / private notes.
+   */
+  private async persistInboundMessage(
+    tenantId: string,
+    conversationId: string,
+    channel: string,
+    dto: InboundLeadDto,
+  ): Promise<void> {
+    const direction = resolveChatwootMessageDirection({
+      messageType: dto.messageType,
+      private: dto.private,
+    });
+    if (!direction) return;
+
+    // Without message payload and without messageId there is nothing durable to store
+    const body = dto.message?.trim() || null;
+    const attachments = normalizeChatwootAttachments(dto.attachments);
+    if (!body && !attachments && dto.messageId == null) return;
+
+    if (dto.messageId != null) {
+      const existing = await this.prisma.conversationMessage.findFirst({
+        where: { tenantId, chatwootMessageId: dto.messageId },
+      });
+      if (existing) return;
+    }
+
+    const safeSentAt = parseChatwootSentAt(dto.sentAt);
+
+    let message;
+    try {
+      message = await this.prisma.conversationMessage.create({
+        data: {
+          tenantId,
+          conversationId,
+          chatwootMessageId: dto.messageId ?? null,
+          direction,
+          channel,
+          body,
+          contentType: dto.contentType?.trim() || 'text',
+          attachments: attachments ? (attachments as unknown as Prisma.InputJsonValue) : undefined,
+          sentAt: safeSentAt,
+        },
+      });
+    } catch (err) {
+      // Unique (tenantId, chatwootMessageId) race → treat as idempotent replay
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002' &&
+        dto.messageId != null
+      ) {
+        return;
+      }
+      throw err;
+    }
+
+    const eventType =
+      direction === 'outbound' ? 'conversation.message.sent' : 'conversation.message.received';
+    await this.events.publish(tenantId, eventType, {
+      conversationId,
+      messageId: message.id,
+      chatwootMessageId: message.chatwootMessageId,
+      channel,
+      direction,
     });
   }
 }

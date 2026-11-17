@@ -1,7 +1,7 @@
 # Histórico de versões — Inova CRM AI
 
 **Produto:** Inova CRM AI  
-**Versão atual do sistema:** **1.1.4** (2026-10-27)  
+**Versão atual do sistema:** **1.1.5** (2026-11-17)  
 **Plano Mestre:** 1.2  
 **Fonte de verdade operacional:** [`.specify/memory/baseline.md`](../.specify/memory/baseline.md)
 
@@ -35,13 +35,24 @@ Convenção SemVer do produto:
 2026-09-21  v1.1.2  Brand favicon/PWA + ops Evolution/n8n
 2026-09-22  v1.1.2  Audit F-01..F-10 em prod + WA reconnect
 2026-09-29  v1.1.3  Spec 031 FTS + idempotência + retry
-2026-10-27  v1.1.4  Spec 032 Telegram via Chatwoot   ← ATUAL
+2026-10-27  v1.1.4  Spec 032 Telegram via Chatwoot
+2026-11-17  v1.1.5  Spec 033 mensagens omnichannel   ← ATUAL
 depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 ```
 
 ---
 
 ## Changelog
+
+### [1.1.5] — 2026-11-17 — Spec 033 mensagens omnichannel + Chatwoot v4.19.1
+
+- Tabela `conversation_messages` (tenant + RLS) com idempotência por `chatwoot_message_id`
+- `POST /leads/inbound` persiste cada mensagem WhatsApp/Telegram, publica `conversation.message.received|sent`
+- Corpo deixa de ir para `leads.notes` (ponteiro curto)
+- `/atendimento`: filtro Todos/WhatsApp/Telegram + fio com selo de origem
+- n8n `lead-inbound` encaminha `messageId`, `messageType`, `contentType`, `sentAt`, anexos
+- Chatwoot CRM pin: `v4.8.0` → **`v4.19.1`** (compose default + docs; upgrade VPS: pull + `db:chatwoot_prepare`)
+- Gate PASS: `2026-11-17T17-59-58-044Z`
 
 ### [1.1.4] — 2026-10-27 — Spec 032 Telegram via Chatwoot
 

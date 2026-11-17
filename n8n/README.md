@@ -45,6 +45,8 @@ Arquivos versionados em `n8n/workflows/`:
 
 `lead-inbound` e `sync-conversation` encaminham `channel`, `senderIdentifier` e `telegramUsername`. A API decide se o identificador é Telegram ou WhatsApp.
 
+Spec 033: `lead-inbound` também encaminha `messageId`, `messageType`, `contentType`, `sentAt`, `private` e `attachments` (metadado). Sem Function/Code — a API decide direção, idempotência e persistência.
+
 1. Acesse `https://n8n-crm.inovatitech.com.br` (ou `http://127.0.0.1:9404` em dev).
 2. **Workflows → Import from file** para cada JSON.
 3. Ative cada workflow (toggle **Active**).

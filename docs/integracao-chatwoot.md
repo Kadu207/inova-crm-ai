@@ -38,12 +38,12 @@ Documenta a instância Chatwoot dedicada ao CRM, mapeamento tenant, webhooks ass
 
 Compose em `chatwoot/` (projeto `crm-chatwoot`):
 
-| Serviço  | Imagem (default)           | Isolamento                        |
-| -------- | -------------------------- | --------------------------------- |
-| rails    | `chatwoot/chatwoot:v4.8.0` | UI + API; `pids_limit=512`, 768M  |
-| sidekiq  | `chatwoot/chatwoot:v4.8.0` | jobs; `pids_limit=512`, 512M      |
-| postgres | `pgvector/pgvector:pg16`   | DB `chatwoot_crm` (só este stack) |
-| redis    | `redis:7-alpine`           | fila Sidekiq (só este stack)      |
+| Serviço  | Imagem (default)            | Isolamento                        |
+| -------- | --------------------------- | --------------------------------- |
+| rails    | `chatwoot/chatwoot:v4.19.1` | UI + API; `pids_limit=512`, 768M  |
+| sidekiq  | `chatwoot/chatwoot:v4.19.1` | jobs; `pids_limit=512`, 512M      |
+| postgres | `pgvector/pgvector:pg16`    | DB `chatwoot_crm` (só este stack) |
+| redis    | `redis:7-alpine`            | fila Sidekiq (só este stack)      |
 
 Override de imagem: `CHATWOOT_IMAGE` em `chatwoot/.env`.
 
@@ -134,11 +134,13 @@ Canal → Chatwoot → webhook (HMAC) → n8n → POST /v1/leads/inbound
                                         → conversation.* event → Workers
 ```
 
+Cada `message_created` (WhatsApp / Telegram) grava `conversation_messages` com `channel` e direção (Spec 033). O corpo completo não vai mais para `leads.notes`. `/atendimento` lista com filtro de canal e exibe o fio.
+
 Respostas ao cliente **sempre** via API → Chatwoot API — nunca bypass de canal.
 
 ## Eventos
 
-`conversation.created`, `conversation.message.received`, `conversation.assigned` — ver [catalog-v0](./events/catalog-v0.md).
+`conversation.created`, `conversation.message.received`, `conversation.message.sent`, `conversation.assigned` — ver [catalog-v0](./events/catalog-v0.md).
 
 ## Segurança
 

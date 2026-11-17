@@ -73,7 +73,7 @@ Estado **2026-08-03:** `infra-chatwoot-1` em `127.0.0.1:3001` (OK). Se voltar `0
 ## Isolamento CRM (este repo)
 
 - Redes: `cw` (interna) + `inova-crm` (external, só API/workers CRM).
-- Imagem pinada: `CHATWOOT_IMAGE` (default `chatwoot/chatwoot:v4.8.0`).
+- Imagem pinada: `CHATWOOT_IMAGE` (default `chatwoot/chatwoot:v4.19.1`).
 - Limites: `pids_limit: 512`, `mem_limit` 768M (rails) / 512M (sidekiq) — evita 500 por `can't fork`.
 - Audit dedicado: `bash chatwoot/scripts/audit-crm-chatwoot.sh`
 - Se rails PID ≥ **80%** do limite → recreate imediato (ver § CRM PID).
@@ -112,10 +112,10 @@ Antes: `0/1` com Rejected — `network sandbox join failed` / vxlan `10.0.1.0/24
 
 ### Snapshot 2026-08-03 (histórico)
 
-| Service                             | Replicas | Image                      | Estado task                       |
-| ----------------------------------- | -------- | -------------------------- | --------------------------------- |
-| `chatwoot-admin_chatwoot-admin`     | **1/1**  | `chatwoot/chatwoot:v4.8.0` | Running ~8d (PIDs baixos no task) |
-| `chatwoot-sidekiq_chatwoot-sidekiq` | **1/1**  | `chatwoot/chatwoot:v4.8.0` | Running ~8d                       |
+| Service                             | Replicas | Image                       | Estado task                       |
+| ----------------------------------- | -------- | --------------------------- | --------------------------------- |
+| `chatwoot-admin_chatwoot-admin`     | **1/1**  | `chatwoot/chatwoot:v4.19.1` | Running ~8d (PIDs baixos no task) |
+| `chatwoot-sidekiq_chatwoot-sidekiq` | **1/1**  | `chatwoot/chatwoot:v4.19.1` | Running ~8d                       |
 
 Histórico: tasks anteriores com **Exit 137** (OOM/kill) — stack instável sob pressão de RAM da VPS compartilhada.
 

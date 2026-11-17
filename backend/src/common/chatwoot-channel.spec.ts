@@ -1,4 +1,9 @@
-import { normalizeChatwootChannel, resolveChatwootIdentity } from './chatwoot-channel';
+import {
+  normalizeChatwootAttachments,
+  normalizeChatwootChannel,
+  resolveChatwootIdentity,
+  resolveChatwootMessageDirection,
+} from './chatwoot-channel';
 
 describe('normalizeChatwootChannel', () => {
   it('maps Chatwoot class names to short labels', () => {
@@ -45,6 +50,32 @@ describe('resolveChatwootIdentity', () => {
       channel: 'chatwoot',
       whatsappExternalId: '5511999999999',
     });
+  });
+
+  it('maps Chatwoot message_type to direction and skips private/activity', () => {
+    expect(resolveChatwootMessageDirection({ messageType: 0 })).toBe('inbound');
+    expect(resolveChatwootMessageDirection({ messageType: 1 })).toBe('outbound');
+    expect(resolveChatwootMessageDirection({ messageType: 2 })).toBeNull();
+    expect(resolveChatwootMessageDirection({ messageType: 0, private: true })).toBeNull();
+    expect(resolveChatwootMessageDirection({ messageType: 'outgoing' })).toBe('outbound');
+    expect(resolveChatwootMessageDirection({})).toBe('inbound');
+  });
+
+  it('normalizes attachment metadata only', () => {
+    expect(
+      normalizeChatwootAttachments([
+        { file_type: 'image', file_name: 'a.png', data_url: 'https://cw/a.png', extension: 'png' },
+        null,
+      ]),
+    ).toEqual([
+      {
+        fileType: 'image',
+        fileName: 'a.png',
+        dataUrl: 'https://cw/a.png',
+        extension: 'png',
+      },
+    ]);
+    expect(normalizeChatwootAttachments([])).toBeUndefined();
   });
 
   it('uses legacy whatsapp field as telegram id when channel is telegram', () => {

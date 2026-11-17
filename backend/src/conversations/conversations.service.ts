@@ -17,9 +17,13 @@ export class ConversationsService {
     private readonly events: EventsService,
   ) {}
 
-  findAll(tenantId: string) {
+  findAll(tenantId: string, channel?: string) {
+    const normalized = channel?.trim().toLowerCase();
     return this.prisma.conversation.findMany({
-      where: { tenantId },
+      where: {
+        tenantId,
+        ...(normalized && normalized !== 'all' ? { channel: normalized } : {}),
+      },
       orderBy: { lastMessageAt: 'desc' },
       include: {
         contact: {
@@ -38,6 +42,20 @@ export class ConversationsService {
           select: { id: true, name: true, phone: true, email: true, telegramUsername: true },
         },
         lead: { select: { id: true, title: true, status: true } },
+        messages: {
+          where: { tenantId },
+          orderBy: { sentAt: 'asc' },
+          select: {
+            id: true,
+            direction: true,
+            channel: true,
+            body: true,
+            contentType: true,
+            attachments: true,
+            sentAt: true,
+            chatwootMessageId: true,
+          },
+        },
       },
     });
     if (!conv) throw new NotFoundException(`Conversation ${id} not found`);

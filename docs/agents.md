@@ -148,14 +148,15 @@ Build: **um C-\* (ou um bloco P0) por vez**; marcar DONE só após R-90.
 
 ## 7. Mapa Spec × papéis (ativo)
 
-| Spec               | Status  | C-\* principais        | R-\* / EMB                             |
-| ------------------ | ------- | ---------------------- | -------------------------------------- |
-| 026 Blueprint/COQL | DONE    | C-14, C-04, C-08       | R-90 done                              |
-| 028 Relatórios     | DONE    | C-13, C-04, C-08       | R-90 + EMB-02 done                     |
-| 030 RBAC nav       | DONE    | C-04, C-08             | R-90 + EMB-02 done                     |
-| 031 FTS/idem/retry | DONE    | C-01, C-11, C-19, C-25 | R-90 + EMB-02/03 done (`0a5266634480`) |
-| 032 Telegram       | DONE    | C-09, C-04, C-08       | gate `2026-10-27T03-47-39-321Z`        |
-| 027 Meta/WABA      | BLOCKED | C-09, C-10             | EMB-06                                 |
+| Spec                | Status  | C-\* principais        | R-\* / EMB                             |
+| ------------------- | ------- | ---------------------- | -------------------------------------- |
+| 026 Blueprint/COQL  | DONE    | C-14, C-04, C-08       | R-90 done                              |
+| 028 Relatórios      | DONE    | C-13, C-04, C-08       | R-90 + EMB-02 done                     |
+| 030 RBAC nav        | DONE    | C-04, C-08             | R-90 + EMB-02 done                     |
+| 031 FTS/idem/retry  | DONE    | C-01, C-11, C-19, C-25 | R-90 + EMB-02/03 done (`0a5266634480`) |
+| 032 Telegram        | DONE    | C-09, C-04, C-08       | gate `2026-10-27T03-47-39-321Z`        |
+| 033 Omnichannel msg | DONE    | C-09, C-04, C-08, C-06 | gate `2026-11-17T17-59-58-044Z`        |
+| 027 Meta/WABA       | BLOCKED | C-09, C-10             | EMB-06                                 |
 
 ---
 
