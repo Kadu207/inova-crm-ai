@@ -204,6 +204,7 @@ services:
       API_TOKEN: ${API_TOKEN:-}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
       AI_BASE_URL: http://ai:8000
+      AI_API_TOKEN: ${AI_API_TOKEN:-}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
@@ -236,9 +237,10 @@ services:
         condition: service_healthy
     environment:
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
-      API_BASE_URL: http://api:3000
+      API_BASE_URL: http://api:3000/api/v1
       API_TOKEN: ${API_TOKEN:-}
       AI_BASE_URL: http://ai:8000
+      AI_API_TOKEN: ${AI_API_TOKEN:-}
     networks:
       - inova-crm
 

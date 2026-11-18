@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from app.agents.followup import suggest_next_step
 from app.agents.qualifier import qualify_lead
+from app.agents.reply import suggest_reply
 from app.agents.sla_alerts import check_sla_alerts
 from app.agents.summarizer import summarize_conversation
 from app.auth import require_ai_token
@@ -36,6 +37,11 @@ class SuggestNextStepRequest(TenantRequest):
 
 class SummarizeRequest(TenantRequest):
     messages: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class SuggestReplyRequest(TenantRequest):
+    messages: list[dict[str, Any]] = Field(default_factory=list)
+    channel: str | None = None
 
 
 class RagQueryRequest(TenantRequest):
@@ -72,6 +78,14 @@ def summarize_conversation_endpoint(body: SummarizeRequest) -> dict[str, Any]:
     for msg in body.messages:
         validate_payload_no_secrets(msg)
     return summarize_conversation(tenant_id, body.messages)
+
+
+@app.post("/v1/suggest-reply", dependencies=_protected)
+def suggest_reply_endpoint(body: SuggestReplyRequest) -> dict[str, Any]:
+    tenant_id = require_tenant_id(body.tenant_id)
+    for msg in body.messages:
+        validate_payload_no_secrets(msg)
+    return suggest_reply(tenant_id, body.messages, body.channel)
 
 
 @app.post("/v1/rag/query", dependencies=_protected)

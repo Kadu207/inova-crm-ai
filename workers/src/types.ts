@@ -49,6 +49,9 @@ export const ROUTING_KEYS: Record<string, string[]> = {
     'conversation.message.received',
     'ai.job.requested',
     'ai.scoring.completed',
+    'ai.assist.requested',
+    'ai.qualification.requested',
+    'ai.rag.index.requested',
   ],
   [WORKER_QUEUES.AUDIT]: [
     'lead.created',
@@ -61,5 +64,6 @@ export const ROUTING_KEYS: Record<string, string[]> = {
     'invoice.sent',
     'conversation.message.sent',
     'conversation.assigned',
+    'ai.suggestion.created',
   ],
 };

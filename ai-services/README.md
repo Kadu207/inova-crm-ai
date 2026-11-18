@@ -4,14 +4,15 @@ FastAPI service for lead qualification, conversation summarization, next-step su
 
 ## Endpoints
 
-| Method | Path                         | Auth                  | Description                          |
-| ------ | ---------------------------- | --------------------- | ------------------------------------ |
-| GET    | `/health`                    | public                | Liveness probe                       |
-| POST   | `/v1/qualify-lead`           | Bearer `AI_API_TOKEN` | Score and tier a lead                |
-| POST   | `/v1/suggest-next-step`      | Bearer `AI_API_TOKEN` | Suggest CRM action by pipeline stage |
-| POST   | `/v1/summarize-conversation` | Bearer `AI_API_TOKEN` | Summarize Chatwoot messages          |
-| POST   | `/v1/rag/query`              | Bearer `AI_API_TOKEN` | Tenant-scoped RAG stub (in-memory)   |
-| POST   | `/v1/sla/check`              | Bearer `AI_API_TOKEN` | SLA breach alerts for conversations  |
+| Method | Path                         | Auth                  | Description                           |
+| ------ | ---------------------------- | --------------------- | ------------------------------------- |
+| GET    | `/health`                    | public                | Liveness probe                        |
+| POST   | `/v1/qualify-lead`           | Bearer `AI_API_TOKEN` | Score and tier a lead                 |
+| POST   | `/v1/suggest-next-step`      | Bearer `AI_API_TOKEN` | Suggest CRM action by pipeline stage  |
+| POST   | `/v1/summarize-conversation` | Bearer `AI_API_TOKEN` | Summarize Chatwoot messages           |
+| POST   | `/v1/suggest-reply`          | Bearer `AI_API_TOKEN` | Draft reply for human agent (no send) |
+| POST   | `/v1/rag/query`              | Bearer `AI_API_TOKEN` | Tenant-scoped RAG stub (in-memory)    |
+| POST   | `/v1/sla/check`              | Bearer `AI_API_TOKEN` | SLA breach alerts for conversations   |
 
 All `POST` endpoints require `tenant_id` in the JSON body **and** `Authorization: Bearer <AI_API_TOKEN>` (Spec 029). Guardrails block sensitive fields and redact PII in outputs.
 

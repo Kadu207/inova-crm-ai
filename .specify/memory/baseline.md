@@ -3,7 +3,7 @@
 **Última atualização:** 2026-11-18  
 **Versão do sistema:** **1.1.5** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
 **Plano Mestre:** 1.2  
-**Quality Gate:** PASS — Spec 033 mensagens omnichannel (`2026-11-17T17-59-58-044Z`)  
+**Quality Gate:** PASS — Spec 034 agent-assist completo (`2026-11-18T12-31-21-174Z`)  
 **Harness:** ativo — [`memory.md`](../../memory.md) · [`docs/agents.md`](../../docs/agents.md) · [`AGENTS.md`](../../AGENTS.md)
 
 ## Estado
@@ -23,6 +23,7 @@
 | **031 FTS + idempotency + retry**  | **DONE** prod — load `0a5266634480` + migrate `20260930010000_fts_idempotency` OK                                                                                                                       |
 | **032 Telegram via Chatwoot**      | **DONE** prod — inbox **CRM Telegram** id=3 · `@InovaCRMAtendimentoBot` · webhook OK · membros OK · 1º `/start` E2E pendente no fio CRM                                                                 |
 | **033 Mensagens omnichannel**      | **DONE** prod — load `be886795d2e7` + migrate OK · n8n reimport · Chatwoot **v4.19.1** · remap `api`→`whatsapp` · guia [`omnichannel-atendimento.md`](../../docs/operations/omnichannel-atendimento.md) |
+| **034 Agent-assist**               | **DONE** (código + gate `2026-11-18T12-31-21-174Z`) — deploy CI/VPS em andamento · [`specs/034-omnichannel-agent-assist/`](../../specs/034-omnichannel-agent-assist/)                                   |
 | **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                                                                                                                                                                       |
 | Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (2026-11-18) · webhook inbox → `crm_evolution_api:8080` · transitório até Spec 027                                                                                              |
 | n8n → API                          | `API_BASE_URL=http://api:3000` · token sync OK · lead-inbound + sync-conversation ativos                                                                                                                |
@@ -32,10 +33,11 @@
 
 ## Sequência oficial
 
-1. **027 Meta:** checklist [`docs/operations/waba-credentials-checklist.md`](../../docs/operations/waba-credentials-checklist.md) → cutover (gatilho: “WABA pronto — executar Spec 027”)
-2. **Ops:** Chatwoot audit periódico (recreate se PID ≥80%); Swarm legado **0/0** — recovery: [`docs/operations/swarm-vxlan-chatwoot-fix.md`](../../docs/operations/swarm-vxlan-chatwoot-fix.md); SSH **`:65025`**
-3. **Webhook secrets tenant:** re-rodar se novos tenants ACTIVE
-4. **F-06:** rotação humana de senhas históricas (checklist remediação)
-5. **Nota migrate:** tabelas CRM owned by `inova`; `crm_app` não cria INDEX — Spec 031 aplicou SQL como superuser + `prisma migrate resolve --applied`
+1. **034 Delivery:** CI images + VPS load (API/FE/AI) com `AI_API_TOKEN` no serviço `api`
+2. **027 Meta:** checklist [`docs/operations/waba-credentials-checklist.md`](../../docs/operations/waba-credentials-checklist.md) → cutover (gatilho: “WABA pronto — executar Spec 027”)
+3. **Ops:** Chatwoot audit periódico (recreate se PID ≥80%); Swarm legado **0/0** — recovery: [`docs/operations/swarm-vxlan-chatwoot-fix.md`](../../docs/operations/swarm-vxlan-chatwoot-fix.md); SSH **`:65025`**
+4. **Webhook secrets tenant:** re-rodar se novos tenants ACTIVE
+5. **F-06:** rotação humana de senhas históricas (checklist remediação)
+6. **Nota migrate:** tabelas CRM owned by `inova`; `crm_app` não cria INDEX — Spec 031 aplicou SQL como superuser + `prisma migrate resolve --applied`
 
 Docs: `docs/harness.md`, `docs/operations/vps-ssh.md`, `docs/architecture/spec-031-fts-idempotency-retry.md`, `docs/design/brand-assets.md`, `docs/chatwoot-whatsapp-setup.md`, `docs/chatwoot-telegram-setup.md`, `docs/integracao-n8n.md`, `docs/operations/ci-docker-images.md`, `docs/operations/waba-credentials-checklist.md`

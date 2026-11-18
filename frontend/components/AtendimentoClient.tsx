@@ -43,6 +43,31 @@ type ConversationDetail = ConversationRow & {
   messages?: ConversationMessage[];
 };
 
+type AiSummarizeResult = {
+  conversationId: string;
+  summary: string;
+  topics: string[];
+  sentiment: string;
+  messageCount: number;
+};
+
+type AiSuggestReplyResult = {
+  conversationId: string;
+  draft: string;
+  confidence: number;
+  disclaimer: string;
+  channel?: string | null;
+};
+
+type AiSuggestNextStepResult = {
+  entityType: string;
+  entityId: string;
+  suggestedAction: string;
+  confidence: number;
+};
+
+type AiAssistKind = 'summary' | 'reply' | 'next' | null;
+
 function formatDate(value?: string | null): string {
   if (!value) return '—';
   const d = new Date(value);
@@ -111,6 +136,12 @@ export function AtendimentoClient() {
   const [detail, setDetail] = useState<ConversationDetail | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState<AiAssistKind>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiDraft, setAiDraft] = useState<string | null>(null);
+  const [aiNextStep, setAiNextStep] = useState<string | null>(null);
+  const [copyHint, setCopyHint] = useState<string | null>(null);
 
   const loadList = useCallback(async (channel: ChannelFilter) => {
     const path =
@@ -154,12 +185,21 @@ export function AtendimentoClient() {
     if (!selectedId) {
       setDetail(null);
       setDetailError(null);
+      setAiError(null);
+      setAiSummary(null);
+      setAiDraft(null);
+      setAiNextStep(null);
+      setCopyHint(null);
       return;
     }
     let cancelled = false;
     void (async () => {
       setDetailLoading(true);
       setDetailError(null);
+      setAiError(null);
+      setAiSummary(null);
+      setAiDraft(null);
+      setAiNextStep(null);
       const result = await apiFetch<ConversationDetail>(`/conversations/${selectedId}`);
       if (cancelled) return;
       setDetailLoading(false);
@@ -174,6 +214,68 @@ export function AtendimentoClient() {
       cancelled = true;
     };
   }, [selectedId]);
+
+  const runSummarize = useCallback(async (conversationId: string) => {
+    setAiLoading('summary');
+    setAiError(null);
+    const result = await apiFetch<AiSummarizeResult>(
+      `/ai/conversations/${conversationId}/summarize`,
+      {
+        method: 'POST',
+      },
+    );
+    setAiLoading(null);
+    if (!result.ok) {
+      setAiError(result.error.message);
+      return;
+    }
+    setAiSummary(result.data.summary);
+  }, []);
+
+  const runSuggestReply = useCallback(async (conversationId: string) => {
+    setAiLoading('reply');
+    setAiError(null);
+    const result = await apiFetch<AiSuggestReplyResult>(
+      `/ai/conversations/${conversationId}/suggest-reply`,
+      { method: 'POST' },
+    );
+    setAiLoading(null);
+    if (!result.ok) {
+      setAiError(result.error.message);
+      return;
+    }
+    setAiDraft(result.data.draft);
+  }, []);
+
+  const runNextStep = useCallback(async (conversationId: string) => {
+    setAiLoading('next');
+    setAiError(null);
+    const result = await apiFetch<AiSuggestNextStepResult>('/ai/suggest-next-step', {
+      method: 'POST',
+      body: {
+        entityType: 'conversation',
+        entityId: conversationId,
+        conversationId,
+      },
+    });
+    setAiLoading(null);
+    if (!result.ok) {
+      setAiError(result.error.message);
+      return;
+    }
+    setAiNextStep(result.data.suggestedAction);
+  }, []);
+
+  const copyDraft = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyHint('Rascunho copiado — cole no Chatwoot.');
+      window.setTimeout(() => setCopyHint(null), 2500);
+    } catch {
+      setCopyHint('Não foi possível copiar. Selecione o texto manualmente.');
+      window.setTimeout(() => setCopyHint(null), 3000);
+    }
+  }, []);
 
   if (items === null && !error) {
     return (
@@ -385,11 +487,80 @@ export function AtendimentoClient() {
                     href={CHATWOOT_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className="btn-ghost px-2 py-1 text-xs"
+                    className="btn-primary px-2 py-1 text-xs"
                   >
                     Responder no Chatwoot
                   </a>
                 </div>
+
+                <div className="mb-3 border-b border-line pb-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-faint">
+                    Sugestão IA
+                  </p>
+                  <p className="mt-1 text-xs text-smoke">
+                    Assistência ao agente — o envio ao cliente continua só no Chatwoot.
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="btn-ghost px-2 py-1 text-xs"
+                      disabled={aiLoading !== null}
+                      onClick={() => void runSummarize(detail.id)}
+                    >
+                      {aiLoading === 'summary' ? 'Resumindo…' : 'Resumir'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost px-2 py-1 text-xs"
+                      disabled={aiLoading !== null}
+                      onClick={() => void runSuggestReply(detail.id)}
+                    >
+                      {aiLoading === 'reply' ? 'Gerando…' : 'Sugerir resposta'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost px-2 py-1 text-xs"
+                      disabled={aiLoading !== null}
+                      onClick={() => void runNextStep(detail.id)}
+                    >
+                      {aiLoading === 'next' ? 'Analisando…' : 'Próximo passo'}
+                    </button>
+                  </div>
+                  {aiError ? <p className="mt-2 text-xs text-bad">{aiError}</p> : null}
+                  {copyHint ? <p className="mt-2 text-xs text-flame">{copyHint}</p> : null}
+                  {aiSummary ? (
+                    <div className="mt-2 rounded-md border border-line bg-ink/30 px-3 py-2 text-sm text-bone">
+                      <p className="text-[10px] uppercase tracking-wide text-faint">Resumo</p>
+                      <p className="mt-1 whitespace-pre-wrap break-words">{aiSummary}</p>
+                    </div>
+                  ) : null}
+                  {aiDraft ? (
+                    <div className="mt-2 rounded-md border border-flame/25 bg-flame/5 px-3 py-2 text-sm text-bone">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-[10px] uppercase tracking-wide text-faint">
+                          Rascunho (somente leitura)
+                        </p>
+                        <button
+                          type="button"
+                          className="btn-ghost px-2 py-0.5 text-[11px]"
+                          onClick={() => void copyDraft(aiDraft)}
+                        >
+                          Copiar
+                        </button>
+                      </div>
+                      <p className="mt-1 whitespace-pre-wrap break-words">{aiDraft}</p>
+                    </div>
+                  ) : null}
+                  {aiNextStep ? (
+                    <div className="mt-2 rounded-md border border-line bg-ink/30 px-3 py-2 text-sm text-bone">
+                      <p className="text-[10px] uppercase tracking-wide text-faint">
+                        Próximo passo
+                      </p>
+                      <p className="mt-1 whitespace-pre-wrap break-words">{aiNextStep}</p>
+                    </div>
+                  ) : null}
+                </div>
+
                 <div className="flex-1 space-y-3 overflow-y-auto pr-1">
                   {(detail.messages ?? []).length === 0 ? (
                     <p className="text-sm text-smoke">

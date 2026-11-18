@@ -100,7 +100,15 @@ async function processMessage(
         await handleBillingEvent(event, { log });
         break;
       case WORKER_QUEUES.AI:
-        await handleAiEvent(event, { log });
+        await handleAiEvent(event, {
+          log,
+          apiPost: api
+            ? async (path, tenantId, body) => {
+                const res = await api.post(path, tenantId, body);
+                return { ok: res.ok };
+              }
+            : undefined,
+        });
         break;
       case WORKER_QUEUES.AUDIT:
         await handleAuditEvent(event, { log });

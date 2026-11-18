@@ -110,13 +110,14 @@ Assinaturas em `WebhookSubscription`; dispatch no `EventsService.publish` com HM
 
 ## ai.*
 
-| Evento                       | Publisher     | Consumers        | Descrição            |
-| ---------------------------- | ------------- | ---------------- | -------------------- |
-| `ai.qualification.requested` | API           | worker-crm-ai    | Job de qualificação  |
-| `ai.qualification.completed` | worker-crm-ai | worker-crm-leads | Score disponível     |
-| `ai.suggestion.created`      | worker-crm-ai | API (persist)    | Sugestão para humano |
-| `ai.rag.index.requested`     | API           | worker-crm-ai    | Indexar documento    |
-| `ai.rag.index.completed`     | worker-crm-ai | worker-crm-audit | Indexação concluída  |
+| Evento                       | Publisher     | Consumers        | Descrição                                    |
+| ---------------------------- | ------------- | ---------------- | -------------------------------------------- |
+| `ai.qualification.requested` | API           | worker-crm-ai    | Job de qualificação                          |
+| `ai.qualification.completed` | worker-crm-ai | worker-crm-leads | Score disponível                             |
+| `ai.assist.requested`        | API           | worker-crm-ai    | Pedido async (summarize / reply / next_step) |
+| `ai.suggestion.created`      | API           | worker-crm-audit | Sugestão persistida para humano (Spec 034)   |
+| `ai.rag.index.requested`     | API           | worker-crm-ai    | Indexar documento                            |
+| `ai.rag.index.completed`     | worker-crm-ai | worker-crm-audit | Indexação concluída                          |
 
 ---
 

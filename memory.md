@@ -18,7 +18,7 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
 | VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
-| Gate         | PASS — Spec 033 + Api→whatsapp (`2026-11-18T03-17-09-046Z`) · prod loaded `be886795d2e7`                                            |
+| Gate         | PASS — Spec 034 completo (`2026-11-18T12-31-21-174Z`) · deploy CI/VPS em andamento                                                  |
 | Images CI    | Prod loaded: **`be886795d2e7`** (run `44229319442`) · Chatwoot **v4.19.1** · TG inbox id=3 · WA Evolution **open**                  |
 | Plano Mestre | 1.2                                                                                                                                 |
 
@@ -40,20 +40,21 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Specs (pós-fase)
 
-| Spec    | Entrega                                           | Status                                                                                                                                                                                                                      |
-| ------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 019–025 | Paridade Zoho onda 1                              | DONE                                                                                                                                                                                                                        |
-| **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                                                                                                                           |
-| **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                                                                                                                             |
-| **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                                                                                                                                  |
-| **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md)                                                                               |
-| **031** | FTS Postgres + idempotência Redis + retry workers | **DONE** · commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · VPS load `0a5266634480` + migrate FTS **OK** · [`docs/architecture/spec-031-fts-idempotency-retry.md`](docs/architecture/spec-031-fts-idempotency-retry.md) |
-| **032** | Telegram via Chatwoot                             | **DONE** · gate `2026-10-27T03-47-39-321Z` · prod `cf8a42e175c8` · inbox **CRM Telegram** id=3 · bot `@InovaCRMAtendimentoBot` ([`docs/chatwoot-telegram-setup.md`](docs/chatwoot-telegram-setup.md))                       |
-| **033** | Mensagens omnichannel (WA/TG)                     | **DONE** · gate `2026-11-17T17-59-58-044Z` · migrate `conversation_messages` · UI filtro + fio · [`docs/operations/omnichannel-atendimento.md`](docs/operations/omnichannel-atendimento.md)                                 |
-| **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                                                                                                    |
+| Spec    | Entrega                                           | Status                                                                                                                                                                                                                       |
+| ------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 019–025 | Paridade Zoho onda 1                              | DONE                                                                                                                                                                                                                         |
+| **026** | Blueprint / FilterEngine / COQL                   | **DONE** (v1.1.0)                                                                                                                                                                                                            |
+| **028** | Relatórios comerciais + `/relatorios`             | **DONE** (v1.1.1) · prod loaded                                                                                                                                                                                              |
+| **029** | Security hardening (RLS/secrets/JWT/AI + P1 RBAC) | **DONE** · gate `2026-08-18T05-07-57-461Z`                                                                                                                                                                                   |
+| **030** | RBAC navegação / páginas por papel                | **DONE** · gate `2026-08-18T05-40-35-457Z` · [`docs/architecture/spec-030-rbac-navigation.md`](docs/architecture/spec-030-rbac-navigation.md)                                                                                |
+| **031** | FTS Postgres + idempotência Redis + retry workers | **DONE** · commit `0a52666` · gate `2026-09-30T02-32-29-884Z` · VPS load `0a5266634480` + migrate FTS **OK** · [`docs/architecture/spec-031-fts-idempotency-retry.md`](docs/architecture/spec-031-fts-idempotency-retry.md)  |
+| **032** | Telegram via Chatwoot                             | **DONE** · gate `2026-10-27T03-47-39-321Z` · prod `cf8a42e175c8` · inbox **CRM Telegram** id=3 · bot `@InovaCRMAtendimentoBot` ([`docs/chatwoot-telegram-setup.md`](docs/chatwoot-telegram-setup.md))                        |
+| **033** | Mensagens omnichannel (WA/TG)                     | **DONE** · gate `2026-11-17T17-59-58-044Z` · migrate `conversation_messages` · UI filtro + fio · [`docs/operations/omnichannel-atendimento.md`](docs/operations/omnichannel-atendimento.md)                                  |
+| **034** | Agent-assist IA em `/atendimento`                 | **DONE** · gate `2026-11-18T12-31-21-174Z` · painel + Nest→ai-crm + `ai_suggestions` + outbox `ai.assist.requested` / `ai.suggestion.created` · [`specs/034-omnichannel-agent-assist/`](specs/034-omnichannel-agent-assist/) |
+| **027** | Meta Cloud API / WABA                             | **BLOCKED** — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md)                                                                                                     |
 
 **Próximo produto:** Spec **027** (Meta/WABA) quando credenciais prontas — gatilho: “WABA pronto — executar Spec 027”.  
-**Próximo ops:** 1º `/start` E2E no bot → conversa TG no `/atendimento`; checklist WABA; Chatwoot audit periódico.
+**Próximo ops:** playbook Fase 1 DONE (labels/macros/greeting + E2E TG no CRM); checklist WABA; Chatwoot audit periódico.
 
 ---
 

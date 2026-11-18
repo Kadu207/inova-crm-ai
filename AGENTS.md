@@ -6,7 +6,7 @@ Front door para agentes Cursor. Detalhe: [`memory.md`](memory.md) · [`docs/agen
 
 CRM omnichannel multi-tenant (Inova TI): Next.js + NestJS/Prisma + FastAPI + workers, Chatwoot e n8n **dedicados**, RabbitMQ (eventos) + Redis (cache/filas n8n), MinIO, deploy VPS Hetzner via Cloudflare Tunnel (portas **9400–9419**).
 
-Fases 0–7 **DONE**. Pós-fase: Spec Kit `026+`. Versão atual **1.1.5** (Spec 033 mensagens WA/TG; Spec 032 Telegram; Spec 028–031 DONE; Spec 027 Meta **BLOCKED**).
+Fases 0–7 **DONE**. Pós-fase: Spec Kit `026+`. Versão atual **1.1.5** (Spec 033 mensagens WA/TG; Spec 032 Telegram; Spec 034 agent-assist **READY**; Spec 028–031 DONE; Spec 027 Meta **BLOCKED**).
 
 ## Antes de qualquer tarefa
 
@@ -80,5 +80,5 @@ docs/             pacote corporativo
 
 ## Próximo produto
 
-Spec **027** Meta/WABA — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md).  
-Gatilho humano: “WABA pronto — executar Spec 027”.
+1. Spec **034** agent-assist **DONE** (gate PASS) — deploy CI/VPS · [`specs/034-omnichannel-agent-assist/`](specs/034-omnichannel-agent-assist/).
+2. Spec **027** Meta/WABA — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md). Gatilho: “WABA pronto — executar Spec 027”.

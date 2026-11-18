@@ -31,16 +31,28 @@ O `create!` do canal chama `getMe` e `setWebhook`. O container `rails` precisa d
 
 Após criar, vincule agentes em Settings → Inboxes → CRM Telegram → Agents (ou `inbox_members` na VPS).
 
+## Menu de comandos (BotFather / API)
+
+```text
+start - Iniciar atendimento Inova CRM
+ajuda - Como funciona o atendimento
+status - Pedir status da solicitação
+humano - Falar com um atendente
+```
+
+Playbook completo (labels, macros, greeting): [`docs/operations/omnichannel-atendimento.md`](operations/omnichannel-atendimento.md).  
+Seed VPS: `chatwoot/scripts/seed_atendimento_playbook.rb`.
+
 ## Passo a passo depois do `/start`
 
 1. Abra o bot no Telegram: https://t.me/InovaCRMAtendimentoBot (confira o username — não use outro bot).
 2. Envie `/start` **depois** do webhook estar ativo (`getWebhookInfo` com URL `chat-crm…`).
 3. Envie uma mensagem de teste, ex.: `Olá, teste CRM`.
 4. Em até alguns segundos:
-   - Chatwoot → inbox **CRM Telegram** mostra a conversa.
+   - Chatwoot → inbox **CRM Telegram** mostra a conversa (+ greeting Inova TI).
    - n8n `lead-inbound` chama a API.
    - CRM → `/atendimento` filtro **Telegram** mostra a conversa + fio.
-5. Responda pelo Chatwoot (botão **Responder no Chatwoot** no CRM). O Chatwoot envia pela Bot API.
+5. Agente: label (`comercial`/`suporte`/…) → macro `/coleta` ou `/humano` → responder no Chatwoot.
 6. Se nada aparecer:
    - Confirme que o `/start` foi no bot **InovaCRMAtendimentoBot**.
    - `getWebhookInfo`: `pending_update_count` e URL correta.
