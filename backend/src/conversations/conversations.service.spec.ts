@@ -141,7 +141,7 @@ describe('ConversationsService syncFromChatwoot', () => {
     prisma.conversation.create.mockResolvedValue({
       id: 'conv-wa',
       tenantId,
-      channel: 'api',
+      channel: 'whatsapp',
       chatwootId: 3,
       status: ConversationStatus.OPEN,
     });
@@ -149,7 +149,7 @@ describe('ConversationsService syncFromChatwoot', () => {
     prisma.conversation.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
       id: 'conv-wa',
       tenantId,
-      channel: 'api',
+      channel: 'whatsapp',
       contact: null,
       lead: null,
     });
@@ -168,7 +168,7 @@ describe('ConversationsService syncFromChatwoot', () => {
       }),
     });
     expect(prisma.conversation.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ tenantId: 'tenant-b', channel: 'api' }),
+      data: expect.objectContaining({ tenantId: 'tenant-b', channel: 'whatsapp' }),
     });
   });
 });
