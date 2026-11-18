@@ -72,6 +72,12 @@ docs/             pacote corporativo
 | QA       | `.cursor/agents/qa-squad.md`       |
 | Delivery | `.cursor/agents/delivery-squad.md` |
 
+## Canais (WA / TG)
+
+- WhatsApp Evolution: instância `crm-whatsapp` · inbox Chatwoot **CRM WhatsApp Evolution**
+- Telegram: [@InovaCRMAtendimentoBot](https://t.me/InovaCRMAtendimentoBot) · inbox **CRM Telegram**
+- Ver mensagens: [`docs/operations/omnichannel-atendimento.md`](docs/operations/omnichannel-atendimento.md) · `/atendimento`
+
 ## Próximo produto
 
 Spec **027** Meta/WABA — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md).  

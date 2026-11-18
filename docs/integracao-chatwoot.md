@@ -134,7 +134,7 @@ Canal → Chatwoot → webhook (HMAC) → n8n → POST /v1/leads/inbound
                                         → conversation.* event → Workers
 ```
 
-Cada `message_created` (WhatsApp / Telegram) grava `conversation_messages` com `channel` e direção (Spec 033). O corpo completo não vai mais para `leads.notes`. `/atendimento` lista com filtro de canal e exibe o fio.
+Cada `message_created` (WhatsApp / Telegram) grava `conversation_messages` com `channel` e direção (Spec 033). O corpo completo não vai mais para `leads.notes`. `/atendimento` lista com filtro de canal e exibe o fio. Guia de visualização e validação: [`operations/omnichannel-atendimento.md`](./operations/omnichannel-atendimento.md). `Channel::Api` (Evolution) normaliza para `whatsapp` no CRM.
 
 Respostas ao cliente **sempre** via API → Chatwoot API — nunca bypass de canal.
 

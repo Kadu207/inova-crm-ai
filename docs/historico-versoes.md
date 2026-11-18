@@ -44,7 +44,7 @@ depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 
 ## Changelog
 
-### [1.1.5] — 2026-11-17 — Spec 033 mensagens omnichannel + Chatwoot v4.19.1
+### [1.1.5] — 2026-11-17 / 2026-11-18 — Spec 033 mensagens omnichannel + Chatwoot v4.19.1
 
 - Tabela `conversation_messages` (tenant + RLS) com idempotência por `chatwoot_message_id`
 - `POST /leads/inbound` persiste cada mensagem WhatsApp/Telegram, publica `conversation.message.received|sent`
@@ -52,6 +52,8 @@ depois      v1.2.0  Spec 027 Meta Cloud API (WABA) ← FILA (BLOCKED)
 - `/atendimento`: filtro Todos/WhatsApp/Telegram + fio com selo de origem
 - n8n `lead-inbound` encaminha `messageId`, `messageType`, `contentType`, `sentAt`, anexos
 - Chatwoot CRM pin: `v4.8.0` → **`v4.19.1`** (compose default + docs; upgrade VPS: pull + `db:chatwoot_prepare`)
+- Prod: load CI `f29f082b12c2` · migrate `conversation_messages` OK · inbox TG id=3 `@InovaCRMAtendimentoBot` · WA Evolution **open**
+- Ops 2026-11-18: `Channel::Api` → label CRM `whatsapp`; remap residual `api`→`whatsapp`; inbox_members WA/TG; guia [`operations/omnichannel-atendimento.md`](./operations/omnichannel-atendimento.md)
 - Gate PASS: `2026-11-17T17-59-58-044Z`
 
 ### [1.1.4] — 2026-10-27 — Spec 032 Telegram via Chatwoot

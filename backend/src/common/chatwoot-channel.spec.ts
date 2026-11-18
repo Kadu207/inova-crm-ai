@@ -10,7 +10,7 @@ describe('normalizeChatwootChannel', () => {
     expect(normalizeChatwootChannel('Channel::Telegram')).toBe('telegram');
     expect(normalizeChatwootChannel('Channel::Whatsapp')).toBe('whatsapp');
     expect(normalizeChatwootChannel('Channel::Email')).toBe('email');
-    expect(normalizeChatwootChannel('Channel::Api')).toBe('api');
+    expect(normalizeChatwootChannel('Channel::Api')).toBe('whatsapp');
     expect(normalizeChatwootChannel('')).toBe('chatwoot');
     expect(normalizeChatwootChannel(undefined)).toBe('chatwoot');
   });
@@ -39,7 +39,7 @@ describe('resolveChatwootIdentity', () => {
         senderIdentifier: '5511999999999@s.whatsapp.net',
       }),
     ).toEqual({
-      channel: 'api',
+      channel: 'whatsapp',
       whatsappExternalId: '5511999999999@s.whatsapp.net',
     });
     expect(

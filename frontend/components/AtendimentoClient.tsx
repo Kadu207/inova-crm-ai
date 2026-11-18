@@ -63,7 +63,8 @@ function channelLabel(channel?: string | null): string {
     case 'facebook':
       return 'Facebook';
     case 'api':
-      return 'API';
+      // Legacy Evolution rows before Spec 033 channel remap
+      return 'WhatsApp';
     case 'web':
       return 'Web';
     case 'sms':

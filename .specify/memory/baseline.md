@@ -1,6 +1,6 @@
 # Baseline — Inova CRM AI
 
-**Última atualização:** 2026-11-17  
+**Última atualização:** 2026-11-18  
 **Versão do sistema:** **1.1.5** — ver [`docs/historico-versoes.md`](../../docs/historico-versoes.md)  
 **Plano Mestre:** 1.2  
 **Quality Gate:** PASS — Spec 033 mensagens omnichannel (`2026-11-17T17-59-58-044Z`)  
@@ -8,27 +8,27 @@
 
 ## Estado
 
-| Item                               | Status                                                                                                                                                    |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Fases 0–7 + Delivery               | DONE                                                                                                                                                      |
-| Produto 019–025 + Admin/Bulk/RAM   | DONE                                                                                                                                                      |
-| Deploy API/FE via CI → docker load | DONE em prod: **`cf8a42e175c8`** (CI run `40446671776`, 2026-10-27)                                                                                       |
-| Swap `/swapfile-inova`             | DONE (4G ativo)                                                                                                                                           |
-| **Harness Cursor**                 | **DONE** — agents/skills/rule + memory/agentes                                                                                                            |
-| **026 Zoho Blueprint/COQL**        | **DONE** (v1.1.0)                                                                                                                                         |
-| **028 Relatórios / funil**         | **DONE** (v1.1.1) — API + UI `/relatorios` em prod                                                                                                        |
-| **029 Security hardening**         | **DONE** (P0+P1) — SHA `878a92fd5969` + remediação `3d2145c` ⊂ prior prod                                                                                 |
-| **030 RBAC navegação**             | **DONE** — nav + deep-link por papel (`frontend/lib/navigation.ts`)                                                                                       |
-| **Brand favicon/PWA**              | **DONE** (v1.1.2) — [`docs/design/brand-assets.md`](../../docs/design/brand-assets.md)                                                                    |
-| **031 FTS + idempotency + retry**  | **DONE** prod — load `0a5266634480` + migrate `20260930010000_fts_idempotency` OK                                                                         |
-| **032 Telegram via Chatwoot**      | **DONE** prod — load `cf8a42e175c8` + migrate telegram identity **OK** · inbox do bot é passo humano                                                      |
-| **033 Mensagens omnichannel**      | **DONE** prod — load `f29f082b12c2` + migrate `conversation_messages` OK · n8n lead-inbound reimport · Chatwoot CRM **v4.19.1** · inbox TG pendente token |
-| **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                                                                                                                         |
-| Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (reconnect 2026-09-29) · transitório até Spec 027                                                                                 |
-| n8n → API                          | `API_BASE_URL=http://api:3000` · token sync OK (2026-09-21)                                                                                               |
-| Chatwoot CRM PID                   | healthy (audit periódico)                                                                                                                                 |
-| Swarm Inova-TI Chatwoot            | **scale 0 (0/0)** — pausado (vxlan); CRM `chat-crm` intacto                                                                                               |
-| Webhook secrets tenant             | Seed OK — tenants `inova`, `rls-test-a`, `rls-test-b`                                                                                                     |
+| Item                               | Status                                                                                                                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fases 0–7 + Delivery               | DONE                                                                                                                                                                                                    |
+| Produto 019–025 + Admin/Bulk/RAM   | DONE                                                                                                                                                                                                    |
+| Deploy API/FE via CI → docker load | DONE em prod: **`f29f082b12c2`** (CI run `44154177443`, 2026-11-17) · patch canal Api→whatsapp em fila de deploy                                                                                        |
+| Swap `/swapfile-inova`             | DONE (4G ativo)                                                                                                                                                                                         |
+| **Harness Cursor**                 | **DONE** — agents/skills/rule + memory/agentes                                                                                                                                                          |
+| **026 Zoho Blueprint/COQL**        | **DONE** (v1.1.0)                                                                                                                                                                                       |
+| **028 Relatórios / funil**         | **DONE** (v1.1.1) — API + UI `/relatorios` em prod                                                                                                                                                      |
+| **029 Security hardening**         | **DONE** (P0+P1) — SHA `878a92fd5969` + remediação `3d2145c` ⊂ prior prod                                                                                                                               |
+| **030 RBAC navegação**             | **DONE** — nav + deep-link por papel (`frontend/lib/navigation.ts`)                                                                                                                                     |
+| **Brand favicon/PWA**              | **DONE** (v1.1.2) — [`docs/design/brand-assets.md`](../../docs/design/brand-assets.md)                                                                                                                  |
+| **031 FTS + idempotency + retry**  | **DONE** prod — load `0a5266634480` + migrate `20260930010000_fts_idempotency` OK                                                                                                                       |
+| **032 Telegram via Chatwoot**      | **DONE** prod — inbox **CRM Telegram** id=3 · `@InovaCRMAtendimentoBot` · webhook OK · membros OK · 1º `/start` E2E pendente no fio CRM                                                                 |
+| **033 Mensagens omnichannel**      | **DONE** prod — load `f29f082b12c2` + migrate OK · n8n reimport · Chatwoot **v4.19.1** · remap `api`→`whatsapp` · guia [`omnichannel-atendimento.md`](../../docs/operations/omnichannel-atendimento.md) |
+| **027 Meta Cloud API**             | READY docs · **BLOCKED** até WABA                                                                                                                                                                       |
+| Evolution WhatsApp (QR)            | **open** `crm-whatsapp` (2026-11-18) · webhook inbox → `crm_evolution_api:8080` · transitório até Spec 027                                                                                              |
+| n8n → API                          | `API_BASE_URL=http://api:3000` · token sync OK · lead-inbound + sync-conversation ativos                                                                                                                |
+| Chatwoot CRM PID                   | healthy · audit OK 2026-11-18 (~13% PID)                                                                                                                                                                |
+| Swarm Inova-TI Chatwoot            | **scale 0 (0/0)** — pausado (vxlan); CRM `chat-crm` intacto                                                                                                                                             |
+| Webhook secrets tenant             | Seed OK — tenants `inova`, `rls-test-a`, `rls-test-b`                                                                                                                                                   |
 
 ## Sequência oficial
 

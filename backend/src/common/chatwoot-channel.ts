@@ -25,12 +25,13 @@ export function normalizeChatwootChannel(raw?: string | null): string {
   if (!value) return 'chatwoot';
   if (value.includes('telegram')) return 'telegram';
   if (value.includes('whatsapp')) return 'whatsapp';
+  // Evolution transitional inbox is Channel::Api — treat as WhatsApp in CRM UI/filter
+  if (value === 'api' || value.endsWith('::api')) return 'whatsapp';
   if (value.includes('instagram')) return 'instagram';
   if (value.includes('facebook') || value.includes('messenger')) return 'facebook';
   if (value.includes('email')) return 'email';
   if (value.includes('sms') || value.includes('twilio')) return 'sms';
   if (value.includes('webwidget') || value.includes('web_widget')) return 'web';
-  if (value === 'api' || value.endsWith('::api')) return 'api';
   const stripped = value.replace(/^channel::/, '').replace(/[^a-z0-9]+/g, '');
   return stripped || 'chatwoot';
 }
