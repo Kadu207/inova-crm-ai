@@ -18,8 +18,8 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 | Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
 | VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
 | Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
-| Gate         | PASS — Spec 034 completo (`2026-11-18T12-31-21-174Z`) · deploy CI/VPS em andamento                                                  |
-| Images CI    | Prod loaded: **`be886795d2e7`** (run `44229319442`) · Chatwoot **v4.19.1** · TG inbox id=3 · WA Evolution **open**                  |
+| Gate         | PASS — Spec 034 completo (`2026-11-18T12-31-21-174Z`) · prod loaded `8d5c61d4170c`                                                  |
+| Images CI    | Prod loaded: **`8d5c61d4170c`** (run `44305899101`) · Chatwoot **v4.19.1** · TG inbox id=3 · WA Evolution **open**                  |
 | Plano Mestre | 1.2                                                                                                                                 |
 
 ### Stack

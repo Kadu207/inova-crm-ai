@@ -80,5 +80,5 @@ docs/             pacote corporativo
 
 ## Próximo produto
 
-1. Spec **034** agent-assist **DONE** (gate PASS) — deploy CI/VPS · [`specs/034-omnichannel-agent-assist/`](specs/034-omnichannel-agent-assist/).
-2. Spec **027** Meta/WABA — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md). Gatilho: “WABA pronto — executar Spec 027”.
+1. Spec **027** Meta/WABA — checklist [`docs/operations/waba-credentials-checklist.md`](docs/operations/waba-credentials-checklist.md). Gatilho: “WABA pronto — executar Spec 027”.
+2. Spec **034** agent-assist **DONE** em prod (`8d5c61d4170c`) · [`specs/034-omnichannel-agent-assist/`](specs/034-omnichannel-agent-assist/).
