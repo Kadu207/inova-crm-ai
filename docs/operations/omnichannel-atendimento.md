@@ -76,8 +76,10 @@ docker exec inova-crm-postgres psql -U inova -d crm -c \
 Falha típica ao responder no Chatwoot: `Hostname '…' has no public ip addresses` (SafeFetch SSRF desde Chatwoot ~v4.14).
 
 1. `SAFE_FETCH_ALLOW_PRIVATE_NETWORK=true` no `.env` do Chatwoot (+ recreate rails/sidekiq).
-2. Webhook da inbox API:
+2. Webhook da inbox API (URL **interna Docker** — não abre no navegador do PC):
 
 `http://evolution.internal:8080/chatwoot/webhook/crm-whatsapp`
 
 Inbound (celular → CRM) continua via Evolution → Chatwoot API e não depende desse URL.
+
+Se `chat-crm` retornar HTTP 500: auditar PIDs (`bash chatwoot/scripts/audit-crm-chatwoot.sh`). Com rails em 512/512, recreate rails/sidekiq **antes** de qualquer feature.

@@ -28,6 +28,11 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<{ user?: { role: UserRole } }>();
     const userRole = request.user?.role;
 
+    // Platform super-admin bypasses endpoint role lists (many @Roles omit SUPER_ADMIN).
+    if (userRole === UserRole.SUPER_ADMIN) {
+      return true;
+    }
+
     if (!userRole || !requiredRoles.includes(userRole)) {
       throw new ForbiddenException('Insufficient permissions');
     }

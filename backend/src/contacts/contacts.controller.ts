@@ -58,7 +58,7 @@ export class ContactsController {
   }
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPPORT)
   create(
     @TenantId() tenantId: string,
     @CurrentUser() user: JwtPayload | undefined,
@@ -68,7 +68,7 @@ export class ContactsController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SALES, UserRole.SUPPORT)
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
