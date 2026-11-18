@@ -125,8 +125,9 @@ PY
 )" || true)
 echo "$CW_SET" | python3 -m json.tool || echo "$CW_SET"
 if echo "$CW_SET" | grep -q '127.0.0.1:9416'; then
-  echo "WARN: webhook_url uses 127.0.0.1 — Chatwoot cannot reach it."
-  echo "Fix: set EVOLUTION_SERVER_URL=http://crm_evolution_api:8080 in evolution.env,"
+  echo "WARN: webhook_url uses 127.0.0.1 — Chatwoot SafeFetch blocks it."
+  echo "Fix: SAFE_FETCH_ALLOW_PRIVATE_NETWORK=true + webhook http://evolution.internal:8080/..."
+  echo "Also set EVOLUTION_SERVER_URL=http://crm_evolution_api:8080 in evolution.env,"
   echo "     then: docker compose ... up -d --force-recreate evolution-api"
   echo "     and re-run this script (or chatwoot/set only)."
 fi

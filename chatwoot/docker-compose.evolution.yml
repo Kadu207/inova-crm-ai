@@ -99,8 +99,13 @@ services:
     volumes:
       - crm_evolution_instances:/evolution/instances
     networks:
-      - cw
-      - inova-crm
+      cw:
+        aliases:
+          # Hostname com ponto — alguns builds SafeFetch rejeitam bare names
+          - evolution.internal
+      inova-crm:
+        aliases:
+          - evolution.internal
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:8080/ || exit 1']
       interval: 30s

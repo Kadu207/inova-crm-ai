@@ -113,11 +113,21 @@ curl -sS -H "apikey: $EVOLUTION_API_KEY" \
   http://127.0.0.1:9416/instance/connectionState/crm-whatsapp | python3 -m json.tool
 ```
 
-**Webhook da inbox API (respostas do agente):** Chatwoot v4 bloqueia `127.0.0.1` (SSRF). Use o hostname Docker:
+**Webhook da inbox API (respostas do agente):** Chatwoot v4+ (SafeFetch) bloqueia URLs privadas por padrão. Erro típico:
+
+`Hostname 'crm_evolution_api' has no public ip addresses`
+
+Correção self-hosted:
+
+1. Em `chatwoot/.env`: `SAFE_FETCH_ALLOW_PRIVATE_NETWORK=true` (já no `.env.example` e no compose rails/sidekiq).
+2. Recreate: `docker compose ... up -d --force-recreate rails sidekiq`
+3. `channel_api.webhook_url` da inbox Evolution:
 
 ```text
-http://crm_evolution_api:8080/chatwoot/webhook/crm-whatsapp
+http://evolution.internal:8080/chatwoot/webhook/crm-whatsapp
 ```
+
+(Alias Docker em `docker-compose.evolution.yml`; alternativa: `http://crm_evolution_api:8080/...`.)
 
 Inbound (celular → Chatwoot → CRM) não depende desse URL. UI: [`docs/operations/omnichannel-atendimento.md`](operations/omnichannel-atendimento.md).
 

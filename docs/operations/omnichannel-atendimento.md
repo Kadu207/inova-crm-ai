@@ -73,8 +73,11 @@ docker exec inova-crm-postgres psql -U inova -d crm -c \
 
 ## Nota — resposta agente no WhatsApp (Evolution)
 
-Chatwoot v4 bloqueia webhook para `127.0.0.1` (SSRF). O `channel_api.webhook_url` da inbox Evolution deve apontar para o hostname Docker interno:
+Falha típica ao responder no Chatwoot: `Hostname '…' has no public ip addresses` (SafeFetch SSRF desde Chatwoot ~v4.14).
 
-`http://crm_evolution_api:8080/chatwoot/webhook/crm-whatsapp`
+1. `SAFE_FETCH_ALLOW_PRIVATE_NETWORK=true` no `.env` do Chatwoot (+ recreate rails/sidekiq).
+2. Webhook da inbox API:
+
+`http://evolution.internal:8080/chatwoot/webhook/crm-whatsapp`
 
 Inbound (celular → CRM) continua via Evolution → Chatwoot API e não depende desse URL.

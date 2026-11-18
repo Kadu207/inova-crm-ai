@@ -55,6 +55,8 @@ services:
       - .env
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      # Evolution Channel::Api webhook → Docker privado (Chatwoot SafeFetch SSRF)
+      SAFE_FETCH_ALLOW_PRIVATE_NETWORK: ${SAFE_FETCH_ALLOW_PRIVATE_NETWORK:-true}
     depends_on:
       postgres:
         condition: service_healthy
@@ -87,6 +89,8 @@ services:
       - .env
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      # Sidekiq entrega api_inbox_webhook → Evolution; precisa do mesmo opt-in SSRF
+      SAFE_FETCH_ALLOW_PRIVATE_NETWORK: ${SAFE_FETCH_ALLOW_PRIVATE_NETWORK:-true}
     depends_on:
       postgres:
         condition: service_healthy
@@ -97,6 +101,7 @@ services:
     command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
     networks:
       - cw
+      - inova-crm
     healthcheck:
       test: ['CMD-SHELL', 'pgrep -f sidekiq || exit 1']
       interval: 30s
