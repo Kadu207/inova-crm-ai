@@ -12,15 +12,15 @@ Detalhe estável: [`.specify/memory/baseline.md`](.specify/memory/baseline.md) �
 
 ## Snapshot operacional
 
-| Item         | Valor                                                                                                                                     |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Repo GitHub  | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                                 |
-| Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                        |
-| VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md)       |
-| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                          |
-| Gate         | PASS — Spec 033 mensagens omnichannel (`2026-11-17T17-59-58-044Z`) · prod loaded `f29f082b12c2` (+ patch canal Api→whatsapp em deploy)    |
-| Images CI    | Prod loaded: **`f29f082b12c2`** (run `44154177443`) · migrate `conversation_messages` **OK** · Chatwoot CRM **v4.19.1** · TG inbox **OK** |
-| Plano Mestre | 1.2                                                                                                                                       |
+| Item         | Valor                                                                                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Repo GitHub  | `https://github.com/Kadu207/inova-crm-ai` · branch `main`                                                                           |
+| Repo GitLab  | `https://gitlab.com/Kadu207/inova-crm-ai` (mirror)                                                                                  |
+| VPS          | `gestaoti@128.140.77.31` · **SSH `:65025`** · path `/opt/inova-crm-ai` · [`docs/operations/vps-ssh.md`](docs/operations/vps-ssh.md) |
+| Portas host  | **9400–9419** — [`docs/ports.md`](docs/ports.md)                                                                                    |
+| Gate         | PASS — Spec 033 + Api→whatsapp (`2026-11-18T03-17-09-046Z`) · prod loaded `be886795d2e7`                                            |
+| Images CI    | Prod loaded: **`be886795d2e7`** (run `44229319442`) · Chatwoot **v4.19.1** · TG inbox id=3 · WA Evolution **open**                  |
+| Plano Mestre | 1.2                                                                                                                                 |
 
 ### Stack
 
