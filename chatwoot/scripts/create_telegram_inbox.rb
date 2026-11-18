@@ -16,7 +16,8 @@ inbox_name = ENV.fetch('TELEGRAM_INBOX_NAME', 'CRM Telegram')
 account_id = Integer(ENV.fetch('ACCOUNT_ID', '1'))
 
 account = Account.find(account_id)
-existing = Inbox.joins(:channel).find_by(account_id: account.id, name: inbox_name)
+# Avoid joins(:channel) — polymorphic association breaks eager load on Chatwoot 4.19+
+existing = Inbox.find_by(account_id: account.id, name: inbox_name)
 
 if existing
   puts "INBOX_EXISTS id=#{existing.id} channel=#{existing.channel_type}"
